@@ -7,66 +7,63 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
-        .apple-card { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-        .step { display: none; opacity: 0; transform: translateY(20px); transition: all 0.4s ease; }
+        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; background: #f5f5f7; }
+        .step { display: none; opacity: 0; transform: translateY(10px); transition: all 0.4s ease; }
         .step.active { display: block; opacity: 1; transform: translateY(0); }
-        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
-        input, select, textarea { border: none !important; background: #f5f5f7 !important; border-radius: 12px !important; padding: 16px !important; outline: none !important; }
-        .btn-next { background: #0071e3; transition: transform 0.2s active; }
-        .btn-next:active { transform: scale(0.98); }
+        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 2rem; }
+        input, select, textarea { border: none !important; background: #f5f5f7 !important; border-radius: 12px !important; padding: 16px !important; outline: none !important; width: 100%; font-size: 1.1rem; }
+        .btn-blue { background: #0071e3; color: white; font-weight: 500; border-radius: 99px; padding: 14px; transition: transform 0.2s; }
+        .btn-blue:active { transform: scale(0.97); }
     </style>
 </head>
-<body class="bg-[#f5f5f7] flex items-center justify-center min-h-screen">
+<body class="flex items-center justify-center min-h-screen p-4">
 
-    <div class="w-full max-w-md p-6">
-        <header class="text-center mb-10">
+    <div class="w-full max-w-md">
+        <header class="text-center mb-8">
             <h1 class="text-2xl font-semibold tracking-tight">Production OLDA</h1>
-            <p class="text-gray-500 text-sm">Collection 2026</p>
+            <p class="text-gray-400 text-sm">Collection 2026</p>
         </header>
 
-        <div class="glass bg-white rounded-[2rem] p-8 shadow-2xl shadow-gray-200/50 apple-card">
-            <form id="mainForm">
+        <div class="glass bg-white p-8 shadow-2xl shadow-gray-200">
+            <form id="orderForm">
                 
                 <div class="step active" id="step1">
-                    <span class="text-[10px] font-bold uppercase tracking-widest text-blue-600 mb-2 block">Étape 1 sur 3</span>
-                    <h2 class="text-2xl font-semibold mb-6">Le Client</h2>
+                    <h2 class="text-xl font-semibold mb-6 text-gray-800">Identité</h2>
                     <div class="space-y-4">
-                        <input type="text" id="client" placeholder="Nom complet" class="w-full text-lg" required>
-                        <input type="tel" id="tel" placeholder="N° de téléphone" class="w-full text-lg" required>
+                        <input type="text" id="client" placeholder="Nom & Prénom" required>
+                        <input type="tel" id="tel" placeholder="N° de téléphone" required>
                     </div>
-                    <button type="button" onclick="goToStep(2)" class="btn-next w-full mt-8 text-white font-medium py-4 rounded-full text-lg">Continuer</button>
+                    <button type="button" onclick="goToStep(2)" class="btn-blue w-full mt-8">Continuer</button>
                 </div>
 
                 <div class="step" id="step2">
-                    <span class="text-[10px] font-bold uppercase tracking-widest text-blue-600 mb-2 block">Étape 2 sur 3</span>
-                    <h2 class="text-2xl font-semibold mb-6">La Pièce</h2>
-                    <div class="flex gap-2 mb-4">
-                        <button type="button" class="flex-1 py-3 rounded-xl bg-gray-100 font-medium hover:bg-black hover:text-white transition">Homme</button>
-                        <button type="button" class="flex-1 py-3 rounded-xl bg-gray-100 font-medium hover:bg-black hover:text-white transition">Femme</button>
-                    </div>
-                    <select id="modele" class="w-full text-lg mb-4">
-                        <option value="">Sélectionner le modèle</option>
-                        <option value="H-Gero1">H-Gero1 — 35€</option>
-                        <option value="H-Iconic">H-Iconic — 39€</option>
-                        <option value="F-Gero1">F-Gero1 — 35€</option>
+                    <h2 class="text-xl font-semibold mb-6 text-gray-800">Sélection</h2>
+                    <select id="modele" required>
+                        <option value="">Choisir un modèle...</option>
+                        <optgroup label="Homme">
+                            <option value="H-Gero1">H-Gero1 (35€)</option>
+                            <option value="H-Iconic">H-Iconic (39€)</option>
+                            <option value="H-Premium">H-Premium (45€)</option>
+                        </optgroup>
+                        <optgroup label="Femme">
+                            <option value="F-Gero1">F-Gero1 (35€)</option>
+                            <option value="F-Iconic">F-Iconic (39€)</option>
+                        </optgroup>
                     </select>
                     <div class="flex items-center justify-between mt-8">
-                        <button type="button" onclick="goToStep(1)" class="text-gray-400 font-medium">Retour</button>
-                        <button type="button" onclick="goToStep(3)" class="btn-next px-8 py-3 text-white rounded-full font-medium">Suivant</button>
+                        <button type="button" onclick="goToStep(1)" class="text-gray-400">Retour</button>
+                        <button type="button" onclick="goToStep(3)" class="btn-blue px-8">Suivant</button>
                     </div>
                 </div>
 
                 <div class="step" id="step3">
-                    <span class="text-[10px] font-bold uppercase tracking-widest text-blue-600 mb-2 block">Étape 3 sur 3</span>
-                    <h2 class="text-2xl font-semibold mb-6">Atelier</h2>
-                    <textarea id="technique" placeholder="Détails (ex: Logo dos 25cm, RAL 9010...)" class="w-full text-lg mb-4" rows="3"></textarea>
-                    <label class="text-xs text-gray-400 ml-2 mb-1 block">Date de livraison</label>
-                    <input type="date" id="delai" class="w-full text-lg mb-6">
+                    <h2 class="text-xl font-semibold mb-6 text-gray-800">Atelier</h2>
+                    <textarea id="technique" placeholder="Détails techniques (logos, dimensions...)" rows="3"></textarea>
+                    <input type="date" id="delai" class="mt-4">
                     
-                    <div class="flex items-center justify-between">
-                        <button type="button" onclick="goToStep(2)" class="text-gray-400 font-medium">Retour</button>
-                        <button type="submit" class="bg-black text-white px-8 py-3 rounded-full font-medium">Valider</button>
+                    <div class="flex items-center justify-between mt-8">
+                        <button type="button" onclick="goToStep(2)" class="text-gray-400">Retour</button>
+                        <button type="submit" id="submitBtn" class="bg-black text-white px-8 py-3 rounded-full font-medium">Valider</button>
                     </div>
                 </div>
 
@@ -75,15 +72,40 @@
     </div>
 
     <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxCmn8nM8n60HhyowTbOELUYJ5xPkzkXdRtdk_XsZIHqgCSh_qq9at2Z_UxFsYSr5Bl/exec";
+
         function goToStep(num) {
             document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-            const nextStep = document.getElementById('step' + num);
-            nextStep.classList.add('active');
+            document.getElementById('step' + num).classList.add('active');
         }
 
-        document.getElementById('mainForm').onsubmit = function(e) {
+        document.getElementById('orderForm').onsubmit = async (e) => {
             e.preventDefault();
-            alert('Commande envoyée à Production OLDA 2026 !');
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerText = "Envoi...";
+
+            const data = {
+                client: document.getElementById('client').value,
+                tel: document.getElementById('tel').value,
+                modele: document.getElementById('modele').value,
+                technique: document.getElementById('technique').value,
+                delai: document.getElementById('delai').value
+            };
+
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify(data)
+                });
+                alert('Commande enregistrée dans Production OLDA 2026 !');
+                location.reload();
+            } catch (error) {
+                alert('Erreur réseau. Réessayez.');
+                btn.disabled = false;
+                btn.innerText = "Valider";
+            }
         };
     </script>
 </body>
