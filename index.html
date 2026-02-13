@@ -3,102 +3,518 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Production OLDA 2026</title>
+    <title>T-Shirt Studio</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; background: #f5f5f7; }
-        .step { display: none; opacity: 0; transform: translateY(10px); transition: all 0.4s ease; }
-        .step.active { display: block; opacity: 1; transform: translateY(0); }
-        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 2rem; }
-        input, select, textarea { border: none !important; background: #f5f5f7 !important; border-radius: 12px !important; padding: 16px !important; outline: none !important; width: 100%; font-size: 1.1rem; }
-        .btn-blue { background: #0071e3; color: white; font-weight: 500; border-radius: 99px; padding: 14px; transition: transform 0.2s; }
-        .btn-blue:active { transform: scale(0.97); }
+        /* Optimisation style Apple */
+        :root {
+            --apple-blue: #007AFF;
+            --apple-gray: #F2F2F7;
+            --apple-bg: #FBFBFD;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--apple-bg);
+            color: #1D1D1F;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+        
+        /* Inputs et Boutons style iOS */
+        .ios-input {
+            background: white;
+            border: 1px solid #D1D1D6;
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 17px;
+            width: 100%;
+            transition: all 0.2s ease;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        .ios-input:focus {
+            border-color: var(--apple-blue);
+            box-shadow: 0 0 0 4px rgba(0,122,255, 0.1);
+        }
+        .ios-btn {
+            background: var(--apple-blue);
+            color: white;
+            border-radius: 14px;
+            padding: 16px;
+            font-size: 17px;
+            font-weight: 600;
+            width: 100%;
+            text-align: center;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.1s, background-color 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .ios-btn:active {
+            transform: scale(0.96);
+            opacity: 0.9;
+        }
+        .ios-btn-secondary {
+            background: transparent;
+            color: var(--apple-blue);
+            font-weight: 500;
+        }
+
+        /* Animations de transition fluides */
+        .step-container {
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+        .step-container.active {
+            display: flex;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Zone de dessin T-Shirt */
+        .tshirt-wrapper {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        .canvas-container {
+            background-color: transparent !important;
+        }
+        
+        /* Loader */
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 3px solid var(--apple-blue);
+            width: 20px;
+            height: 20px;
+            -webkit-animation: spin 1s linear infinite; /* Safari */
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4">
-    <div class="w-full max-w-md">
-        <header class="text-center mb-8">
-            <h1 class="text-2xl font-semibold tracking-tight text-gray-900">Production OLDA</h1>
-            <p class="text-gray-400 text-sm">Collection 2026</p>
-        </header>
+<body class="h-screen w-full flex flex-col justify-between items-center pb-8 pt-20 px-6">
 
-        <div class="glass bg-white p-8 shadow-2xl shadow-gray-200">
-            <form id="orderForm">
-                <div class="step active" id="step1">
-                    <h2 class="text-xl font-semibold mb-6 text-gray-800">Identité</h2>
-                    <input type="text" id="client" placeholder="Nom & Prénom" class="mb-4" required>
-                    <input type="tel" id="tel" placeholder="N° de téléphone" required>
-                    <button type="button" onclick="goToStep(2)" class="btn-blue w-full mt-8">Continuer</button>
-                </div>
-
-                <div class="step" id="step2">
-                    <h2 class="text-xl font-semibold mb-6 text-gray-800">Sélection</h2>
-                    <select id="modele" required>
-                        <option value="">Choisir un modèle...</option>
-                        <optgroup label="Collection Homme">
-                            <option value="H-Gero1">H-Gero1 (35€)</option>
-                            <option value="H-Iconic">H-Iconic (39€)</option>
-                        </optgroup>
-                        <optgroup label="Collection Femme">
-                            <option value="F-Gero1">F-Gero1 (35€)</option>
-                        </optgroup>
-                    </select>
-                    <div class="flex items-center justify-between mt-8">
-                        <button type="button" onclick="goToStep(1)" class="text-gray-400 font-medium">Retour</button>
-                        <button type="button" onclick="goToStep(3)" class="btn-blue px-8">Suivant</button>
-                    </div>
-                </div>
-
-                <div class="step" id="step3">
-                    <h2 class="text-xl font-semibold mb-6 text-gray-800">Atelier</h2>
-                    <textarea id="technique" placeholder="Détails techniques (logos, RAL, dimensions...)" rows="3"></textarea>
-                    <input type="date" id="delai" class="mt-4">
-                    <div class="flex items-center justify-between mt-8">
-                        <button type="button" onclick="goToStep(2)" class="text-gray-400 font-medium">Retour</button>
-                        <button type="submit" id="submitBtn" class="bg-black text-white px-8 py-3 rounded-full font-medium">Valider</button>
-                    </div>
-                </div>
-            </form>
+    <div class="fixed top-0 left-0 w-full p-4 bg-white/90 backdrop-blur-md z-50 border-b border-gray-200/50">
+        <div class="max-w-md mx-auto flex flex-col items-center">
+            <h1 class="text-[17px] font-semibold tracking-tight">Nouvelle Commande</h1>
+            <div class="h-1 w-full bg-gray-100 mt-3 rounded-full overflow-hidden">
+                <div id="progress-bar" class="h-full bg-blue-500 w-[12%] transition-all duration-500 ease-out"></div>
+            </div>
         </div>
     </div>
 
-    <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxDUNfBS4MgUqtHxcHgA6A2w2tAXYisSvAuBGKWJyIQ6BeeV0DJALWYC6QbI7bQKqJT/exec";
+    <div class="w-full max-w-md flex-grow flex flex-col justify-center">
 
-        function goToStep(num) {
-            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-            document.getElementById('step' + num).classList.add('active');
+        <div id="step-1" class="step-container active">
+            <div class="text-center mb-6">
+                <h2 class="text-3xl font-bold mb-2 text-gray-900">Bonjour 👋</h2>
+                <p class="text-gray-500">Qui saisit cette commande ?</p>
+            </div>
+            <input type="text" id="input-vendeuse" class="ios-input shadow-sm" placeholder="Prénom de la vendeuse" autocomplete="off">
+            <button onclick="nextStep(2)" class="ios-btn shadow-lg shadow-blue-500/30 mt-4">Commencer</button>
+        </div>
+
+        <div id="step-2" class="step-container">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold mb-2">Le Client</h2>
+                <p class="text-gray-500">Quel est le nom du client ?</p>
+            </div>
+            <input type="text" id="input-client" class="ios-input shadow-sm" placeholder="Nom complet" autocomplete="off">
+            <div class="flex flex-col gap-3 mt-4">
+                <button onclick="nextStep(3)" class="ios-btn">Suivant</button>
+                <button onclick="prevStep(1)" class="ios-btn ios-btn-secondary">Retour</button>
+            </div>
+        </div>
+
+        <div id="step-3" class="step-container">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold mb-2">La Taille</h2>
+                <p class="text-gray-500">Sélectionnez la taille du T-shirt</p>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <button onclick="selectOption('taille', 'S'); nextStep(4)" class="ios-input text-center font-bold hover:bg-gray-50 active:bg-blue-50 active:border-blue-500">S</button>
+                <button onclick="selectOption('taille', 'M'); nextStep(4)" class="ios-input text-center font-bold hover:bg-gray-50 active:bg-blue-50 active:border-blue-500">M</button>
+                <button onclick="selectOption('taille', 'L'); nextStep(4)" class="ios-input text-center font-bold hover:bg-gray-50 active:bg-blue-50 active:border-blue-500">L</button>
+                <button onclick="selectOption('taille', 'XL'); nextStep(4)" class="ios-input text-center font-bold hover:bg-gray-50 active:bg-blue-50 active:border-blue-500">XL</button>
+            </div>
+            <button onclick="prevStep(2)" class="ios-btn ios-btn-secondary mt-4">Retour</button>
+        </div>
+
+        <div id="step-4" class="step-container">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold mb-2">Couleur</h2>
+                <p class="text-gray-500">Quelle est la couleur de base ?</p>
+            </div>
+            <div class="space-y-3">
+                <button onclick="setColor('white'); nextStep(5)" class="ios-input flex items-center justify-between font-medium active:bg-gray-50">
+                    <span class="flex items-center gap-3"><div class="w-6 h-6 rounded-full border border-gray-200 bg-white shadow-sm"></div> Blanc</span>
+                    <span class="text-gray-300">›</span>
+                </button>
+                <button onclick="setColor('black'); nextStep(5)" class="ios-input flex items-center justify-between font-medium active:bg-gray-50">
+                    <span class="flex items-center gap-3"><div class="w-6 h-6 rounded-full bg-black shadow-sm"></div> Noir</span>
+                    <span class="text-gray-300">›</span>
+                </button>
+                <button onclick="setColor('navy'); nextStep(5)" class="ios-input flex items-center justify-between font-medium active:bg-gray-50">
+                    <span class="flex items-center gap-3"><div class="w-6 h-6 rounded-full bg-blue-900 shadow-sm"></div> Bleu Marine</span>
+                    <span class="text-gray-300">›</span>
+                </button>
+                <button onclick="setColor('red'); nextStep(5)" class="ios-input flex items-center justify-between font-medium active:bg-gray-50">
+                    <span class="flex items-center gap-3"><div class="w-6 h-6 rounded-full bg-red-600 shadow-sm"></div> Rouge</span>
+                    <span class="text-gray-300">›</span>
+                </button>
+            </div>
+            <button onclick="prevStep(3)" class="ios-btn ios-btn-secondary mt-4">Retour</button>
+        </div>
+
+        <div id="step-5" class="step-container">
+            <div class="text-center mb-2">
+                <h2 class="text-2xl font-bold">Design Avant</h2>
+                <p class="text-sm text-gray-500">Tapez le texte pour le visualiser</p>
+            </div>
+            
+            <div class="tshirt-wrapper mb-4">
+                <canvas id="canvas-front" width="300" height="300"></canvas>
+            </div>
+
+            <input type="text" id="input-front" class="ios-input mb-4" placeholder="Votre texte ici..." oninput="updateCanvas()" autocomplete="off">
+            
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="prevStep(4)" class="ios-btn ios-btn-secondary">Retour</button>
+                <button onclick="nextStep(6)" class="ios-btn">Valider</button>
+            </div>
+        </div>
+
+        <div id="step-6" class="step-container">
+            <div class="text-center mb-2">
+                <h2 class="text-2xl font-bold">Design Arrière</h2>
+                <p class="text-sm text-gray-500">Optionnel : texte au dos</p>
+            </div>
+            
+            <div class="tshirt-wrapper mb-4">
+                <canvas id="canvas-back" width="300" height="300"></canvas>
+            </div>
+
+            <input type="text" id="input-back" class="ios-input mb-4" placeholder="Votre texte ici..." oninput="updateCanvas()" autocomplete="off">
+            
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="prevStep(5)" class="ios-btn ios-btn-secondary">Retour</button>
+                <button onclick="nextStep(7)" class="ios-btn">Résumé</button>
+            </div>
+        </div>
+
+        <div id="step-7" class="step-container">
+            <h2 class="text-2xl font-bold mb-4 text-center">Récapitulatif</h2>
+            
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 space-y-3 text-sm">
+                <div class="flex justify-between border-b border-gray-100 pb-2">
+                    <span class="text-gray-500">Vendeuse</span>
+                    <span class="font-semibold" id="summary-vendeuse">-</span>
+                </div>
+                <div class="flex justify-between border-b border-gray-100 pb-2">
+                    <span class="text-gray-500">Client</span>
+                    <span class="font-semibold" id="summary-client">-</span>
+                </div>
+                <div class="flex justify-between border-b border-gray-100 pb-2">
+                    <span class="text-gray-500">Taille & Couleur</span>
+                    <span class="font-semibold"><span id="summary-taille"></span> • <span id="summary-couleur"></span></span>
+                </div>
+            </div>
+            
+            <div class="flex gap-3 overflow-x-auto py-4 scrollbar-hide">
+                <div class="flex-shrink-0 w-32">
+                    <p class="text-center text-xs text-gray-400 font-bold mb-1 uppercase">Avant</p>
+                    <img id="preview-img-front" class="w-full rounded-xl shadow-sm border border-gray-100 bg-white">
+                </div>
+                <div class="flex-shrink-0 w-32">
+                    <p class="text-center text-xs text-gray-400 font-bold mb-1 uppercase">Arrière</p>
+                    <img id="preview-img-back" class="w-full rounded-xl shadow-sm border border-gray-100 bg-white">
+                </div>
+            </div>
+
+            <button onclick="submitOrder()" id="btn-submit" class="ios-btn bg-green-500 text-white shadow-lg shadow-green-500/30">Envoyer la commande</button>
+            <p id="status-msg" class="text-center text-sm text-red-500 mt-2 font-medium"></p>
+            <button onclick="prevStep(6)" class="ios-btn ios-btn-secondary mt-2">Modifier</button>
+        </div>
+
+        <div id="step-8" class="step-container text-center">
+            <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
+                <svg class="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            </div>
+            <h2 class="text-3xl font-bold mb-2 text-gray-900">Succès !</h2>
+            <p class="text-gray-500 mb-8 px-4">La commande a été transmise au Google Sheet avec le mockup.</p>
+            <button onclick="location.reload()" class="ios-btn bg-gray-900 text-white shadow-xl">Nouvelle commande</button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxXM44btJkr0IrX6bG1Jw07iku9Uq_boToCpfTEWJSlFaE_QL-YDiBflPsCYWz4E8ck/exec';
+
+        // --- STATE ---
+        let currentStep = 1;
+        let orderData = {
+            vendeuse: '',
+            client: '',
+            taille: '',
+            couleur: 'white',
+            textFront: '',
+            textBack: ''
+        };
+
+        // --- FABRIC JS INIT ---
+        let canvasFront, canvasBack;
+
+        window.onload = function() {
+            canvasFront = new fabric.Canvas('canvas-front', { selection: false });
+            canvasBack = new fabric.Canvas('canvas-back', { selection: false });
+            
+            initTshirt(canvasFront, 'Avant');
+            initTshirt(canvasBack, 'Arrière');
+        };
+
+        function initTshirt(canvas, placeholder) {
+            // SVG Path simplifié d'un T-shirt
+            const path = "M10,40 L30,40 L40,10 L90,10 L100,40 L120,40 L120,50 L105,50 L105,130 L25,130 L25,50 L10,50 Z";
+            
+            // On s'assure que le canvas est transparent pour l'export
+            canvas.backgroundColor = null;
+            
+            const tshirt = new fabric.Path(path, { 
+                fill: '#ffffff', 
+                stroke: '#e0e0e0',
+                strokeWidth: 2,
+                selectable: false, 
+                evented: false,
+                originX: 'center',
+                originY: 'center',
+                scaleX: 2.3,
+                scaleY: 2.3
+            });
+            
+            // Centrage
+            tshirt.set({ left: 150, top: 150 });
+            canvas.add(tshirt);
+            canvas.tshirtObj = tshirt;
+            
+            // Placeholder text (invisible par défaut si l'utilisateur n'écrit rien)
+            const text = new fabric.Text(placeholder, {
+                left: 150,
+                top: 130,
+                fontSize: 18,
+                fontFamily: '-apple-system',
+                fill: '#e5e5e5',
+                originX: 'center',
+                originY: 'center',
+                selectable: false
+            });
+            canvas.add(text);
+            canvas.placeholderText = text;
+            canvas.renderAll();
         }
 
-        document.getElementById('orderForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('submitBtn');
+        // --- NAVIGATION ---
+        function nextStep(step) {
+            // Validation
+            if (currentStep === 1 && !document.getElementById('input-vendeuse').value.trim()) {
+                shakeElement(document.getElementById('input-vendeuse'));
+                return;
+            }
+            if (currentStep === 2 && !document.getElementById('input-client').value.trim()) {
+                shakeElement(document.getElementById('input-client'));
+                return;
+            }
+
+            // Save Data
+            if(currentStep === 1) orderData.vendeuse = document.getElementById('input-vendeuse').value;
+            if(currentStep === 2) orderData.client = document.getElementById('input-client').value;
+            if(currentStep === 5) orderData.textFront = document.getElementById('input-front').value;
+            if(currentStep === 6) orderData.textBack = document.getElementById('input-back').value;
+
+            // Prepare Summary
+            if (step === 7) prepareSummary();
+
+            // Transition
+            document.querySelector('.active').classList.remove('active');
+            setTimeout(() => {
+                document.getElementById('step-' + step).classList.add('active');
+            }, 300); // petit délai pour la fluidité
+            
+            currentStep = step;
+            updateProgressBar(step);
+            
+            // Fermer le clavier mobile
+            document.activeElement.blur();
+        }
+
+        function prevStep(step) {
+            document.querySelector('.active').classList.remove('active');
+            document.getElementById('step-' + step).classList.add('active');
+            currentStep = step;
+            updateProgressBar(step);
+        }
+
+        function updateProgressBar(step) {
+            const percent = (step / 8 * 100);
+            document.getElementById('progress-bar').style.width = percent + '%';
+        }
+
+        function shakeElement(element) {
+            element.classList.add('border-red-500');
+            setTimeout(() => element.classList.remove('border-red-500'), 500);
+        }
+
+        // --- LOGIC ---
+        function selectOption(key, value) {
+            orderData[key] = value;
+        }
+
+        function setColor(color) {
+            orderData.couleur = color;
+            let hex = '#ffffff';
+            let stroke = '#e0e0e0';
+            let textContrast = '#000000';
+
+            if(color === 'black') { hex = '#1c1c1e'; stroke = '#333'; textContrast = '#ffffff'; }
+            if(color === 'navy') { hex = '#1e3a8a'; stroke = '#172554'; textContrast = '#ffffff'; }
+            if(color === 'red') { hex = '#ef4444'; stroke = '#b91c1c'; textContrast = '#ffffff'; }
+
+            [canvasFront, canvasBack].forEach(c => {
+                c.tshirtObj.set({ fill: hex, stroke: stroke });
+                c.textColorContrast = textContrast; 
+                
+                // Mettre à jour la couleur du texte existant
+                c.getObjects().forEach(obj => {
+                    if(obj.isUserText) obj.set('fill', textContrast);
+                });
+                c.renderAll();
+            });
+        }
+
+        function updateCanvas() {
+            const frontText = document.getElementById('input-front').value;
+            const backText = document.getElementById('input-back').value;
+
+            updateCanvasText(canvasFront, frontText);
+            updateCanvasText(canvasBack, backText);
+        }
+
+        function updateCanvasText(canvas, textVal) {
+            // Clean old text
+            canvas.getObjects().forEach(obj => {
+                if (obj.isUserText) canvas.remove(obj);
+            });
+            
+            // Logic placeholder
+            if (textVal) {
+                canvas.placeholderText.set('opacity', 0);
+                
+                // Contraste auto
+                let textColor = canvas.textColorContrast || '#000000';
+                
+                const textObj = new fabric.Text(textVal, {
+                    left: 150,
+                    top: 130,
+                    fontSize: 22,
+                    fontFamily: 'Arial',
+                    fill: textColor,
+                    originX: 'center',
+                    originY: 'center',
+                    fontWeight: 'bold',
+                    isUserText: true
+                });
+                
+                // Si le texte est trop long, on réduit la taille
+                if (textObj.width > 120) {
+                    textObj.scaleToWidth(120);
+                }
+                
+                canvas.add(textObj);
+            } else {
+                canvas.placeholderText.set('opacity', 1);
+            }
+            canvas.renderAll();
+        }
+
+        function prepareSummary() {
+            document.getElementById('summary-vendeuse').innerText = orderData.vendeuse;
+            document.getElementById('summary-client').innerText = orderData.client;
+            document.getElementById('summary-taille').innerText = orderData.taille;
+            document.getElementById('summary-couleur').innerText = orderData.couleur;
+
+            // Generate Images pour le résumé
+            // On ajoute un fond blanc temporaire pour que l'image soit propre dans le résumé
+            const bgFront = canvasFront.backgroundColor;
+            canvasFront.backgroundColor = '#ffffff';
+            canvasBack.backgroundColor = '#ffffff';
+            
+            document.getElementById('preview-img-front').src = canvasFront.toDataURL({format: 'png', multiplier: 0.5});
+            document.getElementById('preview-img-back').src = canvasBack.toDataURL({format: 'png', multiplier: 0.5});
+            
+            // Reset background transparent
+            canvasFront.backgroundColor = bgFront;
+            canvasBack.backgroundColor = bgFront;
+        }
+
+        function submitOrder() {
+            const btn = document.getElementById('btn-submit');
+            const status = document.getElementById('status-msg');
+            
+            // UI Loading
             btn.disabled = true;
-            btn.innerText = "Envoi...";
+            btn.innerHTML = '<span class="loader"></span> Envoi...';
+            btn.classList.add('opacity-75');
+            
+            // On génère une image composite (Front) pour le Sheet
+            // On force un fond blanc pour le fichier final
+            canvasFront.backgroundColor = '#ffffff';
+            const finalImage = canvasFront.toDataURL({format: 'png', multiplier: 1});
+            canvasFront.backgroundColor = null; // reset
 
             const payload = {
-                client: document.getElementById('client').value,
-                tel: document.getElementById('tel').value,
-                modele: document.getElementById('modele').value,
-                technique: document.getElementById('technique').value,
-                delai: document.getElementById('delai').value
+                ...orderData,
+                image: finalImage
             };
 
-            try {
-                await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    body: JSON.stringify(payload)
-                });
-                alert('Commande bien enregistrée dans le tableau !');
-                location.reload();
-            } catch (error) {
-                alert('Erreur technique. Vérifiez la connexion.');
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(response => {
+                // Succès présumé (mode no-cors)
+                nextStep(8);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                status.innerText = "Erreur de connexion. Vérifiez internet.";
                 btn.disabled = false;
-                btn.innerText = "Valider";
-            }
-        };
+                btn.innerText = "Réessayer l'envoi";
+                btn.classList.remove('opacity-75');
+            });
+        }
     </script>
 </body>
 </html>
