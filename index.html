@@ -49,14 +49,6 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 0 0 0.5px rgba(0,0,0,0.04);
         }
 
-        .glass-card {
-            background: var(--glass);
-            backdrop-filter: blur(40px) saturate(180%);
-            -webkit-backdrop-filter: blur(40px) saturate(180%);
-            border: 0.5px solid var(--glass-border);
-            border-radius: 20px;
-        }
-
         /* ═══════════════════════════════════
            INPUTS
            ═══════════════════════════════════ */
@@ -142,6 +134,10 @@
             width: 18px; height: 18px; flex-shrink: 0;
             background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23007AFF' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E") center/contain no-repeat;
         }
+
+        /* Compact selects for 3-col grid */
+        .aselect-compact .aselect-trigger { padding: 14px 30px 14px 12px; font-size: 15px; }
+        .aselect-compact .aselect-chevron { right: 10px; }
 
         /* ═══════════════════════════════════
            BUTTONS
@@ -370,15 +366,6 @@
         .upload-pill .x:hover { background: rgba(255,59,48,0.14); }
 
         /* ═══════════════════════════════════
-           PAYMENT
-           ═══════════════════════════════════ */
-        .pay-bar { display: flex; background: #E5E5EA; border-radius: 12px; padding: 2px; cursor: pointer; position: relative; }
-        .pay-opt { flex: 1; text-align: center; padding: 13px; font-size: 13px; font-weight: 700; z-index: 1; transition: color 0.3s; color: var(--text-3); }
-        .pay-knob { position: absolute; width: calc(50% - 2px); height: calc(100% - 4px); background: white; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1); }
-        .pay-bar.paid .pay-knob { transform: translateX(100%); }
-        .pay-bar.paid .opt-yes { color: var(--green); }
-
-        /* ═══════════════════════════════════
            RESPONSIVE
            ═══════════════════════════════════ */
         @media (min-width: 768px) {
@@ -413,39 +400,38 @@
     </header>
 
     <!-- ════════════════════════════════════════
-         STEP 1 — CLIENT
+         STEP 1 — CLIENT  (A: Commande, B: Date, C: Nom, D: Telephone)
          ════════════════════════════════════════ -->
     <div id="s1" class="step active mt-6">
-        <div class="card p-5 space-y-4">
-            <div>
-                <label class="label ml-1 mb-1.5 block">Numero de commande</label>
-                <input type="text" id="orderNo" class="input font-mono text-sm" style="color:var(--text-2)" readonly>
-            </div>
-            <div>
-                <label class="label ml-1 mb-1.5 block">Collection</label>
-                <div class="aselect" id="selCollection"></div>
-            </div>
-            <div>
-                <label class="label ml-1 mb-1.5 block">Reference</label>
-                <div class="aselect" id="selRef"></div>
+        <div class="card p-5 space-y-3">
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="label ml-1 mb-1.5 block">Commande</label>
+                    <input type="text" id="orderNo" class="input font-mono text-sm" style="color:var(--text-2)" readonly>
+                </div>
+                <div>
+                    <label class="label ml-1 mb-1.5 block">Date</label>
+                    <input type="text" id="orderDate" class="input text-sm" style="color:var(--text-2)" readonly>
+                </div>
             </div>
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="label ml-1 mb-1.5 block">Taille</label>
-                    <div class="aselect" id="selSize"></div>
+                    <label class="label ml-1 mb-1.5 block">Nom</label>
+                    <input type="text" id="clientName" class="input" placeholder="Nom du client">
                 </div>
                 <div>
                     <label class="label ml-1 mb-1.5 block">Telephone</label>
                     <input type="tel" id="clientPhone" class="input" placeholder="06 00 00 00 00">
                 </div>
             </div>
-            <input type="text" id="clientName" class="input" placeholder="Nom du client">
         </div>
         <button class="btn btn-primary" onclick="go(2)">Continuer</button>
     </div>
 
     <!-- ════════════════════════════════════════
          STEP 2 — CONFIGURATEUR
+         (E: Collection, F: Reference, G: Taille, H: Couleur T-shirt,
+          I: Couleur Logo, J: Logo Avant, K: Logo Arriere, L: Note)
          ════════════════════════════════════════ -->
     <div id="s2" class="step mt-6">
 
@@ -470,6 +456,24 @@
             <p class="text-center mt-2 text-[13px] font-semibold" style="color:var(--text-2)" id="colorName">Blanc</p>
         </div>
 
+        <!-- Collection / Reference / Taille — one row -->
+        <div class="card p-5">
+            <div class="grid grid-cols-3 gap-3">
+                <div>
+                    <label class="label ml-1 mb-1.5 block">Collection</label>
+                    <div class="aselect aselect-compact" id="selCollection"></div>
+                </div>
+                <div>
+                    <label class="label ml-1 mb-1.5 block">Reference</label>
+                    <div class="aselect aselect-compact" id="selRef"></div>
+                </div>
+                <div>
+                    <label class="label ml-1 mb-1.5 block">Taille</label>
+                    <div class="aselect aselect-compact" id="selSize"></div>
+                </div>
+            </div>
+        </div>
+
         <!-- Color Picker -->
         <div class="card p-5">
             <p class="label mb-3">Couleur du t-shirt</p>
@@ -479,7 +483,7 @@
         <!-- Logos Atelier -->
         <div class="card p-5">
             <div class="flex items-center justify-between mb-3">
-                <p class="label mb-0">Motif Logo Atelier</p>
+                <p class="label mb-0">Motif Logo</p>
                 <button style="border:none;background:none;cursor:pointer;font-size:12px;font-weight:600;color:var(--accent);font-family:inherit;" onclick="dropLogo()">Retirer</button>
             </div>
             <div class="seg mb-4">
@@ -514,10 +518,10 @@
             </div>
         </div>
 
-        <!-- Notes -->
+        <!-- Note -->
         <div class="card p-5">
-            <p class="label mb-3">Notes atelier</p>
-            <textarea id="note" class="input" rows="3" placeholder="Instructions pour l'atelier..."></textarea>
+            <p class="label mb-3">Note</p>
+            <textarea id="note" class="input" rows="2" placeholder="Commentaires specifiques..."></textarea>
         </div>
 
         <div class="flex gap-3">
@@ -530,26 +534,30 @@
 
     <!-- ════════════════════════════════════════
          STEP 3 — PAIEMENT
+         (M: Prix T-shirt, N: Personnalisation, O: Total, P: Paye, Q: Fiche)
          ════════════════════════════════════════ -->
     <div id="s3" class="step mt-6">
-        <div class="card p-6 space-y-7">
-            <div class="flex gap-4">
-                <div class="flex-1 text-center">
+        <div class="card p-6 space-y-5">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="text-center">
                     <p class="label mb-2">T-Shirt</p>
                     <input type="number" id="price" class="input text-center font-bold text-lg" value="25" oninput="calcTotal()">
                 </div>
-                <div class="flex-1 text-center">
-                    <p class="label mb-2">Perso</p>
+                <div class="text-center">
+                    <p class="label mb-2">Personnalisation</p>
                     <input type="number" id="customPrice" class="input text-center font-bold text-lg" value="0" oninput="calcTotal()">
                 </div>
             </div>
             <div class="py-5 border-y text-center" style="border-color:var(--border)">
                 <p class="text-[56px] font-black tracking-tighter leading-none" id="totalLabel">25 &euro;</p>
             </div>
-            <div class="pay-bar" id="payBar" onclick="togglePay()">
-                <div class="pay-knob"></div>
-                <div class="pay-opt">A REGLER</div>
-                <div class="pay-opt opt-yes">PAYE</div>
+            <div>
+                <p class="label mb-2 text-center">Statut du paiement</p>
+                <div class="seg" id="payStatus">
+                    <button class="seg-btn on" data-p="non" onclick="setPay('non')">A regler</button>
+                    <button class="seg-btn" data-p="acompte" onclick="setPay('acompte')">Acompte</button>
+                    <button class="seg-btn" data-p="oui" onclick="setPay('oui')">Paye</button>
+                </div>
             </div>
         </div>
         <div class="flex gap-3">
@@ -609,18 +617,20 @@ const LOGOS = {
 let color = COLORS[0];
 let side  = 'front';
 let tab   = 'bea';
-let logo  = null;
 let logoColor = '#1A1A1A';
-let paid  = false;
 let svgF  = null;
 let svgB  = null;
 
-/* Logo interaction state */
-let logoX = 50;
-let logoY = 42;
-let logoW = 24;
+/* Per-side logo state (J: Logo Avant, K: Logo Arriere) */
+const logos = {
+    front: { data: null, x: 50, y: 42, w: 24 },
+    back:  { data: null, x: 50, y: 42, w: 24 }
+};
+function cl() { return logos[side]; }
+
 let logoSelected = false;
 let dragState = null;
+let payStatus = 'non';
 
 /* Custom selects registry */
 const selects = {};
@@ -735,11 +745,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const d = new Date();
     document.getElementById('orderNo').value =
         `ST-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}`;
+    document.getElementById('orderDate').value =
+        `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
 
     // Build custom selects
     createSelect('selCollection',
         [{v:'Homme',l:'Homme'},{v:'Femme',l:'Femme'},{v:'Enfant',l:'Enfant'},{v:'Accessoire',l:'Accessoire'}],
-        'Choisir la collection',
+        'Collection',
         (val) => buildRefs()
     );
     createSelect('selRef', [], 'Reference', () => {});
@@ -829,8 +841,9 @@ function applyLogoColor(svgStr) {
 function renderLogo() {
     const inner = document.getElementById('logoInner');
     const zone = document.getElementById('logoZone');
+    const cur = cl();
 
-    if (!logo) {
+    if (!cur.data) {
         inner.innerHTML = '';
         zone.classList.add('empty');
         zone.classList.remove('has-logo', 'selected');
@@ -841,10 +854,10 @@ function renderLogo() {
     zone.classList.remove('empty');
     zone.classList.add('has-logo');
 
-    if (logo.type === 'atelier') {
-        inner.innerHTML = applyLogoColor(logo.s);
+    if (cur.data.type === 'atelier') {
+        inner.innerHTML = applyLogoColor(cur.data.s);
     } else {
-        inner.innerHTML = `<img src="${logo.url}" alt="">`;
+        inner.innerHTML = `<img src="${cur.data.url}" alt="">`;
     }
 
     updateLogoPosition();
@@ -852,9 +865,32 @@ function renderLogo() {
 
 function updateLogoPosition() {
     const zone = document.getElementById('logoZone');
-    zone.style.left = logoX + '%';
-    zone.style.top = logoY + '%';
-    zone.style.width = logoW + '%';
+    const cur = cl();
+    zone.style.left = cur.x + '%';
+    zone.style.top = cur.y + '%';
+    zone.style.width = cur.w + '%';
+}
+
+/* ══════════════════════════════════════
+   SYNC LOGO UI (on side flip)
+   ══════════════════════════════════════ */
+function syncLogoUI() {
+    const cur = cl();
+    // Refresh logo grid highlights
+    buildLogos(tab);
+    // Upload pill
+    if (cur.data && cur.data.type === 'custom') {
+        document.getElementById('upThumb').src = cur.data.url;
+        document.getElementById('upName').textContent = cur.data.name || 'Custom';
+        document.getElementById('upPill').classList.add('show');
+        document.getElementById('uploadArea').style.display = 'none';
+    } else {
+        document.getElementById('upPill').classList.remove('show');
+        document.getElementById('uploadArea').style.display = 'flex';
+        document.getElementById('fileIn').value = '';
+    }
+    // Logo color section
+    showLogoColorSection(cur.data && cur.data.type === 'atelier');
 }
 
 /* ══════════════════════════════════════
@@ -878,7 +914,8 @@ function initLogoInteraction() {
 }
 
 function onLogoDown(e) {
-    if (!logo) return;
+    const cur = cl();
+    if (!cur.data) return;
     e.preventDefault();
     e.stopPropagation();
 
@@ -886,34 +923,31 @@ function onLogoDown(e) {
     const stage = document.getElementById('svgView');
     const rect = stage.getBoundingClientRect();
 
-    // Select the logo
     logoSelected = true;
     zone.classList.add('selected');
 
     const handle = e.target.closest('.logo-handle');
     if (handle) {
-        // Start resize
         dragState = {
             type: 'resize',
             corner: handle.dataset.corner,
             startX: e.clientX,
             startY: e.clientY,
-            origW: logoW,
-            origX: logoX,
-            origY: logoY,
+            origW: cur.w,
+            origX: cur.x,
+            origY: cur.y,
             stageW: rect.width,
             stageH: rect.height,
-            centerX: rect.left + (logoX / 100) * rect.width,
-            centerY: rect.top + (logoY / 100) * rect.height
+            centerX: rect.left + (cur.x / 100) * rect.width,
+            centerY: rect.top + (cur.y / 100) * rect.height
         };
     } else {
-        // Start drag
         dragState = {
             type: 'drag',
             startX: e.clientX,
             startY: e.clientY,
-            origX: logoX,
-            origY: logoY,
+            origX: cur.x,
+            origY: cur.y,
             stageW: rect.width,
             stageH: rect.height
         };
@@ -925,19 +959,19 @@ function onLogoDown(e) {
 function onLogoMove(e) {
     if (!dragState) return;
     e.preventDefault();
+    const cur = cl();
 
     if (dragState.type === 'drag') {
         const dx = e.clientX - dragState.startX;
         const dy = e.clientY - dragState.startY;
-        logoX = dragState.origX + (dx / dragState.stageW) * 100;
-        logoY = dragState.origY + (dy / dragState.stageH) * 100;
-        logoX = Math.max(logoW / 2, Math.min(100 - logoW / 2, logoX));
-        logoY = Math.max(5, Math.min(95, logoY));
+        cur.x = dragState.origX + (dx / dragState.stageW) * 100;
+        cur.y = dragState.origY + (dy / dragState.stageH) * 100;
+        cur.x = Math.max(cur.w / 2, Math.min(100 - cur.w / 2, cur.x));
+        cur.y = Math.max(5, Math.min(95, cur.y));
         requestAnimationFrame(updateLogoPosition);
     }
 
     if (dragState.type === 'resize') {
-        // Distance-based resize (natural diagonal feel)
         const distNow = Math.sqrt(
             (e.clientX - dragState.centerX) ** 2 +
             (e.clientY - dragState.centerY) ** 2
@@ -948,7 +982,7 @@ function onLogoMove(e) {
         );
         if (distStart < 1) return;
         const scale = distNow / distStart;
-        logoW = Math.max(8, Math.min(50, dragState.origW * scale));
+        cur.w = Math.max(8, Math.min(50, dragState.origW * scale));
         requestAnimationFrame(updateLogoPosition);
     }
 }
@@ -966,7 +1000,11 @@ window.flipSide = function(s) {
     document.querySelectorAll('.seg-btn[data-v]').forEach(b => b.classList.toggle('on', b.dataset.v === s));
     const v = document.getElementById('svgView');
     v.classList.add('fading');
-    setTimeout(() => { renderSVG(); v.classList.remove('fading'); }, 200);
+    setTimeout(() => {
+        renderSVG();
+        syncLogoUI();
+        v.classList.remove('fading');
+    }, 200);
 };
 
 /* ══════════════════════════════════════
@@ -1032,10 +1070,11 @@ window.logoTab = function(t) {
 
 function buildLogos(t) {
     const g = document.getElementById('logoGrid');
+    const cur = cl();
     g.innerHTML = '';
     LOGOS[t].forEach(l => {
         const d = document.createElement('div');
-        d.className = 'lthumb' + (logo && logo.id === l.id ? ' on' : '');
+        d.className = 'lthumb' + (cur.data && cur.data.id === l.id ? ' on' : '');
         d.innerHTML = l.s + `<span class="text-[11px] font-semibold" style="color:var(--text-2)">${l.n}</span>`;
         d.onclick = () => pickLogo(l, d);
         g.appendChild(d);
@@ -1043,19 +1082,19 @@ function buildLogos(t) {
 }
 
 function pickLogo(l, el) {
-    if (logo && logo.id === l.id) {
-        logo = null;
+    const cur = cl();
+    if (cur.data && cur.data.id === l.id) {
+        cur.data = null;
         el.classList.remove('on');
         showLogoColorSection(false);
         renderLogo();
         return;
     }
-    logo = {type:'atelier', id:l.id, s:l.s};
+    cur.data = {type:'atelier', id:l.id, s:l.s};
     document.querySelectorAll('.lthumb').forEach(t => t.classList.remove('on'));
     el.classList.add('on');
     showLogoColorSection(true);
-    // Reset logo position
-    logoX = 50; logoY = 42; logoW = 24;
+    cur.x = 50; cur.y = 42; cur.w = 24;
     // Clear upload
     document.getElementById('upPill').classList.remove('show');
     document.getElementById('uploadArea').style.display = 'flex';
@@ -1064,10 +1103,14 @@ function pickLogo(l, el) {
 }
 
 window.dropLogo = function() {
-    logo = null;
+    const cur = cl();
+    cur.data = null;
     logoSelected = false;
     document.querySelectorAll('.lthumb').forEach(t => t.classList.remove('on'));
     showLogoColorSection(false);
+    document.getElementById('upPill').classList.remove('show');
+    document.getElementById('uploadArea').style.display = 'flex';
+    document.getElementById('fileIn').value = '';
     renderLogo();
 };
 
@@ -1079,22 +1122,23 @@ window.onUpload = function(e) {
     if (!f) return;
     const r = new FileReader();
     r.onload = function(ev) {
-        logo = {type:'custom', url:ev.target.result};
+        const cur = cl();
+        cur.data = {type:'custom', url:ev.target.result, name:f.name};
         document.querySelectorAll('.lthumb').forEach(t => t.classList.remove('on'));
         document.getElementById('upThumb').src = ev.target.result;
         document.getElementById('upName').textContent = f.name;
         document.getElementById('upPill').classList.add('show');
         document.getElementById('uploadArea').style.display = 'none';
         showLogoColorSection(false);
-        // Reset logo position
-        logoX = 50; logoY = 42; logoW = 24;
+        cur.x = 50; cur.y = 42; cur.w = 24;
         renderLogo();
     };
     r.readAsDataURL(f);
 };
 
 window.rmUpload = function() {
-    if (logo && logo.type === 'custom') { logo = null; renderLogo(); }
+    const cur = cl();
+    if (cur.data && cur.data.type === 'custom') { cur.data = null; renderLogo(); }
     document.getElementById('upPill').classList.remove('show');
     document.getElementById('uploadArea').style.display = 'flex';
     document.getElementById('fileIn').value = '';
@@ -1103,9 +1147,9 @@ window.rmUpload = function() {
 /* ══════════════════════════════════════
    PAYMENT
    ══════════════════════════════════════ */
-window.togglePay = function() {
-    paid = !paid;
-    document.getElementById('payBar').classList.toggle('paid', paid);
+window.setPay = function(s) {
+    payStatus = s;
+    document.querySelectorAll('#payStatus .seg-btn').forEach(b => b.classList.toggle('on', b.dataset.p === s));
 };
 
 window.calcTotal = function() {
@@ -1114,40 +1158,47 @@ window.calcTotal = function() {
 };
 
 /* ══════════════════════════════════════
-   SUBMIT
+   SUBMIT  (A-Q payload)
    ══════════════════════════════════════ */
 window.submit = async function() {
     const b = document.getElementById('subBtn');
     b.textContent = 'Envoi...'; b.disabled = true; b.style.opacity = '0.6';
 
+    /* Fiche (Q): generate canvas summary */
     const ec = document.getElementById('exportCanvas'), ctx = ec.getContext('2d');
     ctx.fillStyle = '#fff'; ctx.fillRect(0,0,800,1100);
     ctx.fillStyle = '#000'; ctx.font = 'bold 40px sans-serif';
     ctx.fillText('COMMANDE: ' + document.getElementById('orderNo').value, 50, 100);
     ctx.font = '25px sans-serif';
-    ctx.fillText('Client: ' + document.getElementById('clientName').value, 50, 160);
-    ctx.fillText('Couleur: ' + color.n, 50, 210);
-    ctx.fillText('Logo: ' + (logo ? (logo.type === 'atelier' ? logo.id : 'Custom') : 'Aucun'), 50, 260);
+    ctx.fillText('Date: ' + document.getElementById('orderDate').value, 50, 150);
+    ctx.fillText('Client: ' + document.getElementById('clientName').value, 50, 200);
+    ctx.fillText('Tel: ' + document.getElementById('clientPhone').value, 50, 240);
+    ctx.fillText('Couleur: ' + color.n, 50, 290);
+    ctx.fillText('Logo Avant: ' + (logos.front.data ? (logos.front.data.type === 'atelier' ? logos.front.data.id : 'Custom') : 'Aucun'), 50, 340);
+    ctx.fillText('Logo Arriere: ' + (logos.back.data ? (logos.back.data.type === 'atelier' ? logos.back.data.id : 'Custom') : 'Aucun'), 50, 390);
 
     const collVal = selects['selCollection'] ? selects['selCollection'].value : '';
     const refVal = selects['selRef'] ? selects['selRef'].value : '';
     const sizeVal = selects['selSize'] ? selects['selSize'].value : '';
 
     const payload = {
-        orderNo: document.getElementById('orderNo').value,
-        client: document.getElementById('clientName').value,
-        phone: document.getElementById('clientPhone').value,
-        collection: (collVal || '—') + ' / ' + (refVal || '—'),
-        size: sizeVal,
-        tshirtColor: color.n,
-        logoColor: logo && logo.type === 'atelier' ? logoColor : '—',
-        logoId: logo ? (logo.type === 'atelier' ? logo.id : 'Custom Upload') : 'Aucun',
+        commande: document.getElementById('orderNo').value,
+        date: document.getElementById('orderDate').value,
+        nom: document.getElementById('clientName').value,
+        telephone: document.getElementById('clientPhone').value,
+        collection: collVal || '',
+        reference: refVal || '',
+        taille: sizeVal || '',
+        couleurTshirt: color.n,
+        couleurLogo: (logos.front.data && logos.front.data.type === 'atelier') || (logos.back.data && logos.back.data.type === 'atelier') ? logoColor : '',
+        logoAvant: logos.front.data ? (logos.front.data.type === 'atelier' ? logos.front.data.id : 'Custom') : '',
+        logoArriere: logos.back.data ? (logos.back.data.type === 'atelier' ? logos.back.data.id : 'Custom') : '',
         note: document.getElementById('note').value,
-        price: document.getElementById('price').value,
-        customPrice: document.getElementById('customPrice').value,
+        prixTshirt: document.getElementById('price').value,
+        personnalisation: document.getElementById('customPrice').value,
         total: document.getElementById('totalLabel').textContent,
-        paid: paid ? 'OUI' : 'NON',
-        image: ec.toDataURL('image/png')
+        paye: payStatus === 'oui' ? 'OUI' : (payStatus === 'acompte' ? 'ACOMPTE' : 'NON'),
+        fiche: ec.toDataURL('image/png')
     };
 
     try {
