@@ -18,9 +18,11 @@
             --glass: rgba(255,255,255,0.72);
             --glass-border: rgba(255,255,255,0.45);
             --border: rgba(0,0,0,0.06);
+            --separator: #D2D2D7;
             --text-1: #1D1D1F;
             --text-2: #86868B;
             --text-3: #AEAEB2;
+            --radius: 12px;
         }
 
         * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; margin: 0; }
@@ -32,6 +34,7 @@
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             overflow-x: hidden;
+            letter-spacing: -0.022em;
         }
 
         /* ═══════════════════════════════════
@@ -45,8 +48,8 @@
            ═══════════════════════════════════ */
         .card {
             background: var(--card);
-            border-radius: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 0 0 0.5px rgba(0,0,0,0.04);
+            border-radius: var(--radius);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 0 0 0.5px rgba(0,0,0,0.03);
         }
 
         /* ═══════════════════════════════════
@@ -55,7 +58,7 @@
         .input {
             background: var(--bg);
             border: 1.5px solid transparent;
-            border-radius: 14px;
+            border-radius: var(--radius);
             padding: 14px 16px;
             width: 100%;
             outline: none;
@@ -63,6 +66,7 @@
             color: var(--text-1);
             transition: border-color 0.2s, box-shadow 0.2s;
             font-family: inherit;
+            letter-spacing: -0.022em;
         }
         .input:focus { border-color: var(--accent); box-shadow: 0 0 0 3.5px rgba(0,122,255,0.12); }
         .input::placeholder { color: var(--text-3); }
@@ -75,7 +79,7 @@
         .aselect-trigger {
             background: var(--bg);
             border: 1.5px solid transparent;
-            border-radius: 14px;
+            border-radius: var(--radius);
             padding: 14px 40px 14px 16px;
             font-size: 16px;
             color: var(--text-1);
@@ -88,6 +92,7 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            letter-spacing: -0.022em;
         }
         .aselect-trigger.placeholder { color: var(--text-3); }
         .aselect.open .aselect-trigger { border-color: var(--accent); box-shadow: 0 0 0 3.5px rgba(0,122,255,0.12); }
@@ -102,9 +107,11 @@
 
         .aselect-dropdown {
             position: absolute; top: calc(100% + 6px); left: 0; right: 0;
-            background: white;
-            border-radius: 14px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.14), 0 0 0 0.5px rgba(0,0,0,0.04);
+            background: rgba(255,255,255,0.88);
+            backdrop-filter: blur(10px) saturate(180%);
+            -webkit-backdrop-filter: blur(10px) saturate(180%);
+            border-radius: var(--radius);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04), 0 0 0 0.5px rgba(0,0,0,0.03);
             z-index: 200;
             overflow: hidden;
             transform-origin: top center;
@@ -136,25 +143,25 @@
         }
 
         /* Compact selects for 3-col grid */
-        .aselect-compact .aselect-trigger { padding: 14px 30px 14px 12px; font-size: 15px; }
+        .aselect-compact .aselect-trigger { padding: 12px 28px 12px 12px; font-size: 14px; }
         .aselect-compact .aselect-chevron { right: 10px; }
 
         /* ═══════════════════════════════════
            BUTTONS
            ═══════════════════════════════════ */
         .btn {
-            border: none; border-radius: 14px; padding: 16px 24px;
+            border: none; border-radius: var(--radius); padding: 16px 24px;
             font-weight: 600; font-size: 17px; text-align: center; width: 100%;
             cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 8px;
-            letter-spacing: -0.01em;
+            letter-spacing: -0.022em;
         }
         .btn:active { transform: scale(0.97); opacity: 0.85; }
         .btn-primary { background: var(--accent); color: white; }
         .btn-primary:hover { background: #0066D6; }
         .btn-dark { background: var(--text-1); color: white; }
         .btn-dark:hover { background: #333; }
-        .btn-ghost { background: white; color: var(--text-2); box-shadow: 0 0 0 1px rgba(0,0,0,0.08); }
+        .btn-ghost { background: white; color: var(--text-2); box-shadow: 0 0 0 0.5px var(--separator); }
         .btn-ghost:hover { background: var(--bg); }
 
         /* ═══════════════════════════════════
@@ -189,14 +196,14 @@
            ═══════════════════════════════════ */
         .stage {
             background: linear-gradient(180deg, #F5F5F7 0%, #EEEEF0 100%);
-            border-radius: 24px;
+            border-radius: var(--radius);
             position: relative;
             overflow: hidden;
         }
         .stage::after {
             content: ''; position: absolute; inset: 0;
             background: radial-gradient(ellipse at 50% 90%, rgba(0,0,0,0.04) 0%, transparent 55%);
-            pointer-events: none; border-radius: 24px;
+            pointer-events: none; border-radius: var(--radius);
         }
 
         .svg-view {
@@ -317,7 +324,7 @@
            LOGO THUMBS
            ═══════════════════════════════════ */
         .lthumb {
-            border-radius: 16px; padding: 14px; cursor: pointer;
+            border-radius: var(--radius); padding: 14px; cursor: pointer;
             border: 2px solid transparent;
             background: rgba(0,0,0,0.02);
             display: flex; flex-direction: column; align-items: center; gap: 6px;
@@ -334,7 +341,7 @@
            ═══════════════════════════════════ */
         .upload-area {
             display: flex; align-items: center; justify-content: center; gap: 10px;
-            padding: 16px; border-radius: 14px;
+            padding: 16px; border-radius: var(--radius);
             border: 1.5px dashed rgba(0,122,255,0.25);
             background: rgba(0,122,255,0.02); color: var(--accent);
             font-size: 15px; font-weight: 600; cursor: pointer;
@@ -351,7 +358,7 @@
 
         .upload-pill {
             display: none; align-items: center; gap: 12px; padding: 10px 14px;
-            border-radius: 14px; background: rgba(0,122,255,0.04);
+            border-radius: var(--radius); background: rgba(0,122,255,0.04);
             border: 1.5px solid rgba(0,122,255,0.12);
             animation: enterStep 0.3s ease;
         }
@@ -364,6 +371,76 @@
             cursor: pointer; font-weight: 700; font-size: 15px; border: none; transition: background 0.2s;
         }
         .upload-pill .x:hover { background: rgba(255,59,48,0.14); }
+
+        /* ═══════════════════════════════════
+           SINGLE-LINE ORDER INFO (iCloud Style)
+           ═══════════════════════════════════ */
+        .order-line {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            padding: 16px 20px;
+            flex-wrap: wrap;
+            row-gap: 8px;
+        }
+        .order-line-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+        .order-line-item .oli-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-3);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .order-line-item .oli-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-1);
+            letter-spacing: -0.022em;
+        }
+        .order-line-item .oli-value.mono {
+            font-family: 'SF Mono', 'Menlo', 'Monaco', monospace;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-2);
+        }
+        .order-line-sep {
+            width: 3px; height: 3px;
+            border-radius: 50%;
+            background: var(--separator);
+            margin: 0 12px;
+            flex-shrink: 0;
+        }
+        .order-line-divider {
+            width: 1px; height: 20px;
+            background: var(--separator);
+            margin: 0 16px;
+            flex-shrink: 0;
+            opacity: 0.6;
+        }
+
+        /* Editable inline fields */
+        .oli-input {
+            background: transparent;
+            border: none;
+            border-bottom: 1.5px solid transparent;
+            outline: none;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-1);
+            letter-spacing: -0.022em;
+            font-family: inherit;
+            padding: 2px 0;
+            transition: border-color 0.2s;
+            width: 120px;
+        }
+        .oli-input::placeholder { color: var(--text-3); font-weight: 500; }
+        .oli-input:focus { border-bottom-color: var(--accent); }
+        .oli-input.phone { width: 130px; }
 
         /* ═══════════════════════════════════
            RESPONSIVE
@@ -401,28 +478,29 @@
 
     <!-- ════════════════════════════════════════
          STEP 1 — CLIENT  (A: Commande, B: Date, C: Nom, D: Telephone)
+         Single-line iCloud/Apple Business style
          ════════════════════════════════════════ -->
     <div id="s1" class="step active mt-6">
-        <div class="card p-5 space-y-3">
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="label ml-1 mb-1.5 block">Commande</label>
-                    <input type="text" id="orderNo" class="input font-mono text-sm" style="color:var(--text-2)" readonly>
-                </div>
-                <div>
-                    <label class="label ml-1 mb-1.5 block">Date</label>
-                    <input type="text" id="orderDate" class="input text-sm" style="color:var(--text-2)" readonly>
-                </div>
+        <!-- Order info bar — single horizontal line -->
+        <div class="card order-line">
+            <div class="order-line-item">
+                <span class="oli-label">N&deg;</span>
+                <span class="oli-value mono" id="orderNo">ST-...</span>
             </div>
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="label ml-1 mb-1.5 block">Nom</label>
-                    <input type="text" id="clientName" class="input" placeholder="Nom du client">
-                </div>
-                <div>
-                    <label class="label ml-1 mb-1.5 block">Telephone</label>
-                    <input type="tel" id="clientPhone" class="input" placeholder="06 00 00 00 00">
-                </div>
+            <div class="order-line-sep"></div>
+            <div class="order-line-item">
+                <span class="oli-label">Date</span>
+                <span class="oli-value" id="orderDate" style="color:var(--text-2)">--/--/----</span>
+            </div>
+            <div class="order-line-divider"></div>
+            <div class="order-line-item">
+                <span class="oli-label">Client</span>
+                <input type="text" id="clientName" class="oli-input" placeholder="Nom du client">
+            </div>
+            <div class="order-line-sep"></div>
+            <div class="order-line-item">
+                <span class="oli-label">Tel</span>
+                <input type="tel" id="clientPhone" class="oli-input phone" placeholder="06 00 00 00 00">
             </div>
         </div>
         <button class="btn btn-primary" onclick="go(2)">Continuer</button>
@@ -494,7 +572,7 @@
             <div id="logoGrid" class="grid grid-cols-3 gap-3"></div>
 
             <!-- Logo Color Pastilles -->
-            <div id="logoColorSection" class="mt-4 pt-4" style="border-top:0.5px solid var(--border);display:none;">
+            <div id="logoColorSection" class="mt-4 pt-4" style="border-top:0.5px solid var(--separator);display:none;">
                 <p class="label mb-3">Couleur du logo</p>
                 <div id="logoColorGrid" class="pastille-row"></div>
             </div>
@@ -548,7 +626,7 @@
                     <input type="number" id="customPrice" class="input text-center font-bold text-lg" value="0" oninput="calcTotal()">
                 </div>
             </div>
-            <div class="py-5 border-y text-center" style="border-color:var(--border)">
+            <div class="py-5 border-y text-center" style="border-color:var(--separator)">
                 <p class="text-[56px] font-black tracking-tighter leading-none" id="totalLabel">25 &euro;</p>
             </div>
             <div>
@@ -743,10 +821,10 @@ function updateSelectOptions(containerId, newOptions, placeholder) {
    ══════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', async () => {
     const d = new Date();
-    document.getElementById('orderNo').value =
-        `ST-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}`;
-    document.getElementById('orderDate').value =
-        `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+    const orderNoVal = `ST-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}`;
+    const orderDateVal = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+    document.getElementById('orderNo').textContent = orderNoVal;
+    document.getElementById('orderDate').textContent = orderDateVal;
 
     // Build custom selects
     createSelect('selCollection',
@@ -1168,9 +1246,9 @@ window.submit = async function() {
     const ec = document.getElementById('exportCanvas'), ctx = ec.getContext('2d');
     ctx.fillStyle = '#fff'; ctx.fillRect(0,0,800,1100);
     ctx.fillStyle = '#000'; ctx.font = 'bold 40px sans-serif';
-    ctx.fillText('COMMANDE: ' + document.getElementById('orderNo').value, 50, 100);
+    ctx.fillText('COMMANDE: ' + document.getElementById('orderNo').textContent, 50, 100);
     ctx.font = '25px sans-serif';
-    ctx.fillText('Date: ' + document.getElementById('orderDate').value, 50, 150);
+    ctx.fillText('Date: ' + document.getElementById('orderDate').textContent, 50, 150);
     ctx.fillText('Client: ' + document.getElementById('clientName').value, 50, 200);
     ctx.fillText('Tel: ' + document.getElementById('clientPhone').value, 50, 240);
     ctx.fillText('Couleur: ' + color.n, 50, 290);
@@ -1182,8 +1260,8 @@ window.submit = async function() {
     const sizeVal = selects['selSize'] ? selects['selSize'].value : '';
 
     const payload = {
-        commande: document.getElementById('orderNo').value,
-        date: document.getElementById('orderDate').value,
+        commande: document.getElementById('orderNo').textContent,
+        date: document.getElementById('orderDate').textContent,
         nom: document.getElementById('clientName').value,
         telephone: document.getElementById('clientPhone').value,
         collection: collVal || '',
