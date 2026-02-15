@@ -500,7 +500,7 @@
             <div class="flex items-center mb-6">
                 <span class="w-[70px] shrink-0 text-[13px] font-medium text-gray-400 uppercase tracking-wide">CLIENT</span>
                 <input type="text" id="clientName"
-                       class="flex-1 bg-transparent appearance-none rounded-none outline-none border-x-0 border-t-0 border-b-2 border-blue-600 text-[15px] font-semibold text-gray-900 tracking-tight py-1.5 placeholder:text-gray-300 placeholder:font-normal focus:ring-0"
+                       class="flex-1 bg-transparent appearance-none rounded-none outline-none border-0 text-[15px] font-semibold text-gray-900 tracking-tight py-1.5 placeholder:text-gray-300 placeholder:font-normal focus:ring-0"
                        placeholder="Nom du client">
             </div>
 
@@ -548,48 +548,43 @@
             <p class="text-center mt-2 text-[13px] font-semibold" style="color:var(--text-2)" id="colorName">Blanc</p>
         </div>
 
-        <!-- Collection / Reference / Taille — one row -->
+        <!-- Collection -->
         <div class="card p-5">
-            <div class="grid grid-cols-3 gap-3">
-                <div>
-                    <label class="label ml-1 mb-1.5 block">Collection</label>
-                    <div class="aselect aselect-compact" id="selCollection"></div>
-                </div>
-                <div>
-                    <label class="label ml-1 mb-1.5 block">Reference</label>
-                    <div class="aselect aselect-compact" id="selRef"></div>
-                </div>
-                <div>
-                    <label class="label ml-1 mb-1.5 block">Taille</label>
-                    <div class="aselect aselect-compact" id="selSize"></div>
-                </div>
-            </div>
+            <label class="label ml-1 mb-2 block">Collection</label>
+            <div class="aselect" id="selCollection"></div>
         </div>
 
-        <!-- Color Picker -->
+        <!-- Reference -->
         <div class="card p-5">
-            <p class="label mb-3">Couleur du t-shirt</p>
-            <div id="swatchGrid" class="swatch-row"></div>
+            <label class="label ml-1 mb-2 block">Reference</label>
+            <div class="aselect" id="selRef"></div>
         </div>
 
-        <!-- Logos Atelier -->
+        <!-- Taille -->
         <div class="card p-5">
-            <div class="flex items-center justify-between mb-3">
+            <label class="label ml-1 mb-2 block">Taille</label>
+            <div class="aselect" id="selSize"></div>
+        </div>
+
+        <!-- Couleur du t-shirt -->
+        <div class="card p-5">
+            <label class="label ml-1 mb-2 block">Couleur du t-shirt</label>
+            <div class="aselect" id="selColor"></div>
+        </div>
+
+        <!-- Motif Logo -->
+        <div class="card p-5">
+            <div class="flex items-center justify-between mb-2">
                 <p class="label mb-0">Motif Logo</p>
                 <button style="border:none;background:none;cursor:pointer;font-size:12px;font-weight:600;color:var(--accent);font-family:inherit;" onclick="dropLogo()">Retirer</button>
             </div>
-            <div class="seg mb-4">
-                <button class="seg-btn on" data-t="bea" onclick="logoTab('bea')">BEA-16</button>
-                <button class="seg-btn" data-t="sxm" onclick="logoTab('sxm')">SXM-12</button>
-                <button class="seg-btn" data-t="cor" onclick="logoTab('cor')">COR-01</button>
-            </div>
-            <div id="logoGrid" class="grid grid-cols-3 gap-3"></div>
+            <div class="aselect" id="selLogo"></div>
+        </div>
 
-            <!-- Logo Color Pastilles -->
-            <div id="logoColorSection" class="mt-4 pt-4" style="border-top:0.5px solid var(--separator);display:none;">
-                <p class="label mb-3">Couleur du logo</p>
-                <div id="logoColorGrid" class="pastille-row"></div>
-            </div>
+        <!-- Couleur du logo -->
+        <div class="card p-5" id="logoColorSection" style="display:none;">
+            <label class="label ml-1 mb-2 block">Couleur du logo</label>
+            <div class="aselect" id="selLogoColor"></div>
         </div>
 
         <!-- Upload -->
@@ -708,7 +703,6 @@ const LOGOS = {
 /* ── State ── */
 let color = COLORS[0];
 let side  = 'front';
-let tab   = 'bea';
 let logoColor = '#1A1A1A';
 let svgF  = null;
 let svgB  = null;
@@ -831,6 +825,59 @@ function updateSelectOptions(containerId, newOptions, placeholder) {
 }
 
 /* ══════════════════════════════════════
+   RICH SELECT (with HTML options)
+   ══════════════════════════════════════ */
+function colorDotHtml(hex, name) {
+    return '<div style="display:flex;align-items:center;gap:10px;pointer-events:none;"><div style="width:22px;height:22px;border-radius:50%;background:' + hex + ';box-shadow:inset 0 0 0 0.5px rgba(0,0,0,0.12);flex-shrink:0;"></div><span>' + name + '</span></div>';
+}
+
+function createRichSelect(containerId, options, placeholder, onChange) {
+    const container = document.getElementById(containerId);
+    if (!container) return null;
+    const state = { value: '', label: '', _html: '', onChange: onChange || (() => {}), _options: options };
+
+    function renderTrigger() {
+        const isP = !state.value;
+        container.innerHTML = '<div class="aselect-trigger ' + (isP ? 'placeholder' : '') + '">' + (isP ? placeholder : (state._html || state.label)) + '</div>' + CHEVRON_SVG;
+        container.querySelector('.aselect-trigger').addEventListener('click', toggle);
+    }
+
+    function toggle(e) {
+        e.stopPropagation();
+        const wasOpen = container.classList.contains('open');
+        closeAllSelects();
+        if (wasOpen) return;
+        container.classList.add('open');
+        const dd = document.createElement('div');
+        dd.className = 'aselect-dropdown';
+        state._options.forEach(o => {
+            const opt = document.createElement('div');
+            opt.className = 'aselect-opt' + (o.v === state.value ? ' on' : '');
+            if (o.html) { opt.innerHTML = o.html; } else { opt.textContent = o.l; }
+            opt.addEventListener('click', ev => {
+                ev.stopPropagation();
+                state.value = o.v; state.label = o.l; state._html = o.trigger || o.html || '';
+                container.classList.remove('open');
+                renderTrigger();
+                state.onChange(o.v);
+            });
+            dd.appendChild(opt);
+        });
+        container.appendChild(dd);
+    }
+
+    state.reset = function() { state.value = ''; state.label = ''; state._html = ''; renderTrigger(); };
+    state.setValue = function(v) {
+        const o = state._options.find(x => x.v === v);
+        if (o) { state.value = o.v; state.label = o.l; state._html = o.trigger || o.html || ''; renderTrigger(); }
+    };
+
+    renderTrigger();
+    selects[containerId] = state;
+    return state;
+}
+
+/* ══════════════════════════════════════
    INIT
    ══════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', async () => {
@@ -857,9 +904,46 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.querySelector('#selSize .aselect-trigger').textContent = 'S';
     document.querySelector('#selSize .aselect-trigger').classList.remove('placeholder');
 
-    buildSwatches();
-    buildLogoColors();
-    buildLogos('bea');
+    // Color dropdown (replaces swatches)
+    createRichSelect('selColor',
+        COLORS.map(c => ({ v: c.h, l: c.n, html: colorDotHtml(c.h, c.n), trigger: colorDotHtml(c.h, c.n) })),
+        'Couleur',
+        (val) => {
+            const c = COLORS.find(x => x.h === val);
+            if (c) { color = c; const v = document.getElementById('svgView'); v.classList.add('fading'); setTimeout(() => { renderSVG(); v.classList.remove('fading'); }, 180); }
+        }
+    );
+    selects['selColor'].setValue(COLORS[0].h);
+
+    // Logo dropdown (all ateliers in one list)
+    const _logoOpts = [];
+    Object.entries(LOGOS).forEach(([k, arr]) => {
+        const gn = k === 'bea' ? 'BEA-16' : k === 'sxm' ? 'SXM-12' : 'COR-01';
+        arr.forEach(l => _logoOpts.push({ v: l.id, l: gn + ' \u2014 ' + l.n }));
+    });
+    createRichSelect('selLogo', _logoOpts, 'Choisir un motif', (val) => {
+        let found = null;
+        Object.values(LOGOS).forEach(arr => arr.forEach(l => { if (l.id === val) found = l; }));
+        if (found) {
+            const cur = cl();
+            cur.data = { type: 'atelier', id: found.id, s: found.s };
+            showLogoColorSection(true);
+            cur.x = 50; cur.y = 42; cur.w = 24;
+            document.getElementById('upPill').classList.remove('show');
+            document.getElementById('uploadArea').style.display = 'flex';
+            document.getElementById('fileIn').value = '';
+            renderLogo();
+        }
+    });
+
+    // Logo color dropdown (replaces pastilles)
+    createRichSelect('selLogoColor',
+        LOGO_COLORS.map(c => ({ v: c.h, l: c.n, html: colorDotHtml(c.h, c.n), trigger: colorDotHtml(c.h, c.n) })),
+        'Couleur du logo',
+        (val) => { logoColor = val; renderLogo(); }
+    );
+    selects['selLogoColor'].setValue(LOGO_COLORS[0].h);
+
     initLogoInteraction();
 
     // Close selects on outside click
@@ -968,8 +1052,14 @@ function updateLogoPosition() {
    ══════════════════════════════════════ */
 function syncLogoUI() {
     const cur = cl();
-    // Refresh logo grid highlights
-    buildLogos(tab);
+    // Update logo dropdown
+    if (cur.data && cur.data.type === 'atelier') {
+        if (selects['selLogo'] && selects['selLogo'].setValue) selects['selLogo'].setValue(cur.data.id);
+        showLogoColorSection(true);
+    } else {
+        if (selects['selLogo'] && selects['selLogo'].reset) selects['selLogo'].reset();
+        showLogoColorSection(false);
+    }
     // Upload pill
     if (cur.data && cur.data.type === 'custom') {
         document.getElementById('upThumb').src = cur.data.url;
@@ -981,8 +1071,6 @@ function syncLogoUI() {
         document.getElementById('uploadArea').style.display = 'flex';
         document.getElementById('fileIn').value = '';
     }
-    // Logo color section
-    showLogoColorSection(cur.data && cur.data.type === 'atelier');
 }
 
 /* ══════════════════════════════════════
@@ -1099,106 +1187,15 @@ window.flipSide = function(s) {
     }, 200);
 };
 
-/* ══════════════════════════════════════
-   COLOR SWATCHES (iPhone Style)
-   ══════════════════════════════════════ */
-function buildSwatches() {
-    const g = document.getElementById('swatchGrid');
-    COLORS.forEach((c, i) => {
-        const btn = document.createElement('button');
-        btn.className = 'swatch' + (i === 0 ? ' on' : '');
-        btn.title = c.n;
-        btn.innerHTML = `<div class="swatch-fill" style="background:${c.h}"></div>`;
-        btn.onclick = () => pickColor(c, btn);
-        g.appendChild(btn);
-    });
-}
-
-function pickColor(c, el) {
-    if (color.h === c.h) return;
-    color = c;
-    document.querySelectorAll('.swatch').forEach(s => s.classList.remove('on'));
-    el.classList.add('on');
-    const v = document.getElementById('svgView');
-    v.classList.add('fading');
-    setTimeout(() => { renderSVG(); v.classList.remove('fading'); }, 180);
-}
-
-/* ══════════════════════════════════════
-   LOGO COLOR PASTILLES
-   ══════════════════════════════════════ */
-function buildLogoColors() {
-    const g = document.getElementById('logoColorGrid');
-    LOGO_COLORS.forEach((c, i) => {
-        const btn = document.createElement('button');
-        btn.className = 'pastille' + (i === 0 ? ' on' : '');
-        btn.title = c.n;
-        btn.innerHTML = `<div class="pastille-fill" style="background:${c.h}"></div>`;
-        btn.onclick = () => pickLogoColor(c, btn);
-        g.appendChild(btn);
-    });
-}
-
-function pickLogoColor(c, el) {
-    if (logoColor === c.h) return;
-    logoColor = c.h;
-    document.querySelectorAll('.pastille').forEach(p => p.classList.remove('on'));
-    el.classList.add('on');
-    renderLogo();
-}
-
 function showLogoColorSection(show) {
     document.getElementById('logoColorSection').style.display = show ? 'block' : 'none';
-}
-
-/* ══════════════════════════════════════
-   LOGO TABS & GRID
-   ══════════════════════════════════════ */
-window.logoTab = function(t) {
-    tab = t;
-    document.querySelectorAll('.seg-btn[data-t]').forEach(b => b.classList.toggle('on', b.dataset.t === t));
-    buildLogos(t);
-};
-
-function buildLogos(t) {
-    const g = document.getElementById('logoGrid');
-    const cur = cl();
-    g.innerHTML = '';
-    LOGOS[t].forEach(l => {
-        const d = document.createElement('div');
-        d.className = 'lthumb' + (cur.data && cur.data.id === l.id ? ' on' : '');
-        d.innerHTML = l.s + `<span class="text-[11px] font-semibold" style="color:var(--text-2)">${l.n}</span>`;
-        d.onclick = () => pickLogo(l, d);
-        g.appendChild(d);
-    });
-}
-
-function pickLogo(l, el) {
-    const cur = cl();
-    if (cur.data && cur.data.id === l.id) {
-        cur.data = null;
-        el.classList.remove('on');
-        showLogoColorSection(false);
-        renderLogo();
-        return;
-    }
-    cur.data = {type:'atelier', id:l.id, s:l.s};
-    document.querySelectorAll('.lthumb').forEach(t => t.classList.remove('on'));
-    el.classList.add('on');
-    showLogoColorSection(true);
-    cur.x = 50; cur.y = 42; cur.w = 24;
-    // Clear upload
-    document.getElementById('upPill').classList.remove('show');
-    document.getElementById('uploadArea').style.display = 'flex';
-    document.getElementById('fileIn').value = '';
-    renderLogo();
 }
 
 window.dropLogo = function() {
     const cur = cl();
     cur.data = null;
     logoSelected = false;
-    document.querySelectorAll('.lthumb').forEach(t => t.classList.remove('on'));
+    if (selects['selLogo'] && selects['selLogo'].reset) selects['selLogo'].reset();
     showLogoColorSection(false);
     document.getElementById('upPill').classList.remove('show');
     document.getElementById('uploadArea').style.display = 'flex';
@@ -1216,7 +1213,7 @@ window.onUpload = function(e) {
     r.onload = function(ev) {
         const cur = cl();
         cur.data = {type:'custom', url:ev.target.result, name:f.name};
-        document.querySelectorAll('.lthumb').forEach(t => t.classList.remove('on'));
+        if (selects['selLogo'] && selects['selLogo'].reset) selects['selLogo'].reset();
         document.getElementById('upThumb').src = ev.target.result;
         document.getElementById('upName').textContent = f.name;
         document.getElementById('upPill').classList.add('show');
