@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Studio — Configurateur T-Shirt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'Inter', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        '2xl': '20px',
+                        '3xl': '24px',
+                        '4xl': '32px',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --tshirt-color: #FFFFFF;
+            --accent: #007AFF;
+            --bg: #F5F5F7;
+            --card: rgba(255, 255, 255, 0.72);
+            --card-border: rgba(0, 0, 0, 0.06);
+            --text-primary: #1D1D1F;
+            --text-secondary: #86868B;
+            --text-tertiary: #AEAEB2;
+            --glass: rgba(255, 255, 255, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.35);
+        }
+
+        * { -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+        }
+
+        /* ── Glassmorphism Card ── */
+        .glass-card {
+            background: var(--card);
+            backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+        }
+
+        .glass-panel {
+            background: var(--glass);
+            backdrop-filter: blur(24px) saturate(150%);
+            -webkit-backdrop-filter: blur(24px) saturate(150%);
+            border: 1px solid var(--glass-border);
+        }
+
+        /* ── Stage ── */
+        .stage-container {
+            background: linear-gradient(180deg, #F5F5F7 0%, #E8E8ED 100%);
+            border-radius: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stage-container::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 50% 80%, rgba(0,0,0,0.03) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        /* ── SVG Stage ── */
+        .svg-stage {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 380px;
+            transition: opacity 0.4s ease-in-out;
+        }
+
+        .svg-stage svg {
+            max-width: 100%;
+            max-height: 360px;
+            filter: drop-shadow(0 8px 32px rgba(0,0,0,0.08));
+            transition: filter 0.4s ease;
+        }
+
+        .svg-stage.loading {
+            opacity: 0.4;
+        }
+
+        /* ── Logo Overlay ── */
+        .logo-overlay {
+            position: absolute;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            /* Positioned in the chest area of the t-shirt */
+            top: 42%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 25%;
+            height: 18%;
+        }
+
+        .logo-overlay img,
+        .logo-overlay svg {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));
+            opacity: 0.92;
+            mix-blend-mode: multiply;
+        }
+
+        /* ── Segmented Control ── */
+        .segmented-control {
+            display: flex;
+            background: rgba(0, 0, 0, 0.06);
+            border-radius: 10px;
+            padding: 2px;
+            position: relative;
+        }
+
+        .segment-btn {
+            flex: 1;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            z-index: 1;
+            user-select: none;
+            border: none;
+            background: none;
+        }
+
+        .segment-btn.active {
+            color: var(--text-primary);
+            background: white;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08), 0 0.5px 1px rgba(0,0,0,0.04);
+        }
+
+        /* ── Color Swatch ── */
+        .color-swatch {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            position: relative;
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease;
+            border: 2.5px solid transparent;
+            box-sizing: border-box;
+        }
+
+        .color-swatch:hover {
+            transform: scale(1.12);
+        }
+
+        .color-swatch:active {
+            transform: scale(0.95);
+        }
+
+        .color-swatch.active {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.25);
+            transform: scale(1.08);
+        }
+
+        .color-swatch::after {
+            content: '';
+            position: absolute;
+            inset: 1px;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            pointer-events: none;
+        }
+
+        /* ── Logo Thumbnail ── */
+        .logo-thumb {
+            border-radius: 16px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            user-select: none;
+            min-height: 100px;
+            justify-content: center;
+        }
+
+        .logo-thumb:hover {
+            background: rgba(255, 255, 255, 0.85);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        }
+
+        .logo-thumb:active {
+            transform: scale(0.97);
+        }
+
+        .logo-thumb.active {
+            border-color: var(--accent);
+            background: rgba(0, 122, 255, 0.06);
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.12);
+        }
+
+        .logo-thumb svg, .logo-thumb img {
+            width: 48px;
+            height: 48px;
+            object-fit: contain;
+        }
+
+        /* ── Upload Button ── */
+        .upload-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 16px 24px;
+            border-radius: 14px;
+            border: 1.5px dashed rgba(0, 122, 255, 0.35);
+            background: rgba(0, 122, 255, 0.04);
+            color: var(--accent);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .upload-btn:hover {
+            background: rgba(0, 122, 255, 0.08);
+            border-color: var(--accent);
+        }
+
+        .upload-btn:active {
+            transform: scale(0.98);
+            opacity: 0.8;
+        }
+
+        .upload-btn .icon-circle {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            line-height: 1;
+        }
+
+        /* ── Custom uploaded preview ── */
+        .upload-preview {
+            position: relative;
+            display: none;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 14px;
+            background: rgba(0, 122, 255, 0.06);
+            border: 1.5px solid rgba(0, 122, 255, 0.2);
+        }
+
+        .upload-preview.visible {
+            display: flex;
+            animation: fadeSlideIn 0.3s ease;
+        }
+
+        .upload-preview img {
+            width: 52px;
+            height: 52px;
+            object-fit: contain;
+            border-radius: 10px;
+            background: white;
+            padding: 4px;
+        }
+
+        .upload-preview .remove-btn {
+            margin-left: auto;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(255, 59, 48, 0.1);
+            color: #FF3B30;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 700;
+            transition: all 0.2s ease;
+            border: none;
+            flex-shrink: 0;
+        }
+
+        .upload-preview .remove-btn:hover {
+            background: rgba(255, 59, 48, 0.2);
+        }
+
+        /* ── Section Labels ── */
+        .section-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            margin-bottom: 12px;
+        }
+
+        /* ── Animations ── */
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .animate-in {
+            animation: fadeSlideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ── Desktop Layout ── */
+        @media (min-width: 768px) {
+            .configurator-layout {
+                display: grid;
+                grid-template-columns: 1fr 400px;
+                gap: 24px;
+                align-items: start;
+            }
+
+            .stage-container {
+                position: sticky;
+                top: 24px;
+            }
+
+            .svg-stage {
+                min-height: 500px;
+            }
+
+            .svg-stage svg {
+                max-height: 480px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .configurator-layout {
+                grid-template-columns: 1fr 440px;
+                gap: 32px;
+            }
+
+            .svg-stage {
+                min-height: 580px;
+            }
+
+            .svg-stage svg {
+                max-height: 540px;
+            }
+        }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 3px; }
+
+        /* ── Reset button ── */
+        .reset-btn {
+            font-size: 13px;
+            color: #FF3B30;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            border: none;
+            background: none;
+        }
+        .reset-btn:hover {
+            background: rgba(255, 59, 48, 0.08);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ═══════════════ HEADER ═══════════════ -->
+    <header class="px-5 md:px-8 pt-6 pb-4 max-w-6xl mx-auto">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-[11px] font-bold uppercase tracking-[0.1em] text-[var(--text-tertiary)]">Studio</p>
+                <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight mt-0.5">Configurateur</h1>
+            </div>
+            <button class="reset-btn" onclick="resetAll()">Réinitialiser</button>
+        </div>
+    </header>
+
+    <!-- ═══════════════ MAIN LAYOUT ═══════════════ -->
+    <main class="px-5 md:px-8 pb-12 max-w-6xl mx-auto">
+        <div class="configurator-layout">
+
+            <!-- ── LEFT: Stage ── -->
+            <div>
+                <div class="stage-container p-4 md:p-6">
+                    <!-- View Toggle -->
+                    <div class="segmented-control mx-auto mb-4" style="max-width: 200px;">
+                        <button class="segment-btn active" data-side="front" onclick="switchSide('front')">Avant</button>
+                        <button class="segment-btn" data-side="back" onclick="switchSide('back')">Arrière</button>
+                    </div>
+
+                    <!-- SVG Viewport -->
+                    <div class="svg-stage" id="svgStage">
+                        <div id="svgContainer"></div>
+                        <div class="logo-overlay" id="logoOverlay"></div>
+                    </div>
+
+                    <!-- Color Name Display -->
+                    <div class="text-center mt-3">
+                        <span id="colorLabel" class="text-[13px] font-semibold text-[var(--text-secondary)]">Blanc</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── RIGHT: Control Panel ── -->
+            <div class="space-y-5 mt-5 md:mt-0 animate-in">
+
+                <!-- ── Color Picker ── -->
+                <div class="glass-card p-5">
+                    <p class="section-label">Couleur du T-shirt</p>
+                    <div id="colorPicker" class="flex flex-wrap gap-3 justify-start"></div>
+                </div>
+
+                <!-- ── Atelier Library ── -->
+                <div class="glass-card p-5">
+                    <div class="flex items-center justify-between mb-3">
+                        <p class="section-label mb-0">Logos Atelier</p>
+                        <button class="text-[12px] font-semibold text-[var(--accent)] hover:opacity-70 transition-opacity" onclick="clearLogo()" style="border:none;background:none;cursor:pointer;">Retirer</button>
+                    </div>
+
+                    <!-- Logo Segmented Control -->
+                    <div class="segmented-control mb-4">
+                        <button class="segment-btn active" data-logo="bea" onclick="selectLogoTab('bea')">BEA-16</button>
+                        <button class="segment-btn" data-logo="sxm" onclick="selectLogoTab('sxm')">SXM-12</button>
+                        <button class="segment-btn" data-logo="cor" onclick="selectLogoTab('cor')">COR-01</button>
+                    </div>
+
+                    <!-- Logo Variants Grid -->
+                    <div id="logoGrid" class="grid grid-cols-3 gap-3"></div>
+                </div>
+
+                <!-- ── Custom Upload ── -->
+                <div class="glass-card p-5">
+                    <p class="section-label">Mon Logo</p>
+
+                    <label class="upload-btn" id="uploadBtn">
+                        <span class="icon-circle">+</span>
+                        <span>Ajouter mon logo</span>
+                        <input type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" class="hidden" id="fileInput" onchange="handleUpload(event)">
+                    </label>
+
+                    <div class="upload-preview mt-3" id="uploadPreview">
+                        <img id="uploadThumb" src="" alt="Logo uploadé">
+                        <div>
+                            <p class="text-[13px] font-semibold" id="uploadName">logo.png</p>
+                            <p class="text-[11px] text-[var(--text-tertiary)]">Logo personnalisé</p>
+                        </div>
+                        <button class="remove-btn" onclick="removeUpload()" title="Retirer le logo">×</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- ═══════════════ JAVASCRIPT ═══════════════ -->
+    <script>
+    (function() {
+        'use strict';
+
+        // ── Configuration ──────────────────────────────────
+        const COLORS = [
+            { name: 'Blanc',    hex: '#FFFFFF' },
+            { name: 'Ivoire',   hex: '#FAF3E8' },
+            { name: 'Gris',     hex: '#C7C7CC' },
+            { name: 'Anthracite', hex: '#4A4A4A' },
+            { name: 'Noir',     hex: '#1A1A1A' },
+            { name: 'Marine',   hex: '#00205B' },
+            { name: 'Bleu',     hex: '#007AFF' },
+            { name: 'Ciel',     hex: '#64D2FF' },
+            { name: 'Rouge',    hex: '#FF3B30' },
+            { name: 'Bordeaux', hex: '#8B1A2B' },
+            { name: 'Vert',     hex: '#34C759' },
+            { name: 'Sauge',    hex: '#8DA67E' },
+            { name: 'Jaune',    hex: '#FFCC00' },
+            { name: 'Orange',   hex: '#FF9500' },
+            { name: 'Rose',     hex: '#FF6482' },
+            { name: 'Lavande',  hex: '#BDB5D5' },
+        ];
+
+        // SVG fill values that represent the white t-shirt fabric
+        const FABRIC_FILL = 'rgb(100%, 100%, 100%)';
+
+        // Logos Atelier – inline SVGs for each collection
+        const ATELIER_LOGOS = {
+            bea: [
+                {
+                    id: 'bea-1',
+                    name: 'BEA Classic',
+                    svg: `<svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="60" cy="60" r="50" stroke="#1A1A1A" stroke-width="3" fill="none"/>
+                        <text x="60" y="52" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="28" font-weight="800" fill="#1A1A1A">BEA</text>
+                        <text x="60" y="74" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="12" font-weight="600" fill="#1A1A1A" letter-spacing="4">ATELIER</text>
+                        <line x1="28" y1="82" x2="92" y2="82" stroke="#1A1A1A" stroke-width="1.5"/>
+                        <text x="60" y="98" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" font-weight="500" fill="#1A1A1A">— 16 —</text>
+                    </svg>`
+                },
+                {
+                    id: 'bea-2',
+                    name: 'BEA Minimal',
+                    svg: `<svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="15" y="25" width="90" height="70" rx="4" stroke="#1A1A1A" stroke-width="2.5" fill="none"/>
+                        <text x="60" y="60" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="32" font-weight="900" fill="#1A1A1A">B</text>
+                        <text x="60" y="82" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" font-weight="600" fill="#1A1A1A" letter-spacing="6">BEAUTÉ</text>
+                    </svg>`
+                },
+                {
+                    id: 'bea-3',
+                    name: 'BEA Script',
+                    svg: `<svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <text x="60" y="55" text-anchor="middle" font-family="Georgia, serif" font-size="36" font-style="italic" font-weight="700" fill="#1A1A1A">Bea</text>
+                        <line x1="20" y1="65" x2="100" y2="65" stroke="#1A1A1A" stroke-width="1"/>
+                        <text x="60" y="82" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="8" font-weight="600" fill="#1A1A1A" letter-spacing="5">COLLECTION 16</text>
+                    </svg>`
+                }
+            ],
+            sxm: [
+                {
+                    id: 'sxm-1',
+                    name: 'SXM Island',
+                    svg: `<svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M60 15 L95 45 L85 95 L35 95 L25 45 Z" stroke="#1A1A1A" stroke-width="2.5" fill="none"/>
+                        <text x="60" y="58" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="22" font-weight="900" fill="#1A1A1A">SXM</text>
+                        <text x="60" y="76" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" font-weight="500" fill="#1A1A1A" letter-spacing="3">ISLAND</text>
+                        <text x="60" y="90" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="8" fill="#1A1A1A">— 12 —</text>
+                    </svg>`
+                },
+                {
+                    id: 'sxm-2',
+                    name: 'SXM Wave',
+                    svg: `<svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <text x="60" y="50" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="30" font-weight="900" fill="#1A1A1A">SXM</text>
+                        <path d="M20 65 Q35 55 50 65 Q65 75 80 65 Q95 55 100 65" stroke="#1A1A1A" stroke-width="2.5" fill="none"/>
+                        <path d="M20 78 Q35 68 50 78 Q65 88 80 78 Q95 68 100 78" stroke="#1A1A1A" stroke-width="1.5" fill="none" opacity="0.5"/>
+                        <text x="60" y="100" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="8" font-weight="600" fill="#1A1A1A" letter-spacing="4">SAINT-MARTIN</text>
+                    </svg>`
+                },
+                {
+                    id: 'sxm-3',
+                    name: 'SXM Geo',
+                    svg: `<svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="60" cy="55" r="35" stroke="#1A1A1A" stroke-width="2" fill="none"/>
+                        <circle cx="60" cy="55" r="25" stroke="#1A1A1A" stroke-width="1.5" fill="none" opacity="0.4"/>
+                        <text x="60" y="62" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="18" font-weight="800" fill="#1A1A1A">SXM</text>
+                        <text x="60" y="105" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="8" font-weight="600" fill="#1A1A1A" letter-spacing="3">12 — CARAÏBES</text>
+                    </svg>`
+                }
+            ],
+            cor: [
+                {
+                    id: 'cor-1',
+                    name: 'COR Shield',
+                    svg: `<svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M60 18 L95 35 L95 70 Q95 95 60 108 Q25 95 25 70 L25 35 Z" stroke="#1A1A1A" stroke-width="2.5" fill="none"/>
+                        <text x="60" y="62" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="20" font-weight="900" fill="#1A1A1A">COR</text>
+                        <text x="60" y="80" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" font-weight="500" fill="#1A1A1A" letter-spacing="2">— 01 —</text>
+                    </svg>`
+                },
+                {
+                    id: 'cor-2',
+                    name: 'COR Typo',
+                    svg: `<svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <text x="60" y="45" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="40" font-weight="900" fill="#1A1A1A">C</text>
+                        <line x1="25" y1="55" x2="95" y2="55" stroke="#1A1A1A" stroke-width="2"/>
+                        <text x="60" y="72" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="11" font-weight="600" fill="#1A1A1A" letter-spacing="8">CORSICA</text>
+                        <text x="60" y="92" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" font-weight="500" fill="#1A1A1A">Édition 01</text>
+                    </svg>`
+                },
+                {
+                    id: 'cor-3',
+                    name: 'COR Crest',
+                    svg: `<svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <ellipse cx="60" cy="58" rx="42" ry="45" stroke="#1A1A1A" stroke-width="2" fill="none"/>
+                        <ellipse cx="60" cy="58" rx="35" ry="38" stroke="#1A1A1A" stroke-width="1" fill="none" opacity="0.3"/>
+                        <text x="60" y="55" text-anchor="middle" font-family="Georgia, serif" font-size="22" font-weight="700" font-style="italic" fill="#1A1A1A">Cor</text>
+                        <text x="60" y="72" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="8" font-weight="600" fill="#1A1A1A" letter-spacing="5">PREMIÈRE</text>
+                        <circle cx="60" cy="85" r="3" fill="#1A1A1A"/>
+                    </svg>`
+                }
+            ]
+        };
+
+        // ── State ──────────────────────────────────────────
+        let currentColor = COLORS[0];
+        let currentSide = 'front';
+        let currentLogoTab = 'bea';
+        let currentLogo = null;        // { type: 'atelier', id, svg } | { type: 'custom', dataUrl }
+        let svgTextFront = null;
+        let svgTextBack = null;
+        let uploadedLogoDataUrl = null;
+
+        // ── Initialize ─────────────────────────────────────
+        async function init() {
+            buildColorPicker();
+            buildLogoGrid('bea');
+            await loadSVGs();
+            renderStage();
+        }
+
+        // ── Load SVGs ──────────────────────────────────────
+        async function loadSVGs() {
+            const stage = document.getElementById('svgStage');
+            stage.classList.add('loading');
+
+            try {
+                const [frontRes, backRes] = await Promise.all([
+                    fetch('tshirt-front.svg').then(r => r.text()),
+                    fetch('tshirt-back.svg').then(r => r.text())
+                ]);
+                svgTextFront = frontRes;
+                svgTextBack = backRes;
+            } catch (e) {
+                console.error('Failed to load SVGs:', e);
+            }
+
+            stage.classList.remove('loading');
+        }
+
+        // ── Render Stage ───────────────────────────────────
+        function renderStage() {
+            const container = document.getElementById('svgContainer');
+            const rawSvg = currentSide === 'front' ? svgTextFront : svgTextBack;
+
+            if (!rawSvg) {
+                container.innerHTML = '<p style="color:var(--text-tertiary);font-size:14px;">Chargement...</p>';
+                return;
+            }
+
+            // Replace fabric fill with current color
+            const colorized = rawSvg.replace(
+                new RegExp(escapeRegex(FABRIC_FILL), 'gi'),
+                currentColor.hex
+            );
+
+            container.innerHTML = colorized;
+
+            // Ensure SVG is responsive
+            const svgEl = container.querySelector('svg');
+            if (svgEl) {
+                svgEl.removeAttribute('width');
+                svgEl.removeAttribute('height');
+                svgEl.style.width = '100%';
+                svgEl.style.height = 'auto';
+                svgEl.style.maxHeight = '540px';
+            }
+
+            // Update logo overlay
+            renderLogoOverlay();
+
+            // Update color label
+            document.getElementById('colorLabel').textContent = currentColor.name;
+            document.documentElement.style.setProperty('--tshirt-color', currentColor.hex);
+        }
+
+        // ── Render Logo Overlay ────────────────────────────
+        function renderLogoOverlay() {
+            const overlay = document.getElementById('logoOverlay');
+
+            if (!currentLogo) {
+                overlay.innerHTML = '';
+                return;
+            }
+
+            if (currentLogo.type === 'atelier') {
+                overlay.innerHTML = currentLogo.svg;
+            } else if (currentLogo.type === 'custom') {
+                overlay.innerHTML = `<img src="${currentLogo.dataUrl}" alt="Logo personnalisé">`;
+            }
+        }
+
+        // ── Build Color Picker ─────────────────────────────
+        function buildColorPicker() {
+            const container = document.getElementById('colorPicker');
+            container.innerHTML = '';
+
+            COLORS.forEach((color, i) => {
+                const swatch = document.createElement('button');
+                swatch.className = `color-swatch${i === 0 ? ' active' : ''}`;
+                swatch.style.backgroundColor = color.hex;
+                swatch.title = color.name;
+                swatch.setAttribute('aria-label', `Couleur ${color.name}`);
+                swatch.onclick = () => selectColor(color, swatch);
+                container.appendChild(swatch);
+            });
+        }
+
+        // ── Select Color ───────────────────────────────────
+        function selectColor(color, el) {
+            if (currentColor.hex === color.hex) return;
+
+            currentColor = color;
+
+            // Update active swatch
+            document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+            el.classList.add('active');
+
+            // Re-render with transition
+            const stage = document.getElementById('svgStage');
+            stage.style.opacity = '0';
+
+            setTimeout(() => {
+                renderStage();
+                stage.style.opacity = '1';
+            }, 150);
+        }
+
+        // ── Switch Side ────────────────────────────────────
+        window.switchSide = function(side) {
+            if (currentSide === side) return;
+            currentSide = side;
+
+            // Update segmented control
+            document.querySelectorAll('.segment-btn[data-side]').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.side === side);
+            });
+
+            // Animate transition
+            const stage = document.getElementById('svgStage');
+            stage.style.opacity = '0';
+            stage.style.transform = side === 'back' ? 'translateX(-8px)' : 'translateX(8px)';
+
+            setTimeout(() => {
+                renderStage();
+                stage.style.opacity = '1';
+                stage.style.transform = 'translateX(0)';
+            }, 200);
+        };
+
+        // ── Logo Tab Selection ─────────────────────────────
+        window.selectLogoTab = function(tab) {
+            currentLogoTab = tab;
+
+            document.querySelectorAll('.segment-btn[data-logo]').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.logo === tab);
+            });
+
+            buildLogoGrid(tab);
+        };
+
+        // ── Build Logo Grid ────────────────────────────────
+        function buildLogoGrid(tab) {
+            const grid = document.getElementById('logoGrid');
+            const logos = ATELIER_LOGOS[tab];
+            grid.innerHTML = '';
+
+            logos.forEach(logo => {
+                const thumb = document.createElement('div');
+                thumb.className = `logo-thumb${currentLogo && currentLogo.id === logo.id ? ' active' : ''}`;
+                thumb.innerHTML = `
+                    ${logo.svg}
+                    <span class="text-[11px] font-semibold text-[var(--text-secondary)]">${logo.name}</span>
+                `;
+                thumb.onclick = () => selectAtelierLogo(logo, thumb);
+                grid.appendChild(thumb);
+            });
+        }
+
+        // ── Select Atelier Logo ────────────────────────────
+        function selectAtelierLogo(logo, el) {
+            // Toggle off if same logo is clicked
+            if (currentLogo && currentLogo.id === logo.id) {
+                currentLogo = null;
+                el.classList.remove('active');
+                renderLogoOverlay();
+                return;
+            }
+
+            currentLogo = { type: 'atelier', id: logo.id, svg: logo.svg };
+
+            // Update active state
+            document.querySelectorAll('.logo-thumb').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+
+            // Clear custom upload active state if any
+            hideUploadPreview();
+            uploadedLogoDataUrl = null;
+
+            renderLogoOverlay();
+        }
+
+        // ── Clear Logo ─────────────────────────────────────
+        window.clearLogo = function() {
+            currentLogo = null;
+            document.querySelectorAll('.logo-thumb').forEach(t => t.classList.remove('active'));
+            renderLogoOverlay();
+        };
+
+        // ── Handle Upload ──────────────────────────────────
+        window.handleUpload = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Validate file type
+            const validTypes = ['image/png', 'image/jpeg', 'image/svg+xml', 'image/webp'];
+            if (!validTypes.includes(file.type)) {
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                uploadedLogoDataUrl = e.target.result;
+
+                // Set as current logo
+                currentLogo = { type: 'custom', dataUrl: uploadedLogoDataUrl };
+
+                // Clear atelier selection
+                document.querySelectorAll('.logo-thumb').forEach(t => t.classList.remove('active'));
+
+                // Show upload preview
+                showUploadPreview(file.name, uploadedLogoDataUrl);
+
+                // Re-render
+                renderLogoOverlay();
+            };
+            reader.readAsDataURL(file);
+        };
+
+        // ── Upload Preview Management ──────────────────────
+        function showUploadPreview(name, dataUrl) {
+            const preview = document.getElementById('uploadPreview');
+            document.getElementById('uploadThumb').src = dataUrl;
+            document.getElementById('uploadName').textContent = name;
+            preview.classList.add('visible');
+            document.getElementById('uploadBtn').style.display = 'none';
+        }
+
+        function hideUploadPreview() {
+            const preview = document.getElementById('uploadPreview');
+            preview.classList.remove('visible');
+            document.getElementById('uploadBtn').style.display = 'flex';
+        }
+
+        window.removeUpload = function() {
+            uploadedLogoDataUrl = null;
+
+            if (currentLogo && currentLogo.type === 'custom') {
+                currentLogo = null;
+                renderLogoOverlay();
+            }
+
+            hideUploadPreview();
+
+            // Reset file input
+            document.getElementById('fileInput').value = '';
+        };
+
+        // ── Reset All ──────────────────────────────────────
+        window.resetAll = function() {
+            currentColor = COLORS[0];
+            currentSide = 'front';
+            currentLogoTab = 'bea';
+            currentLogo = null;
+            uploadedLogoDataUrl = null;
+
+            // Reset segmented controls
+            document.querySelectorAll('.segment-btn[data-side]').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.side === 'front');
+            });
+            document.querySelectorAll('.segment-btn[data-logo]').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.logo === 'bea');
+            });
+
+            // Reset color picker
+            document.querySelectorAll('.color-swatch').forEach((s, i) => {
+                s.classList.toggle('active', i === 0);
+            });
+
+            // Reset upload
+            hideUploadPreview();
+            document.getElementById('fileInput').value = '';
+
+            // Rebuild and render
+            buildLogoGrid('bea');
+            renderStage();
+        };
+
+        // ── Utility ────────────────────────────────────────
+        function escapeRegex(str) {
+            return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        // ── Boot ───────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', init);
+
+    })();
+    </script>
+
+</body>
+</html>

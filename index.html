@@ -3,254 +3,663 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Studio Pro - Vente</title>
+    <title>Studio Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    <script>
+    tailwind.config = { theme: { extend: { fontFamily: { sans: ['-apple-system','BlinkMacSystemFont','Inter','Segoe UI','Roboto','Helvetica','Arial','sans-serif'] } } } }
+    </script>
     <style>
-        :root { --blue: #007AFF; --gray: #8E8E93; --ios-bg: #F2F2F7; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background: var(--ios-bg);
-            color: #1c1c1e;
-            -webkit-font-smoothing: antialiased;
+        :root {
+            --accent: #007AFF;
+            --green: #34C759;
+            --red: #FF3B30;
+            --bg: #F5F5F7;
+            --card: rgba(255,255,255,0.72);
+            --card-solid: #FFFFFF;
+            --border: rgba(0,0,0,0.06);
+            --text-1: #1D1D1F;
+            --text-2: #86868B;
+            --text-3: #AEAEB2;
+            --glass: rgba(255,255,255,0.65);
+            --tshirt-color: #FFFFFF;
         }
-        .ios-card { background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-        .ios-input { background: #F2F2F7; border: none; border-radius: 12px; padding: 14px; width: 100%; outline: none; font-size: 16px; }
-        .ios-btn { background: var(--blue); color: white; border-radius: 14px; padding: 18px; font-weight: 600; text-align: center; width: 100%; transition: 0.2s; }
-        .ios-btn:active { opacity: 0.7; transform: scale(0.98); }
-        .dot { width: 12px; height: 12px; border-radius: 50%; position: absolute; left: 14px; pointer-events: none; border: 1px solid rgba(0,0,0,0.1); }
-        .dot-input { padding-left: 40px !important; }
 
-        .pay-toggle { display: flex; background: #E3E3E8; border-radius: 12px; padding: 2px; cursor: pointer; position: relative; }
-        .pay-opt { flex: 1; text-align: center; padding: 12px; font-size: 13px; font-weight: 700; z-index: 1; transition: 0.2s; color: #8e8e93; }
-        .pay-slider { position: absolute; width: calc(50% - 2px); height: calc(100% - 4px); background: white; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; }
-        .paid .pay-slider { transform: translateX(100%); }
-        .paid .opt-on { color: #34C759; }
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
 
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text-1);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        /* ── Progress Bar ── */
+        .progress-track { height: 3px; background: rgba(0,0,0,0.06); border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        /* ── Cards ── */
+        .card {
+            background: var(--card-solid);
+            border-radius: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 0 0 1px var(--border);
+        }
+
+        .glass-card {
+            background: var(--card);
+            backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+        }
+
+        /* ── Inputs ── */
+        .input {
+            background: var(--bg);
+            border: 1.5px solid transparent;
+            border-radius: 14px;
+            padding: 15px 16px;
+            width: 100%;
+            outline: none;
+            font-size: 16px;
+            color: var(--text-1);
+            transition: border-color 0.2s, box-shadow 0.2s;
+            font-family: inherit;
+        }
+        .input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,122,255,0.1); }
+        .input::placeholder { color: var(--text-3); }
+
+        select.input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%2386868B' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+
+        /* ── Buttons ── */
+        .btn {
+            border: none;
+            border-radius: 14px;
+            padding: 16px 24px;
+            font-weight: 600;
+            font-size: 16px;
+            text-align: center;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn:active { transform: scale(0.97); opacity: 0.85; }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-primary:hover { background: #0066D6; }
+        .btn-dark { background: var(--text-1); color: white; }
+        .btn-dark:hover { background: #333; }
+        .btn-ghost { background: white; color: var(--text-2); border: 1.5px solid rgba(0,0,0,0.08); }
+        .btn-ghost:hover { background: var(--bg); }
+
+        /* ── Steps ── */
         .step { display: none; flex-direction: column; gap: 20px; }
-        .active { display: flex; animation: slideUp 0.4s ease-out; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .step.active { display: flex; animation: enterStep 0.45s cubic-bezier(0.4, 0, 0.2, 1); }
+        @keyframes enterStep {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Section Labels ── */
+        .label { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); }
+
+        /* ── Segmented Control ── */
+        .seg { display: flex; background: rgba(0,0,0,0.06); border-radius: 10px; padding: 2px; }
+        .seg-btn {
+            flex: 1; padding: 8px 4px; font-size: 13px; font-weight: 600; text-align: center;
+            border-radius: 8px; color: var(--text-2); cursor: pointer; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none; border: none; background: none; font-family: inherit;
+        }
+        .seg-btn.on { color: var(--text-1); background: white; box-shadow: 0 1px 4px rgba(0,0,0,0.08), 0 0.5px 1px rgba(0,0,0,0.04); }
+
+        /* ── Stage ── */
+        .stage {
+            background: linear-gradient(180deg, #F5F5F7 0%, #EEEEF0 100%);
+            border-radius: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+        .stage::after { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 85%, rgba(0,0,0,0.04) 0%, transparent 60%); pointer-events: none; border-radius: 24px; }
+
+        .svg-view {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 340px;
+            transition: opacity 0.35s ease, transform 0.35s ease;
+        }
+        .svg-view svg { max-width: 100%; max-height: 320px; filter: drop-shadow(0 6px 24px rgba(0,0,0,0.08)); }
+        .svg-view.fading { opacity: 0; transform: scale(0.97); }
+
+        .logo-zone {
+            position: absolute;
+            top: 42%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 24%; height: 17%;
+            display: flex; align-items: center; justify-content: center;
+            pointer-events: none; z-index: 10;
+        }
+        .logo-zone img, .logo-zone svg {
+            max-width: 100%; max-height: 100%; object-fit: contain;
+            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.08));
+            opacity: 0.9; mix-blend-mode: multiply;
+        }
+
+        /* ── Color Swatches ── */
+        .swatch {
+            width: 34px; height: 34px; border-radius: 50%; cursor: pointer;
+            border: 2.5px solid transparent; position: relative;
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s;
+        }
+        .swatch:hover { transform: scale(1.15); }
+        .swatch:active { transform: scale(0.93); }
+        .swatch.on { border-color: var(--accent); box-shadow: 0 0 0 2.5px rgba(0,122,255,0.2); transform: scale(1.08); }
+        .swatch::after { content: ''; position: absolute; inset: 1px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.07); pointer-events: none; }
+
+        /* ── Logo Thumbs ── */
+        .lthumb {
+            border-radius: 16px; padding: 14px; cursor: pointer;
+            border: 2px solid transparent; background: rgba(255,255,255,0.55);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            display: flex; flex-direction: column; align-items: center; gap: 6px;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); user-select: none; min-height: 90px; justify-content: center;
+        }
+        .lthumb:hover { background: rgba(255,255,255,0.85); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+        .lthumb:active { transform: scale(0.96); }
+        .lthumb.on { border-color: var(--accent); background: rgba(0,122,255,0.05); box-shadow: 0 0 0 3px rgba(0,122,255,0.1); }
+        .lthumb svg { width: 44px; height: 44px; }
+
+        /* ── Upload ── */
+        .upload-area {
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            padding: 16px; border-radius: 14px; border: 1.5px dashed rgba(0,122,255,0.3);
+            background: rgba(0,122,255,0.03); color: var(--accent); font-size: 15px; font-weight: 600;
+            cursor: pointer; transition: all 0.25s; width: 100%;
+        }
+        .upload-area:hover { background: rgba(0,122,255,0.07); border-color: var(--accent); }
+        .upload-area:active { transform: scale(0.98); }
+        .upload-area .plus { width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-size: 18px; line-height: 1; }
+
+        .upload-pill {
+            display: none; align-items: center; gap: 12px; padding: 10px 14px;
+            border-radius: 14px; background: rgba(0,122,255,0.05); border: 1.5px solid rgba(0,122,255,0.15);
+            animation: enterStep 0.3s ease;
+        }
+        .upload-pill.show { display: flex; }
+        .upload-pill img { width: 44px; height: 44px; object-fit: contain; border-radius: 10px; background: white; padding: 3px; }
+        .upload-pill .x {
+            margin-left: auto; width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+            background: rgba(255,59,48,0.08); color: var(--red); display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-weight: 700; font-size: 15px; border: none; transition: background 0.2s;
+        }
+        .upload-pill .x:hover { background: rgba(255,59,48,0.15); }
+
+        /* ── Payment Toggle ── */
+        .pay-bar { display: flex; background: #E5E5EA; border-radius: 12px; padding: 2px; cursor: pointer; position: relative; }
+        .pay-opt { flex: 1; text-align: center; padding: 13px; font-size: 13px; font-weight: 700; z-index: 1; transition: color 0.25s; color: var(--text-3); }
+        .pay-knob { position: absolute; width: calc(50% - 2px); height: calc(100% - 4px); background: white; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1); }
+        .pay-bar.paid .pay-knob { transform: translateX(100%); }
+        .pay-bar.paid .opt-yes { color: var(--green); }
+
+        /* ── Responsive Stage ── */
+        @media (min-width: 768px) {
+            .svg-view { min-height: 420px; }
+            .svg-view svg { max-height: 400px; }
+        }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 0; }
     </style>
 </head>
-<body class="p-4 max-w-md mx-auto">
+<body>
 
-    <header class="mb-8 pt-6 flex justify-between items-end">
-        <div>
-            <p id="step-label" class="text-blue-500 font-bold text-[11px] uppercase tracking-widest">Étape 1 sur 4</p>
-            <h1 id="step-title" class="text-3xl font-extrabold tracking-tight">Client</h1>
+<div class="max-w-lg mx-auto px-5 pt-6 pb-16">
+
+    <!-- ════ HEADER ════ -->
+    <header class="mb-2">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="label" id="hLabel">Etape 1 sur 3</p>
+                <h1 class="text-[28px] font-extrabold tracking-tight mt-0.5" id="hTitle">Client</h1>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm font-bold text-[15px]" style="box-shadow:0 1px 4px rgba(0,0,0,0.06), 0 0 0 1px var(--border);">
+                <span id="hNum">1</span>
+            </div>
         </div>
-        <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm border border-gray-100 font-bold">
-            <span id="step-num">1</span>
+        <div class="progress-track mt-4">
+            <div class="progress-fill" id="hBar" style="width:33.33%"></div>
         </div>
     </header>
 
-    <div id="step-1" class="step active">
-        <div class="ios-card p-5 space-y-4">
+    <!-- ════ STEP 1 — CLIENT ════ -->
+    <div id="s1" class="step active mt-6">
+        <div class="card p-5 space-y-4">
             <div>
-                <label class="text-[10px] font-bold text-gray-400 ml-1 uppercase">Numéro de Commande</label>
-                <input type="text" id="orderNo" class="ios-input font-mono text-sm text-gray-500" readonly>
+                <label class="label ml-1 mb-1.5 block">Numero de commande</label>
+                <input type="text" id="orderNo" class="input font-mono text-sm text-[var(--text-2)]" readonly>
             </div>
-            <input type="text" id="clientName" class="ios-input" placeholder="Nom du client">
-            <input type="tel" id="clientPhone" class="ios-input" placeholder="Téléphone">
+            <div>
+                <label class="label ml-1 mb-1.5 block">Collection</label>
+                <select id="collection" class="input" onchange="buildRefs()">
+                    <option value="">Choisir la collection</option>
+                    <option>Homme</option><option>Femme</option><option>Enfant</option><option>Accessoire</option>
+                </select>
+            </div>
+            <div>
+                <label class="label ml-1 mb-1.5 block">Reference</label>
+                <select id="refSelect" class="input"><option value="">—</option></select>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="label ml-1 mb-1.5 block">Taille</label>
+                    <select id="size" class="input">
+                        <option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="label ml-1 mb-1.5 block">Telephone</label>
+                    <input type="tel" id="clientPhone" class="input" placeholder="06 00 00 00 00">
+                </div>
+            </div>
+            <input type="text" id="clientName" class="input" placeholder="Nom du client">
         </div>
-        <button onclick="nav(2)" class="ios-btn">Continuer</button>
+        <button class="btn btn-primary" onclick="go(2)">Continuer</button>
     </div>
 
-    <div id="step-2" class="step">
-        <div class="ios-card p-5 space-y-4">
-            <select id="collection" class="ios-input" onchange="updateRefs()">
-                <option value="Aucune">Choisir la Collection</option>
-                <option>Homme</option><option>Femme</option><option>Enfant</option><option>Accessoire</option>
-            </select>
-            <select id="refSelect" class="ios-input"></select>
-            <select id="size" class="ios-input">
-                <option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option>
-            </select>
-            <div class="relative flex items-center">
-                <div id="ts-dot" class="dot"></div>
-                <select id="tshirtColor" class="ios-input dot-input" onchange="syncUI(); updatePreview();"></select>
+    <!-- ════ STEP 2 — CONFIGURATEUR ════ -->
+    <div id="s2" class="step mt-6">
+
+        <!-- Stage -->
+        <div class="stage p-4">
+            <div class="seg mx-auto mb-3" style="max-width:180px;">
+                <button class="seg-btn on" data-v="front" onclick="flipSide('front')">Avant</button>
+                <button class="seg-btn" data-v="back" onclick="flipSide('back')">Arriere</button>
             </div>
-            <div class="relative flex items-center">
-                <div id="lg-dot" class="dot"></div>
-                <select id="logoColor" class="ios-input dot-input" onchange="syncUI();"></select>
+            <div class="svg-view" id="svgView">
+                <div id="svgBox"></div>
+                <div class="logo-zone" id="logoZone"></div>
+            </div>
+            <p class="text-center mt-2 text-[13px] font-semibold" style="color:var(--text-2)" id="colorName">Blanc</p>
+        </div>
+
+        <!-- Color Picker -->
+        <div class="card p-5">
+            <p class="label mb-3">Couleur</p>
+            <div id="swatchGrid" class="flex flex-wrap gap-2.5"></div>
+        </div>
+
+        <!-- Logos Atelier -->
+        <div class="card p-5">
+            <div class="flex items-center justify-between mb-3">
+                <p class="label mb-0">Logos Atelier</p>
+                <button style="border:none;background:none;cursor:pointer;font-size:12px;font-weight:600;color:var(--accent);font-family:inherit;" onclick="dropLogo()">Retirer</button>
+            </div>
+            <div class="seg mb-4">
+                <button class="seg-btn on" data-t="bea" onclick="logoTab('bea')">BEA-16</button>
+                <button class="seg-btn" data-t="sxm" onclick="logoTab('sxm')">SXM-12</button>
+                <button class="seg-btn" data-t="cor" onclick="logoTab('cor')">COR-01</button>
+            </div>
+            <div id="logoGrid" class="grid grid-cols-3 gap-3"></div>
+        </div>
+
+        <!-- Upload -->
+        <div class="card p-5">
+            <p class="label mb-3">Mon Logo</p>
+            <label class="upload-area" id="uploadArea">
+                <span class="plus">+</span>
+                <span>Ajouter mon logo</span>
+                <input type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" class="hidden" id="fileIn" onchange="onUpload(event)">
+            </label>
+            <div class="upload-pill mt-3" id="upPill">
+                <img id="upThumb" src="" alt="">
+                <div style="min-width:0">
+                    <p class="text-[13px] font-semibold truncate" id="upName">logo.png</p>
+                    <p class="text-[11px]" style="color:var(--text-3)">Personnalise</p>
+                </div>
+                <button class="x" onclick="rmUpload()">x</button>
             </div>
         </div>
+
+        <!-- Notes -->
+        <div class="card p-5">
+            <p class="label mb-3">Notes atelier</p>
+            <textarea id="note" class="input" rows="3" placeholder="Instructions pour l'atelier..."></textarea>
+        </div>
+
         <div class="flex gap-3">
-            <button onclick="nav(1)" class="ios-btn bg-white !text-gray-400 border">Retour</button>
-            <button onclick="nav(3)" class="ios-btn">Design</button>
+            <button class="btn btn-ghost" onclick="go(1)" style="flex:0 0 auto;width:auto;padding:16px 20px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <button class="btn btn-primary" onclick="go(3)" style="flex:1;">Paiement</button>
         </div>
     </div>
 
-    <div id="step-3" class="step">
-        <div class="flex bg-gray-200 p-1 rounded-xl shadow-inner">
-            <button id="b-av" onclick="setSide('front')" class="flex-1 py-2.5 text-[11px] font-black rounded-lg bg-white shadow-sm text-blue-600">AVANT</button>
-            <button id="b-ar" onclick="setSide('back')" class="flex-1 py-2.5 text-[11px] font-black rounded-lg text-gray-400">ARRIÈRE</button>
-        </div>
-        <div class="bg-white rounded-2xl p-4 border flex justify-center shadow-inner">
-            <canvas id="c" width="280" height="280"></canvas>
-        </div>
-        <textarea id="note" class="ios-input h-24 pt-4" placeholder="Notes pour l'atelier..."></textarea>
-        <div class="flex gap-3">
-            <button onclick="nav(2)" class="ios-btn bg-white !text-gray-400 border">Retour</button>
-            <button onclick="nav(4)" class="ios-btn">Paiement</button>
-        </div>
-    </div>
-
-    <div id="step-4" class="step">
-        <div class="ios-card p-6 space-y-8">
+    <!-- ════ STEP 3 — PAIEMENT ════ -->
+    <div id="s3" class="step mt-6">
+        <div class="card p-6 space-y-7">
             <div class="flex gap-4">
                 <div class="flex-1 text-center">
-                    <p class="text-[10px] text-gray-400 font-bold mb-2 uppercase">T-Shirt</p>
-                    <input type="number" id="price" class="ios-input text-center font-bold" value="25" oninput="calcTotal()">
+                    <p class="label mb-2">T-Shirt</p>
+                    <input type="number" id="price" class="input text-center font-bold text-lg" value="25" oninput="calcTotal()">
                 </div>
                 <div class="flex-1 text-center">
-                    <p class="text-[10px] text-gray-400 font-bold mb-2 uppercase">Perso</p>
-                    <input type="number" id="customPrice" class="ios-input text-center font-bold" value="0" oninput="calcTotal()">
+                    <p class="label mb-2">Perso</p>
+                    <input type="number" id="customPrice" class="input text-center font-bold text-lg" value="0" oninput="calcTotal()">
                 </div>
             </div>
-            <div class="py-4 border-y text-center">
-                <h2 id="totalLabel" class="text-6xl font-black tracking-tighter">25 €</h2>
+            <div class="py-5 border-y text-center" style="border-color:var(--border)">
+                <p class="text-[56px] font-black tracking-tighter leading-none" id="totalLabel">25 &euro;</p>
             </div>
-            <div id="payToggle" class="pay-toggle" onclick="togglePayment()">
-                <div class="pay-slider"></div>
-                <div class="pay-opt">À RÉGLER</div>
-                <div class="pay-opt opt-on">PAYÉ ✅</div>
+            <div class="pay-bar" id="payBar" onclick="togglePay()">
+                <div class="pay-knob"></div>
+                <div class="pay-opt">A REGLER</div>
+                <div class="pay-opt opt-yes">PAYE</div>
             </div>
         </div>
-        <button onclick="submit()" id="subBtn" class="ios-btn bg-black text-white">Valider la Commande</button>
+        <div class="flex gap-3">
+            <button class="btn btn-ghost" onclick="go(2)" style="flex:0 0 auto;width:auto;padding:16px 20px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <button class="btn btn-dark" id="subBtn" onclick="submit()" style="flex:1;">Valider la Commande</button>
+        </div>
     </div>
 
-    <canvas id="exportCanvas" width="800" height="1100" class="hidden"></canvas>
+</div>
 
-    <script>
-        // URL DE TON SCRIPT GOOGLE
-        const API_URL = "https://script.google.com/macros/s/AKfycbyzeU0tD22L8wZ94PW0f4s1a2LH7fNPhK74RtjcIXs0pWAP59anDV8EYtYlP8WX5iCk/exec";
+<canvas id="exportCanvas" width="800" height="1100" class="hidden"></canvas>
 
-        const COLORS = [{n:'Blanc',h:'#FFFFFF'},{n:'Noir',h:'#1A1A1A'},{n:'Gris',h:'#8E8E93'},{n:'Rouge',h:'#FF3B30'},{n:'Bleu',h:'#007AFF'},{n:'Vert',h:'#34C759'},{n:'Jaune',h:'#FFCC00'},{n:'Marine',h:'#00205B'}];
-        let canvas, side = 'front', paid = false, storage = { front: null, back: null };
+<script>
+(function(){
+'use strict';
 
-        // Cache des SVG chargés pour éviter de les recharger à chaque fois
-        const svgCache = {};
+/* ══════════════════════════════════════
+   CONFIG
+   ══════════════════════════════════════ */
+const API = "https://script.google.com/macros/s/AKfycbyzeU0tD22L8wZ94PW0f4s1a2LH7fNPhK74RtjcIXs0pWAP59anDV8EYtYlP8WX5iCk/exec";
 
-        window.onload = () => {
-            canvas = new fabric.Canvas('c', { selection: false });
-            const d = new Date();
-            document.getElementById('orderNo').value = `ST-${d.getFullYear()}${(d.getMonth()+1)}${d.getDate()}-${d.getHours()}${d.getMinutes()}`;
-            const ts = document.getElementById('tshirtColor'), lg = document.getElementById('logoColor');
-            COLORS.forEach(c => { ts.add(new Option(c.n, c.n)); lg.add(new Option(c.n, c.n)); });
-            ts.selectedIndex = 0; lg.selectedIndex = 1;
-            syncUI(); updateRefs(); updatePreview();
-        };
+const COLORS = [
+    {n:'Blanc',h:'#FFFFFF'},{n:'Ivoire',h:'#FAF3E8'},{n:'Gris',h:'#C7C7CC'},{n:'Anthracite',h:'#4A4A4A'},
+    {n:'Noir',h:'#1A1A1A'},{n:'Marine',h:'#00205B'},{n:'Bleu',h:'#007AFF'},{n:'Ciel',h:'#64D2FF'},
+    {n:'Rouge',h:'#FF3B30'},{n:'Bordeaux',h:'#8B1A2B'},{n:'Vert',h:'#34C759'},{n:'Sauge',h:'#8DA67E'},
+    {n:'Jaune',h:'#FFCC00'},{n:'Orange',h:'#FF9500'},{n:'Rose',h:'#FF6482'},{n:'Lavande',h:'#BDB5D5'}
+];
 
-        function syncUI() {
-            document.getElementById('ts-dot').style.backgroundColor = COLORS.find(c=>c.n===document.getElementById('tshirtColor').value).h;
-            document.getElementById('lg-dot').style.backgroundColor = COLORS.find(c=>c.n===document.getElementById('logoColor').value).h;
-        }
+const FABRIC_RE = /rgb\(100%,\s*100%,\s*100%\)/gi;
 
-        function updateRefs() {
-            const c = document.getElementById('collection').value, r = document.getElementById('refSelect');
-            r.innerHTML = ''; if(c === 'Aucune') return;
-            for(let i=1; i<=5; i++) r.add(new Option('Modèle ' + c[0] + '00' + i, c[0] + '00' + i));
-        }
+const LOGOS = {
+    bea:[
+        {id:'bea-1',n:'Classic',s:`<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><circle cx="60" cy="60" r="50" stroke="#1A1A1A" stroke-width="3" fill="none"/><text x="60" y="52" text-anchor="middle" font-size="28" font-weight="800" fill="#1A1A1A" font-family="sans-serif">BEA</text><text x="60" y="74" text-anchor="middle" font-size="12" font-weight="600" fill="#1A1A1A" letter-spacing="4" font-family="sans-serif">ATELIER</text><line x1="28" y1="82" x2="92" y2="82" stroke="#1A1A1A" stroke-width="1.5"/><text x="60" y="98" text-anchor="middle" font-size="10" fill="#1A1A1A" font-family="sans-serif">— 16 —</text></svg>`},
+        {id:'bea-2',n:'Minimal',s:`<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><rect x="15" y="25" width="90" height="70" rx="4" stroke="#1A1A1A" stroke-width="2.5" fill="none"/><text x="60" y="60" text-anchor="middle" font-size="32" font-weight="900" fill="#1A1A1A" font-family="sans-serif">B</text><text x="60" y="82" text-anchor="middle" font-size="9" font-weight="600" fill="#1A1A1A" letter-spacing="6" font-family="sans-serif">BEAUTE</text></svg>`},
+        {id:'bea-3',n:'Script',s:`<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><text x="60" y="55" text-anchor="middle" font-family="Georgia,serif" font-size="36" font-style="italic" font-weight="700" fill="#1A1A1A">Bea</text><line x1="20" y1="65" x2="100" y2="65" stroke="#1A1A1A" stroke-width="1"/><text x="60" y="82" text-anchor="middle" font-size="8" font-weight="600" fill="#1A1A1A" letter-spacing="5" font-family="sans-serif">COLLECTION 16</text></svg>`}
+    ],
+    sxm:[
+        {id:'sxm-1',n:'Island',s:`<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><path d="M60 15 L95 45 L85 95 L35 95 L25 45 Z" stroke="#1A1A1A" stroke-width="2.5" fill="none"/><text x="60" y="58" text-anchor="middle" font-size="22" font-weight="900" fill="#1A1A1A" font-family="sans-serif">SXM</text><text x="60" y="76" text-anchor="middle" font-size="9" font-weight="500" fill="#1A1A1A" letter-spacing="3" font-family="sans-serif">ISLAND</text><text x="60" y="90" text-anchor="middle" font-size="8" fill="#1A1A1A" font-family="sans-serif">— 12 —</text></svg>`},
+        {id:'sxm-2',n:'Wave',s:`<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><text x="60" y="50" text-anchor="middle" font-size="30" font-weight="900" fill="#1A1A1A" font-family="sans-serif">SXM</text><path d="M20 65 Q35 55 50 65 Q65 75 80 65 Q95 55 100 65" stroke="#1A1A1A" stroke-width="2.5" fill="none"/><path d="M20 78 Q35 68 50 78 Q65 88 80 78 Q95 68 100 78" stroke="#1A1A1A" stroke-width="1.5" fill="none" opacity="0.5"/><text x="60" y="100" text-anchor="middle" font-size="8" font-weight="600" fill="#1A1A1A" letter-spacing="4" font-family="sans-serif">SAINT-MARTIN</text></svg>`},
+        {id:'sxm-3',n:'Geo',s:`<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><circle cx="60" cy="55" r="35" stroke="#1A1A1A" stroke-width="2" fill="none"/><circle cx="60" cy="55" r="25" stroke="#1A1A1A" stroke-width="1.5" fill="none" opacity="0.4"/><text x="60" y="62" text-anchor="middle" font-size="18" font-weight="800" fill="#1A1A1A" font-family="sans-serif">SXM</text><text x="60" y="105" text-anchor="middle" font-size="8" font-weight="600" fill="#1A1A1A" letter-spacing="3" font-family="sans-serif">12 — CARAIBES</text></svg>`}
+    ],
+    cor:[
+        {id:'cor-1',n:'Shield',s:`<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><path d="M60 18 L95 35 L95 70 Q95 95 60 108 Q25 95 25 70 L25 35 Z" stroke="#1A1A1A" stroke-width="2.5" fill="none"/><text x="60" y="62" text-anchor="middle" font-size="20" font-weight="900" fill="#1A1A1A" font-family="sans-serif">COR</text><text x="60" y="80" text-anchor="middle" font-size="9" font-weight="500" fill="#1A1A1A" letter-spacing="2" font-family="sans-serif">— 01 —</text></svg>`},
+        {id:'cor-2',n:'Typo',s:`<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><text x="60" y="45" text-anchor="middle" font-size="40" font-weight="900" fill="#1A1A1A" font-family="sans-serif">C</text><line x1="25" y1="55" x2="95" y2="55" stroke="#1A1A1A" stroke-width="2"/><text x="60" y="72" text-anchor="middle" font-size="11" font-weight="600" fill="#1A1A1A" letter-spacing="8" font-family="sans-serif">CORSICA</text><text x="60" y="92" text-anchor="middle" font-size="9" font-weight="500" fill="#1A1A1A" font-family="sans-serif">Edition 01</text></svg>`},
+        {id:'cor-3',n:'Crest',s:`<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><ellipse cx="60" cy="58" rx="42" ry="45" stroke="#1A1A1A" stroke-width="2" fill="none"/><ellipse cx="60" cy="58" rx="35" ry="38" stroke="#1A1A1A" stroke-width="1" fill="none" opacity="0.3"/><text x="60" y="55" text-anchor="middle" font-family="Georgia,serif" font-size="22" font-weight="700" font-style="italic" fill="#1A1A1A">Cor</text><text x="60" y="72" text-anchor="middle" font-size="8" font-weight="600" fill="#1A1A1A" letter-spacing="5" font-family="sans-serif">PREMIERE</text><circle cx="60" cy="85" r="3" fill="#1A1A1A"/></svg>`}
+    ]
+};
 
-        function updatePreview() {
-            canvas.clear();
-            const hex = COLORS.find(c => c.n === document.getElementById('tshirtColor').value).h;
-            const svgUrl = side === 'front' ? 'tshirt-front.svg' : 'tshirt-back.svg';
-            const cacheKey = svgUrl + '_' + hex;
+/* ── State ── */
+let color = COLORS[0];
+let side  = 'front';
+let tab   = 'bea';
+let logo  = null;   // {type:'atelier',id,s} | {type:'custom',url}
+let paid  = false;
+let svgF  = null;
+let svgB  = null;
 
-            // Si déjà en cache avec cette couleur, réutiliser
-            if (svgCache[cacheKey]) {
-                const cached = fabric.util.object.clone(svgCache[cacheKey]);
-                canvas.add(cached);
-                canvas.renderAll();
-                return;
-            }
+/* ══════════════════════════════════════
+   INIT
+   ══════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', async () => {
+    const d = new Date();
+    document.getElementById('orderNo').value =
+        `ST-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}`;
 
-            fabric.loadSVGFromURL(svgUrl, function(objects, options) {
-                if (!objects || objects.length === 0) return;
+    buildSwatches();
+    buildLogos('bea');
 
-                // Appliquer la couleur à tous les éléments blancs du SVG
-                objects.forEach(function(obj) {
-                    if (obj.fill && typeof obj.fill === 'string') {
-                        const f = obj.fill.toLowerCase();
-                        // Remplacer les remplissages blancs/quasi-blancs par la couleur choisie
-                        if (f === '#fff' || f === '#ffffff' || f === 'white' || f === 'rgb(100%, 100%, 100%)' || f === 'rgb(255, 255, 255)') {
-                            obj.set('fill', hex);
-                        }
-                    }
-                });
+    try {
+        const [f, b] = await Promise.all([
+            fetch('tshirt-front.svg').then(r => r.text()),
+            fetch('tshirt-back.svg').then(r => r.text())
+        ]);
+        svgF = f; svgB = b;
+    } catch(e) { console.error(e); }
 
-                const group = fabric.util.groupSVGElements(objects, options);
-                // Ajuster la taille au canvas
-                const scale = Math.min(260 / group.width, 260 / group.height);
-                group.set({
-                    left: 140,
-                    top: 140,
-                    scaleX: scale,
-                    scaleY: scale,
-                    originX: 'center',
-                    originY: 'center',
-                    selectable: false
-                });
+    renderSVG();
+});
 
-                svgCache[cacheKey] = group;
-                canvas.add(group);
-                canvas.renderAll();
-            });
-        }
+/* ══════════════════════════════════════
+   NAVIGATION
+   ══════════════════════════════════════ */
+const TITLES = ['Client','Configurateur','Paiement'];
 
-        function setSide(s) {
-            side = s;
-            document.getElementById('b-av').className = s==='front'?'flex-1 py-2.5 text-[11px] font-black rounded-lg bg-white shadow-sm text-blue-600':'flex-1 py-2.5 text-[11px] font-black rounded-lg text-gray-400';
-            document.getElementById('b-ar').className = s==='back'?'flex-1 py-2.5 text-[11px] font-black rounded-lg bg-white shadow-sm text-blue-600':'flex-1 py-2.5 text-[11px] font-black rounded-lg text-gray-400';
-            updatePreview();
-        }
+window.go = function(n) {
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    document.getElementById('s'+n).classList.add('active');
+    document.getElementById('hTitle').textContent = TITLES[n-1];
+    document.getElementById('hLabel').textContent = `Etape ${n} sur 3`;
+    document.getElementById('hNum').textContent = n;
+    document.getElementById('hBar').style.width = (n/3*100)+'%';
+    window.scrollTo({top:0,behavior:'smooth'});
+};
 
-        function togglePayment() { paid = !paid; document.getElementById('payToggle').classList.toggle('paid', paid); }
-        function calcTotal() {
-            const t = (parseFloat(document.getElementById('price').value)||0) + (parseFloat(document.getElementById('customPrice').value)||0);
-            document.getElementById('totalLabel').innerText = t + " €";
-        }
-        function nav(s) {
-            document.querySelectorAll('.step').forEach(e => e.classList.remove('active'));
-            document.getElementById('step-'+s).classList.add('active');
-            const titles = ["Client","Config","Atelier","Paiement"];
-            document.getElementById('step-title').innerText = titles[s-1];
-            document.getElementById('step-label').innerText = `Étape ${s} sur 4`;
-            document.getElementById('step-num').innerText = s;
-        }
+/* ══════════════════════════════════════
+   REFS
+   ══════════════════════════════════════ */
+window.buildRefs = function() {
+    const c = document.getElementById('collection').value;
+    const r = document.getElementById('refSelect');
+    r.innerHTML = '<option value="">—</option>';
+    if (!c) return;
+    for (let i = 1; i <= 5; i++) {
+        r.add(new Option('Modele ' + c[0] + '00' + i, c[0] + '00' + i));
+    }
+};
 
-        async function submit() {
-            const b = document.getElementById('subBtn'); b.innerText = "Envoi en cours..."; b.disabled = true;
+/* ══════════════════════════════════════
+   SVG RENDERING
+   ══════════════════════════════════════ */
+function renderSVG() {
+    const raw = side === 'front' ? svgF : svgB;
+    const box = document.getElementById('svgBox');
+    if (!raw) { box.innerHTML = ''; return; }
 
-            const ec = document.getElementById('exportCanvas'), ctx = ec.getContext('2d');
-            ctx.fillStyle = "white"; ctx.fillRect(0,0,800,1100);
-            ctx.fillStyle = "black"; ctx.font = "bold 40px sans-serif";
-            ctx.fillText("COMMANDE : " + document.getElementById('orderNo').value, 50, 100);
-            ctx.font = "25px sans-serif";
-            ctx.fillText("Client : " + document.getElementById('clientName').value, 50, 160);
+    box.innerHTML = raw.replace(FABRIC_RE, color.h);
 
-            const payload = {
-                orderNo: document.getElementById('orderNo').value,
-                client: document.getElementById('clientName').value,
-                phone: document.getElementById('clientPhone').value,
-                collection: document.getElementById('collection').value + " / " + document.getElementById('refSelect').value,
-                size: document.getElementById('size').value,
-                tshirtColor: document.getElementById('tshirtColor').value,
-                logoColor: document.getElementById('logoColor').value,
-                note: document.getElementById('note').value,
-                price: document.getElementById('price').value,
-                customPrice: document.getElementById('customPrice').value,
-                total: document.getElementById('totalLabel').innerText,
-                paid: paid ? "OUI" : "NON",
-                image: ec.toDataURL('image/png')
-            };
+    const el = box.querySelector('svg');
+    if (el) {
+        el.removeAttribute('width');
+        el.removeAttribute('height');
+        el.style.width = '100%';
+        el.style.height = 'auto';
+        el.style.maxHeight = '540px';
+    }
 
-            fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) })
-            .then(() => { alert("Commande validée !"); location.reload(); })
-            .catch(() => { alert("Erreur réseau"); b.disabled = false; b.innerText = "Réessayer"; });
-        }
-    </script>
+    renderLogo();
+    document.getElementById('colorName').textContent = color.n;
+}
+
+function renderLogo() {
+    const z = document.getElementById('logoZone');
+    if (!logo) { z.innerHTML = ''; return; }
+    if (logo.type === 'atelier') z.innerHTML = logo.s;
+    else z.innerHTML = `<img src="${logo.url}" alt="">`;
+}
+
+/* ══════════════════════════════════════
+   SIDE TOGGLE
+   ══════════════════════════════════════ */
+window.flipSide = function(s) {
+    if (side === s) return;
+    side = s;
+    document.querySelectorAll('.seg-btn[data-v]').forEach(b => b.classList.toggle('on', b.dataset.v === s));
+    const v = document.getElementById('svgView');
+    v.classList.add('fading');
+    setTimeout(() => { renderSVG(); v.classList.remove('fading'); }, 200);
+};
+
+/* ══════════════════════════════════════
+   COLOR SWATCHES
+   ══════════════════════════════════════ */
+function buildSwatches() {
+    const g = document.getElementById('swatchGrid');
+    COLORS.forEach((c, i) => {
+        const d = document.createElement('button');
+        d.className = 'swatch' + (i === 0 ? ' on' : '');
+        d.style.backgroundColor = c.h;
+        d.title = c.n;
+        d.onclick = () => pickColor(c, d);
+        g.appendChild(d);
+    });
+}
+
+function pickColor(c, el) {
+    if (color.h === c.h) return;
+    color = c;
+    document.querySelectorAll('.swatch').forEach(s => s.classList.remove('on'));
+    el.classList.add('on');
+    const v = document.getElementById('svgView');
+    v.classList.add('fading');
+    setTimeout(() => { renderSVG(); v.classList.remove('fading'); }, 180);
+}
+
+/* ══════════════════════════════════════
+   LOGO TABS & GRID
+   ══════════════════════════════════════ */
+window.logoTab = function(t) {
+    tab = t;
+    document.querySelectorAll('.seg-btn[data-t]').forEach(b => b.classList.toggle('on', b.dataset.t === t));
+    buildLogos(t);
+};
+
+function buildLogos(t) {
+    const g = document.getElementById('logoGrid');
+    g.innerHTML = '';
+    LOGOS[t].forEach(l => {
+        const d = document.createElement('div');
+        d.className = 'lthumb' + (logo && logo.id === l.id ? ' on' : '');
+        d.innerHTML = l.s + `<span class="text-[11px] font-semibold" style="color:var(--text-2)">${l.n}</span>`;
+        d.onclick = () => pickLogo(l, d);
+        g.appendChild(d);
+    });
+}
+
+function pickLogo(l, el) {
+    if (logo && logo.id === l.id) { logo = null; el.classList.remove('on'); renderLogo(); return; }
+    logo = {type:'atelier', id:l.id, s:l.s};
+    document.querySelectorAll('.lthumb').forEach(t => t.classList.remove('on'));
+    el.classList.add('on');
+    // clear upload if any
+    document.getElementById('upPill').classList.remove('show');
+    document.getElementById('uploadArea').style.display = 'flex';
+    document.getElementById('fileIn').value = '';
+    renderLogo();
+}
+
+window.dropLogo = function() {
+    logo = null;
+    document.querySelectorAll('.lthumb').forEach(t => t.classList.remove('on'));
+    renderLogo();
+};
+
+/* ══════════════════════════════════════
+   FILE UPLOAD
+   ══════════════════════════════════════ */
+window.onUpload = function(e) {
+    const f = e.target.files[0];
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = function(ev) {
+        logo = {type:'custom', url:ev.target.result};
+        document.querySelectorAll('.lthumb').forEach(t => t.classList.remove('on'));
+        document.getElementById('upThumb').src = ev.target.result;
+        document.getElementById('upName').textContent = f.name;
+        document.getElementById('upPill').classList.add('show');
+        document.getElementById('uploadArea').style.display = 'none';
+        renderLogo();
+    };
+    r.readAsDataURL(f);
+};
+
+window.rmUpload = function() {
+    if (logo && logo.type === 'custom') { logo = null; renderLogo(); }
+    document.getElementById('upPill').classList.remove('show');
+    document.getElementById('uploadArea').style.display = 'flex';
+    document.getElementById('fileIn').value = '';
+};
+
+/* ══════════════════════════════════════
+   PAYMENT
+   ══════════════════════════════════════ */
+window.togglePay = function() {
+    paid = !paid;
+    document.getElementById('payBar').classList.toggle('paid', paid);
+};
+
+window.calcTotal = function() {
+    const t = (parseFloat(document.getElementById('price').value)||0) + (parseFloat(document.getElementById('customPrice').value)||0);
+    document.getElementById('totalLabel').innerHTML = t + ' &euro;';
+};
+
+/* ══════════════════════════════════════
+   SUBMIT
+   ══════════════════════════════════════ */
+window.submit = async function() {
+    const b = document.getElementById('subBtn');
+    b.textContent = 'Envoi...'; b.disabled = true; b.style.opacity = '0.6';
+
+    // Export canvas recap
+    const ec = document.getElementById('exportCanvas'), ctx = ec.getContext('2d');
+    ctx.fillStyle = '#fff'; ctx.fillRect(0,0,800,1100);
+    ctx.fillStyle = '#000'; ctx.font = 'bold 40px sans-serif';
+    ctx.fillText('COMMANDE: ' + document.getElementById('orderNo').value, 50, 100);
+    ctx.font = '25px sans-serif';
+    ctx.fillText('Client: ' + document.getElementById('clientName').value, 50, 160);
+    ctx.fillText('Couleur: ' + color.n, 50, 210);
+    ctx.fillText('Logo: ' + (logo ? (logo.type === 'atelier' ? logo.id : 'Custom') : 'Aucun'), 50, 260);
+
+    const payload = {
+        orderNo: document.getElementById('orderNo').value,
+        client: document.getElementById('clientName').value,
+        phone: document.getElementById('clientPhone').value,
+        collection: (document.getElementById('collection').value || '—') + ' / ' + (document.getElementById('refSelect').value || '—'),
+        size: document.getElementById('size').value,
+        tshirtColor: color.n,
+        logoColor: logo ? (logo.type === 'atelier' ? logo.id : 'Custom Upload') : 'Aucun',
+        note: document.getElementById('note').value,
+        price: document.getElementById('price').value,
+        customPrice: document.getElementById('customPrice').value,
+        total: document.getElementById('totalLabel').textContent,
+        paid: paid ? 'OUI' : 'NON',
+        image: ec.toDataURL('image/png')
+    };
+
+    try {
+        await fetch(API, {method:'POST', mode:'no-cors', body:JSON.stringify(payload)});
+        alert('Commande validee !');
+        location.reload();
+    } catch(e) {
+        alert('Erreur reseau');
+        b.disabled = false; b.style.opacity = '1'; b.textContent = 'Reessayer';
+    }
+};
+
+})();
+</script>
+
 </body>
 </html>
