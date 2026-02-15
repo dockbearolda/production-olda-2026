@@ -614,8 +614,6 @@ let logoColor = '#1A1A1A';
 let paid  = false;
 let svgF  = null;
 let svgB  = null;
-let vbF   = null;
-let vbB   = null;
 
 /* Logo interaction state */
 let logoX = 50;
@@ -685,20 +683,23 @@ function closeAllSelects() {
     });
 }
 
-function updateSelectOptions(containerId, options, placeholder) {
+function updateSelectOptions(containerId, newOptions, placeholder) {
     const container = document.getElementById(containerId);
     const state = selects[containerId];
     if (!state) return;
     state.value = '';
     state.label = '';
-    const onChange = state.onChange;
 
-    const isPlaceholder = true;
-    container.innerHTML = `
-        <div class="aselect-trigger placeholder">${placeholder}</div>
-        ${CHEVRON_SVG}
-    `;
-    container.querySelector('.aselect-trigger').addEventListener('click', function(e) {
+    function renderTrigger() {
+        const isPlaceholder = !state.value;
+        container.innerHTML = `
+            <div class="aselect-trigger ${isPlaceholder ? 'placeholder' : ''}">${isPlaceholder ? placeholder : state.label}</div>
+            ${CHEVRON_SVG}
+        `;
+        container.querySelector('.aselect-trigger').addEventListener('click', toggleDD);
+    }
+
+    function toggleDD(e) {
         e.stopPropagation();
         const wasOpen = container.classList.contains('open');
         closeAllSelects();
@@ -707,7 +708,7 @@ function updateSelectOptions(containerId, options, placeholder) {
 
         const dd = document.createElement('div');
         dd.className = 'aselect-dropdown';
-        options.forEach(o => {
+        newOptions.forEach(o => {
             const opt = document.createElement('div');
             opt.className = 'aselect-opt' + (o.v === state.value ? ' on' : '');
             opt.textContent = o.l;
@@ -716,17 +717,15 @@ function updateSelectOptions(containerId, options, placeholder) {
                 state.value = o.v;
                 state.label = o.l;
                 container.classList.remove('open');
-                container.innerHTML = `
-                    <div class="aselect-trigger">${state.label}</div>
-                    ${CHEVRON_SVG}
-                `;
-                container.querySelector('.aselect-trigger').addEventListener('click', arguments.callee);
-                onChange(o.v);
+                renderTrigger();
+                state.onChange(o.v);
             });
             dd.appendChild(opt);
         });
         container.appendChild(dd);
-    });
+    }
+
+    renderTrigger();
 }
 
 /* ══════════════════════════════════════
@@ -768,24 +767,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             fetch('tshirt-back.svg').then(r => r.text())
         ]);
         svgF = f; svgB = b;
-
-        // Compute aligned viewBoxes via getBBox
-        const tmp = document.getElementById('svgBox');
-        const bboxes = [svgF, svgB].map(raw => {
-            tmp.innerHTML = raw;
-            const s = tmp.querySelector('svg');
-            s.removeAttribute('width'); s.removeAttribute('height');
-            s.style.position = 'absolute'; s.style.visibility = 'hidden';
-            return s.getBBox();
-        });
-        const maxW = Math.max(bboxes[0].width, bboxes[1].width);
-        const minY = Math.min(bboxes[0].y, bboxes[1].y);
-        const maxYB = Math.max(bboxes[0].y + bboxes[0].height, bboxes[1].y + bboxes[1].height);
-        const uniH = maxYB - minY;
-        const pad = 20;
-        vbF = `${bboxes[0].x + bboxes[0].width/2 - maxW/2 - pad} ${minY - pad} ${maxW + pad*2} ${uniH + pad*2}`;
-        vbB = `${bboxes[1].x + bboxes[1].width/2 - maxW/2 - pad} ${minY - pad} ${maxW + pad*2} ${uniH + pad*2}`;
-        tmp.innerHTML = '';
     } catch(e) { console.error(e); }
 
     renderSVG();
@@ -834,8 +815,6 @@ function renderSVG() {
     if (el) {
         el.removeAttribute('width');
         el.removeAttribute('height');
-        const vb = side === 'front' ? vbF : vbB;
-        if (vb) el.setAttribute('viewBox', vb);
         el.setAttribute('preserveAspectRatio', 'xMidYMid meet');
     }
 
