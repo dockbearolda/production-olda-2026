@@ -1371,6 +1371,8 @@ window.submit = async function() {
     /* Open atelier window NOW (before any await) to avoid popup blocker */
     var atelierWin = window.open('about:blank', '_blank');
 
+    try {
+
     /* Capture mockups front + back */
     var mockupFront = await captureMockup(svgF, logos.front, color.h);
     var mockupBack  = await captureMockup(svgB, logos.back, color.h);
@@ -1437,13 +1439,9 @@ window.submit = async function() {
         mockupBack: mockupBack
     };
 
-    try {
-        var encoded = btoa(unescape(encodeURIComponent(JSON.stringify(ficheData))));
-        if (atelierWin && !atelierWin.closed) {
-            atelierWin.location.href = ATELIER_URL + '#' + encoded;
-        }
-    } catch(e) {
-        console.error('Fiche atelier:', e);
+    var encoded = btoa(unescape(encodeURIComponent(JSON.stringify(ficheData))));
+    if (atelierWin && !atelierWin.closed) {
+        atelierWin.location.href = ATELIER_URL + '#' + encoded;
     }
 
     /* ── Send to Google Sheets (best effort, non-blocking) ── */
@@ -1451,6 +1449,15 @@ window.submit = async function() {
 
     alert('Commande validee !');
     location.reload();
+
+    } catch(e) {
+        console.error('Erreur validation commande:', e);
+        /* Close the blank window if it was opened */
+        if (atelierWin && !atelierWin.closed) { atelierWin.close(); }
+        alert('Erreur lors de la validation: ' + e.message + '\nVeuillez reessayer.');
+        /* Re-enable button so user can retry */
+        b.textContent = 'Valider la Commande'; b.disabled = false; b.style.opacity = '1';
+    }
 };
 
 })();
