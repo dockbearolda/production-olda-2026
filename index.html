@@ -1020,7 +1020,8 @@ function updateSerial() {
     const d = new Date();
     const year = d.getFullYear();
     const mmdd = String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0');
-    const name = (document.getElementById('clientName').value || '').trim();
+    const raw  = (document.getElementById('clientName').value || '').trim();
+    const name = raw.replace(/\s+/g, '-');
     const el = document.getElementById('orderNo');
     if (name) {
         el.textContent = year + '\u2013' + mmdd + '\u2013' + name;
