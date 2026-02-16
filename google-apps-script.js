@@ -1,5 +1,5 @@
 /**
- * Google Apps Script — OLDA Production
+ * Code.gs — Google Apps Script — OLDA Production
  *
  * Colonnes Google Sheets :
  *   A = N°              B = Date           C = Client
