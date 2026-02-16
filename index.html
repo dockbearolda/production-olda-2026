@@ -373,60 +373,131 @@
         .upload-pill .x:hover { background: rgba(255,59,48,0.14); }
 
         /* ═══════════════════════════════════
-           iOS SETTINGS TABLE
+           PREMIUM STEP 1 CARD
            ═══════════════════════════════════ */
-        .stbl {
+        .s1-card {
+            background: #fff;
+            border-radius: 32px;
+            padding: 40px 32px 36px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.03), 0 0 0 0.5px rgba(0,0,0,0.02);
+        }
+        .s1-meta {
+            font-size: 11px;
+            font-weight: 600;
+            color: #AEAEB2;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+        }
+        .s1-title {
+            font-size: 44px;
+            font-weight: 800;
+            color: #1d1d1f;
+            letter-spacing: -0.035em;
+            line-height: 1.06;
+            margin-top: 6px;
+        }
+        .s1-progress {
+            height: 2px;
+            background: #E8E8ED;
+            border-radius: 1px;
+            margin: 28px 0 40px;
             overflow: hidden;
         }
-        .stbl-row {
+        .s1-progress-fill {
+            height: 100%;
+            background: #2563EB;
+            border-radius: 1px;
+            width: 33.33%;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .s1-order-line {
             display: flex;
             align-items: center;
-            min-height: 44px;
-            padding: 0 16px;
+            gap: 10px;
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 0.5px solid rgba(0,0,0,0.05);
         }
-        .stbl-row + .stbl-row {
-            /* Inset separator — starts after the label zone, exactly like iOS */
-            box-shadow: inset 16px 0 0 0 var(--card), 0 -0.33px 0 0 var(--separator);
-            /* Alternative: real border with margin trick */
-        }
-        .stbl-label {
-            font-size: 17px;
-            color: var(--text-1);
-            min-width: 110px;
-            flex-shrink: 0;
-            padding: 12px 0;
-        }
-        .stbl-value {
-            font-size: 17px;
-            color: var(--text-2);
-            text-align: right;
-            flex: 1;
-            padding: 12px 0;
-            min-width: 0;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .stbl-value.mono {
+        .s1-order-val {
             font-family: 'SF Mono', ui-monospace, 'Menlo', monospace;
-            font-size: 15px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1d1d1f;
             letter-spacing: -0.01em;
         }
-        .stbl-input {
-            background: none;
+        .s1-order-dot {
+            font-size: 8px;
+            color: #D1D1D6;
+            line-height: 1;
+        }
+        .s1-order-date {
+            font-size: 14px;
+            font-weight: 500;
+            color: #86868b;
+        }
+        .s1-field {
+            display: flex;
+            align-items: center;
+            padding: 18px 0;
+        }
+        .s1-field + .s1-field {
+            border-top: 0.5px solid rgba(0,0,0,0.04);
+        }
+        .s1-label {
+            width: 80px;
+            flex-shrink: 0;
+            font-size: 13px;
+            font-weight: 600;
+            color: #AEAEB2;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+        .s1-input {
+            flex: 1;
             border: none;
             outline: none;
+            background: transparent;
             font-size: 17px;
-            color: var(--text-2);
+            font-weight: 500;
+            color: #1d1d1f;
             font-family: inherit;
-            letter-spacing: inherit;
-            text-align: right;
-            flex: 1;
-            padding: 12px 0;
-            min-width: 0;
+            letter-spacing: -0.022em;
+            padding: 0 0 4px 0;
+            border-bottom: 2px solid transparent;
+            transition: border-color 0.3s ease;
         }
-        .stbl-input::placeholder { color: var(--text-3); }
-        .stbl-input:focus { color: var(--accent); }
+        .s1-input::placeholder {
+            color: #D1D1D6;
+            font-weight: 400;
+        }
+        .s1-input:focus {
+            border-bottom-color: #2563EB;
+        }
+        .s1-input.has-underline {
+            border-bottom-color: #2563EB;
+        }
+        .s1-static {
+            font-size: 17px;
+            font-weight: 500;
+            color: #1d1d1f;
+        }
+        .s1-btn {
+            width: 100%;
+            background: #2563EB;
+            color: white;
+            font-size: 17px;
+            font-weight: 600;
+            padding: 18px;
+            border: none;
+            border-radius: 22px;
+            cursor: pointer;
+            margin-top: 40px;
+            font-family: inherit;
+            letter-spacing: -0.01em;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .s1-btn:hover { background: #1D4ED8; }
+        .s1-btn:active { transform: scale(0.95); }
 
         /* ═══════════════════════════════════
            RESPONSIVE
