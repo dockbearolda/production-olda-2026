@@ -1312,11 +1312,65 @@ window.calcTotal = function() {
 };
 
 /* ══════════════════════════════════════
+   MOCKUP CAPTURE — renders a side (front/back) to a JPEG data-URL
+   ══════════════════════════════════════ */
+function renderSvgToImg(svgStr, w, h) {
+    return new Promise(function(resolve) {
+        var blob = new Blob([svgStr], {type:'image/svg+xml;charset=utf-8'});
+        var url = URL.createObjectURL(blob);
+        var img = new Image();
+        img.onload = function() { URL.revokeObjectURL(url); resolve(img); };
+        img.onerror = function() { URL.revokeObjectURL(url); resolve(null); };
+        img.src = url;
+    });
+}
+
+async function captureMockup(shirtSvg, sideData, fabricHex) {
+    var W = 400, H = 480;
+    var c = document.createElement('canvas'); c.width = W; c.height = H;
+    var cx = c.getContext('2d');
+    cx.fillStyle = '#F5F5F7'; cx.fillRect(0, 0, W, H);
+
+    if (shirtSvg) {
+        var colored = shirtSvg.replace(FABRIC_RE, fabricHex);
+        var shirtImg = await renderSvgToImg(colored, W, H);
+        if (shirtImg) {
+            var scale = Math.min(W / shirtImg.naturalWidth, H / shirtImg.naturalHeight) * 0.92;
+            var sw = shirtImg.naturalWidth * scale, sh = shirtImg.naturalHeight * scale;
+            cx.drawImage(shirtImg, (W - sw) / 2, (H - sh) / 2, sw, sh);
+        }
+    }
+
+    /* Overlay logo */
+    if (sideData && sideData.data) {
+        var lx = (sideData.x / 100) * W, ly = (sideData.y / 100) * H;
+        var lw = (sideData.w / 100) * W, lh = (sideData.h / 100) * H;
+        var logoImg = null;
+        if (sideData.data.type === 'atelier' && sideData.data.s) {
+            var logoSvg = sideData.data.s.replace(/#1A1A1A/gi, sideData.logoColor || '#1A1A1A');
+            logoImg = await renderSvgToImg(logoSvg, lw, lh);
+        } else if (sideData.data.type === 'custom' && sideData.data.url) {
+            logoImg = await new Promise(function(resolve) {
+                var im = new Image(); im.onload = function() { resolve(im); };
+                im.onerror = function() { resolve(null); }; im.src = sideData.data.url;
+            });
+        }
+        if (logoImg) cx.drawImage(logoImg, lx - lw / 2, ly - lh / 2, lw, lh);
+    }
+
+    return c.toDataURL('image/jpeg', 0.65);
+}
+
+/* ══════════════════════════════════════
    SUBMIT  (A-Q payload)
    ══════════════════════════════════════ */
 window.submit = async function() {
     const b = document.getElementById('subBtn');
     b.textContent = 'Envoi...'; b.disabled = true; b.style.opacity = '0.6';
+
+    /* Capture mockups front + back */
+    var mockupFront = await captureMockup(svgF, logos.front, color.h);
+    var mockupBack  = await captureMockup(svgB, logos.back, color.h);
 
     /* Fiche (Q): generate canvas summary */
     const ec = document.getElementById('exportCanvas'), ctx = ec.getContext('2d');
@@ -1360,12 +1414,39 @@ window.submit = async function() {
 
     try {
         await fetch(API, {method:'POST', mode:'no-cors', body:JSON.stringify(payload)});
-        alert('Commande validee !');
-        location.reload();
+    } catch(e) { /* Google Sheets — best effort */ }
+
+    /* ── Send fiche to Atelier ── */
+    const ATELIER_URL = 'https://ficheatelier.pages.dev';
+    const ficheData = {
+        commande: payload.commande,
+        date: payload.date,
+        nom: payload.nom,
+        telephone: payload.telephone,
+        collection: payload.collection,
+        reference: payload.reference,
+        taille: payload.taille,
+        couleur: { nom: color.n, hex: color.h },
+        logoAvant: payload.logoAvant,
+        logoArriere: payload.logoArriere,
+        couleurLogoAvant: payload.couleurLogoAvant,
+        couleurLogoArriere: payload.couleurLogoArriere,
+        note: payload.note,
+        prix: { tshirt: payload.prixTshirt, personnalisation: payload.personnalisation, total: payload.total },
+        paiement: { statut: payload.paye, acompte: payload.acompte },
+        mockupFront: mockupFront,
+        mockupBack: mockupBack
+    };
+
+    try {
+        var encoded = btoa(unescape(encodeURIComponent(JSON.stringify(ficheData))));
+        window.open(ATELIER_URL + '#' + encoded, '_blank');
     } catch(e) {
-        alert('Erreur reseau');
-        b.disabled = false; b.style.opacity = '1'; b.textContent = 'Reessayer';
+        console.error('Fiche atelier:', e);
     }
+
+    alert('Commande validee !');
+    location.reload();
 };
 
 })();
