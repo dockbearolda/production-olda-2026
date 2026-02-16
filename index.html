@@ -496,10 +496,10 @@
     <div id="s1" class="step active mt-8">
         <div class="bg-white rounded-[32px] px-8 pt-9 pb-8" style="box-shadow:0 2px 16px rgba(0,0,0,0.04);">
 
-            <!-- N° -->
+            <!-- N° de série (auto: Année–date–client) -->
             <div class="flex items-baseline">
                 <span class="w-[70px] shrink-0 text-[13px] font-medium text-gray-400 uppercase tracking-wide">N&deg;</span>
-                <span class="text-[15px] font-semibold text-gray-900 tracking-tight" id="orderNo">ST–20260215–1553</span>
+                <span class="text-[15px] font-semibold text-gray-900 tracking-tight" id="orderNo">&mdash;</span>
             </div>
 
             <!-- Point median separator -->
@@ -574,10 +574,10 @@
             <div class="aselect" id="selCollection"></div>
         </div>
 
-        <!-- Reference (auto: annee-date-client) -->
+        <!-- Reference (dropdown: H-001, F-001...) -->
         <div class="card p-5">
             <label class="label ml-1 mb-2 block">Reference</label>
-            <div id="refDisplay" style="background:var(--bg);border:1.5px solid transparent;border-radius:var(--radius);padding:14px 16px;font-size:16px;color:var(--text-2);font-weight:500;letter-spacing:-0.022em;font-family:inherit;">&mdash;</div>
+            <div class="aselect" id="selRef"></div>
         </div>
 
         <!-- Taille -->
@@ -915,17 +915,17 @@ function createRichSelect(containerId, options, placeholder, onChange) {
    ══════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', async () => {
     const d = new Date();
-    const orderNoVal = `ST\u2013${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}\u2013${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}`;
     const orderDateVal = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
-    document.getElementById('orderNo').textContent = orderNoVal;
     document.getElementById('orderDate').textContent = orderDateVal;
+    updateSerial();
 
     // Build custom selects
     createSelect('selCollection',
         [{v:'Homme',l:'Homme'},{v:'Femme',l:'Femme'},{v:'Enfant',l:'Enfant'},{v:'Accessoire',l:'Accessoire'}],
         'Collection',
-        () => {}
+        (val) => buildRefs()
     );
+    createSelect('selRef', [], 'Reference', () => {});
     createSelect('selSize',
         [{v:'S',l:'S'},{v:'M',l:'M'},{v:'L',l:'L'},{v:'XL',l:'XL'},{v:'XXL',l:'XXL'}],
         'Taille',
@@ -978,9 +978,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     initLogoInteraction();
 
-    // Live reference update when client name changes
-    document.getElementById('clientName').addEventListener('input', updateRef);
-    updateRef();
+    // Live serial number update when client name changes
+    document.getElementById('clientName').addEventListener('input', updateSerial);
 
     // Close selects on outside click
     document.addEventListener('click', () => closeAllSelects());
@@ -1008,27 +1007,41 @@ window.go = function(n) {
     document.getElementById('hLabel').textContent = `Etape ${n} sur 3`;
     document.getElementById('hNum').textContent = n;
     document.getElementById('hBar').style.width = (n/3*100)+'%';
-    if (n === 2) updateRef();
+    if (n === 2) updateSerial();
     window.scrollTo({top:0,behavior:'smooth'});
 };
 
 /* ══════════════════════════════════════
-   AUTO REFERENCE (Annee-date-client)
+   SERIAL NUMBER (Annee–date–client)
    ══════════════════════════════════════ */
-function updateRef() {
+function updateSerial() {
     const d = new Date();
     const year = d.getFullYear();
     const mmdd = String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0');
     const name = (document.getElementById('clientName').value || '').trim();
-    const el = document.getElementById('refDisplay');
+    const el = document.getElementById('orderNo');
     if (name) {
         el.textContent = year + '\u2013' + mmdd + '\u2013' + name;
-        el.style.color = 'var(--text-1)';
     } else {
         el.textContent = year + '\u2013' + mmdd + '\u2013...';
-        el.style.color = 'var(--text-2)';
     }
 }
+
+/* ══════════════════════════════════════
+   REFS (H-001, F-001, E-001, A-001...)
+   ══════════════════════════════════════ */
+window.buildRefs = function() {
+    const c = selects['selCollection'] ? selects['selCollection'].value : '';
+    const opts = [];
+    if (c) {
+        const prefix = c[0].toUpperCase();
+        for (let i = 1; i <= 5; i++) {
+            const code = prefix + '-' + String(i).padStart(3,'0');
+            opts.push({v: code, l: code});
+        }
+    }
+    updateSelectOptions('selRef', opts, 'Reference');
+};
 
 /* ══════════════════════════════════════
    SVG RENDERING
@@ -1316,7 +1329,7 @@ window.submit = async function() {
     ctx.fillText('Logo Arriere: ' + (logos.back.data ? (logos.back.data.type === 'atelier' ? logos.back.data.id : 'Custom') : 'Aucun'), 50, 390);
 
     const collVal = selects['selCollection'] ? selects['selCollection'].value : '';
-    const refVal = document.getElementById('refDisplay').textContent;
+    const refVal = selects['selRef'] ? selects['selRef'].value : '';
     const sizeVal = selects['selSize'] ? selects['selSize'].value : '';
     const acompteVal = document.getElementById('acompteAmount').value || '';
 
