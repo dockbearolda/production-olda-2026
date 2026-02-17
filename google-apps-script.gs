@@ -23,7 +23,7 @@ function doPost(e) {
       data.commande          || '',  // A  N° COMMANDE
       data.date              || '',  // B  DATE
       data.nom               || '',  // C  NOM
-      data.telephone         || '',  // D  TÉLÉPHONE
+      '',                            // D  TÉLÉPHONE (écrit séparément en texte pur)
       data.collection        || '',  // E  COLLECTION
       data.reference         || '',  // F  RÉFÉRENCE
       data.taille            || '',  // G  TAILLE
@@ -40,18 +40,14 @@ function doPost(e) {
       data.note              || ''   // R  NOTE
     ];
 
-    // Force TÉLÉPHONE en texte — format AVANT pour conserve le + et le 0 initial
-    var nextRow = sheet.getLastRow() + 1;
-    sheet.getRange(nextRow, 4).setNumberFormat('@');
-
     sheet.appendRow(row);
 
     var lastRow = sheet.getLastRow();
 
-    // Re-forcer le texte APRÈS écriture (double sécurité anti-reformatage Google)
+    // TÉLÉPHONE — format texte puis setValue garantit la conservation du + et du 0 initial
     var telCell = sheet.getRange(lastRow, 4);
     telCell.setNumberFormat('@');
-    if (data.telephone) telCell.setValue(data.telephone);
+    telCell.setValue(data.telephone || '');
 
     // Ligne entière — fond pastel rose (Femme) ou bleu (Homme)
     var collectionLower = (data.collection || '').toLowerCase();

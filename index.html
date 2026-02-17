@@ -1507,7 +1507,18 @@ window.submit = async function() {
         mockupBack        : mockupBack
     };
     const ficheURL = ATELIER_URL + '#' + btoa(unescape(encodeURIComponent(JSON.stringify(ficheData))));
-    payload.fiche = ficheURL;
+
+    /* URL légère sans images pour Google Sheets (HYPERLINK a une limite ~50 000 chars) */
+    const ficheDataLite = {
+        commande: ficheData.commande, date: ficheData.date, nom: ficheData.nom,
+        telephone: ficheData.telephone, collection: ficheData.collection,
+        reference: ficheData.reference, taille: ficheData.taille,
+        couleur: ficheData.couleur, logoAvant: ficheData.logoAvant,
+        logoArriere: ficheData.logoArriere, couleurLogoAvant: ficheData.couleurLogoAvant,
+        couleurLogoArriere: ficheData.couleurLogoArriere, note: ficheData.note,
+        prix: ficheData.prix, paiement: ficheData.paiement
+    };
+    payload.fiche = ATELIER_URL + '#' + btoa(unescape(encodeURIComponent(JSON.stringify(ficheDataLite))));
 
     /* ── Envoi Google Sheets (best-effort, non-bloquant) ── */
     fetch(API, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }).catch(() => {});
