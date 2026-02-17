@@ -44,13 +44,18 @@ function doPost(e) {
       ''                             // Q  FICHE (lien, défini via setFormula)
     ];
 
-    // Force TÉLÉPHONE en texte AVANT l'écriture → conserve le 0 initial
+    // Force TÉLÉPHONE en texte — format AVANT pour conserve le + et le 0 initial
     var nextRow = sheet.getLastRow() + 1;
     sheet.getRange(nextRow, 4).setNumberFormat('@');
 
     sheet.appendRow(row);
 
     var lastRow = sheet.getLastRow();
+
+    // Re-forcer le texte APRÈS écriture (double sécurité anti-reformatage Google)
+    var telCell = sheet.getRange(lastRow, 4);
+    telCell.setNumberFormat('@');
+    if (data.telephone) telCell.setValue(data.telephone);
 
     // Colonne G (col 7) — fond = couleur du t-shirt
     if (data.couleurTshirtHex) {

@@ -473,6 +473,66 @@
         }
 
         ::-webkit-scrollbar { width: 0; }
+
+        /* ── Apple Success Overlay ── */
+        @keyframes sfOverlayIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+        @keyframes sfCardIn {
+            from { opacity: 0; transform: scale(.86) translateY(32px); }
+            to   { opacity: 1; transform: scale(1)  translateY(0); }
+        }
+        @keyframes sfCheckDraw {
+            to { stroke-dashoffset: 0; }
+        }
+        @keyframes sfCheckBg {
+            0%   { transform: scale(.6); opacity: 0; }
+            60%  { transform: scale(1.12); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+        #successOverlay { display:none; }
+        #successOverlay.sf-on {
+            display: flex;
+            position: fixed; inset: 0; z-index: 9999;
+            align-items: center; justify-content: center;
+            background: rgba(0,0,0,.52);
+            backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
+            animation: sfOverlayIn .22s ease;
+        }
+        #successCard {
+            background: #fff; border-radius: 28px;
+            padding: 48px 36px 36px; width: min(370px, 92vw);
+            text-align: center;
+            box-shadow: 0 48px 120px rgba(0,0,0,.38);
+            animation: sfCardIn .42s cubic-bezier(.34,1.44,.64,1);
+        }
+        .sf-check-circle {
+            width: 80px; height: 80px; border-radius: 50%;
+            background: #34C759; margin: 0 auto 24px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 10px 28px rgba(52,199,89,.38);
+            animation: sfCheckBg .42s cubic-bezier(.34,1.44,.64,1);
+        }
+        .sf-check-path {
+            stroke-dasharray: 52; stroke-dashoffset: 52;
+            animation: sfCheckDraw .5s .25s cubic-bezier(.4,0,.2,1) forwards;
+        }
+        .sf-btn-primary {
+            width: 100%; background: #007AFF; color: #fff;
+            border: none; border-radius: 14px; padding: 16px;
+            font-size: 16px; font-weight: 600; cursor: pointer;
+            margin-bottom: 10px; font-family: inherit;
+            transition: opacity .15s;
+        }
+        .sf-btn-primary:active { opacity: .8; }
+        .sf-btn-secondary {
+            width: 100%; background: #F2F2F7; color: #1A1A1A;
+            border: none; border-radius: 14px; padding: 16px;
+            font-size: 16px; font-weight: 600; cursor: pointer;
+            font-family: inherit; transition: opacity .15s;
+        }
+        .sf-btn-secondary:active { opacity: .6; }
     </style>
 </head>
 <body>
@@ -688,6 +748,27 @@
         </div>
     </div>
 
+</div>
+
+<!-- ═══════════════════════════════════════════
+     APPLE SUCCESS OVERLAY
+════════════════════════════════════════════ -->
+<div id="successOverlay">
+    <div id="successCard">
+        <div class="sf-check-circle">
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                <path class="sf-check-path"
+                      d="M10 21L17 28L30 13"
+                      stroke="white" stroke-width="3.4"
+                      stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </div>
+        <p style="font-size:24px;font-weight:700;color:#1A1A1A;margin:0 0 6px;letter-spacing:-.4px;">Commande envoyée</p>
+        <p id="sfOrderNo" style="font-size:13px;color:#8E8E93;margin:0 0 10px;letter-spacing:.3px;font-variant-numeric:tabular-nums;"></p>
+        <p id="sfClientName" style="font-size:15px;color:#3A3A3C;margin:0 0 30px;font-weight:500;"></p>
+        <button id="sfFicheBtn" class="sf-btn-primary">Voir la fiche atelier &rsaquo;</button>
+        <button class="sf-btn-secondary" onclick="location.reload()">Nouvelle commande</button>
+    </div>
 </div>
 
 <canvas id="exportCanvas" width="800" height="1100" class="hidden"></canvas>
@@ -1365,94 +1446,82 @@ window.submit = async function() {
     const b = document.getElementById('subBtn');
     b.textContent = 'Envoi...'; b.disabled = true; b.style.opacity = '0.6';
 
-    /* Open atelier window NOW (before any await) to avoid popup blocker */
-    var atelierWin = window.open('about:blank', '_blank');
-
     try {
 
-    /* Capture mockups front + back */
-    var mockupFront = await captureMockup(svgF, logos.front, color.h);
-    var mockupBack  = await captureMockup(svgB, logos.back, color.h);
-
-    /* Fiche (Q): generate canvas summary */
-    const ec = document.getElementById('exportCanvas'), ctx = ec.getContext('2d');
-    ctx.fillStyle = '#fff'; ctx.fillRect(0,0,800,1100);
-    ctx.fillStyle = '#000'; ctx.font = 'bold 40px sans-serif';
-    ctx.fillText('COMMANDE: ' + document.getElementById('orderNo').textContent, 50, 100);
-    ctx.font = '25px sans-serif';
-    ctx.fillText('Date: ' + document.getElementById('orderDate').textContent, 50, 150);
-    ctx.fillText('Client: ' + document.getElementById('clientName').value, 50, 200);
-    ctx.fillText('Tel: ' + document.getElementById('countryCode').value + ' ' + document.getElementById('clientPhone').value, 50, 240);
-    ctx.fillText('Couleur: ' + color.n, 50, 290);
-    ctx.fillText('Logo Avant: ' + (logos.front.data ? (logos.front.data.type === 'atelier' ? logos.front.data.id : 'Custom') : 'Aucun'), 50, 340);
-    ctx.fillText('Logo Arriere: ' + (logos.back.data ? (logos.back.data.type === 'atelier' ? logos.back.data.id : 'Custom') : 'Aucun'), 50, 390);
-
+    /* ── Build payload ── */
     const collVal = selects['selCollection'] ? selects['selCollection'].value : '';
-    const refVal = selects['selRef'] ? selects['selRef'].value : '';
-    const sizeVal = selects['selSize'] ? selects['selSize'].value : '';
+    const refVal  = selects['selRef']        ? selects['selRef'].value        : '';
+    const sizeVal = selects['selSize']       ? selects['selSize'].value       : '';
+
+    const tel = (document.getElementById('countryCode').value || '') + ' ' +
+                (document.getElementById('clientPhone').value  || '');
+
+    const logoColorName = (hex, arr) => (arr.find(c => c.h === hex) || { n: hex }).n;
+
     const payload = {
-        commande: document.getElementById('orderNo').textContent,
-        date: document.getElementById('orderDate').textContent,
-        nom: document.getElementById('clientName').value,
-        telephone: document.getElementById('countryCode').value + ' ' + document.getElementById('clientPhone').value,
-        collection: collVal || '',
-        reference: refVal || '',
-        taille: sizeVal || '',
-        couleurTshirt: color.n,
-        couleurTshirtHex: color.h,
-        couleurLogoAvant: logos.front.data && logos.front.data.type === 'atelier'
-            ? (LOGO_COLORS.find(c => c.h === logos.front.logoColor) || {n: logos.front.logoColor}).n : '',
-        couleurLogoArriere: logos.back.data && logos.back.data.type === 'atelier'
-            ? (LOGO_COLORS.find(c => c.h === logos.back.logoColor) || {n: logos.back.logoColor}).n : '',
-        logoAvant: logos.front.data ? (logos.front.data.type === 'atelier' ? logos.front.data.id : 'Custom') : '',
-        logoArriere: logos.back.data ? (logos.back.data.type === 'atelier' ? logos.back.data.id : 'Custom') : '',
-        note: document.getElementById('note').value,
-        prixTshirt: document.getElementById('price').value,
-        personnalisation: document.getElementById('customPrice').value,
-        total: document.getElementById('totalLabel').textContent,
-        paye: payStatus === 'oui' ? 'OUI' : 'NON'
+        commande          : document.getElementById('orderNo').textContent.trim(),
+        date              : document.getElementById('orderDate').textContent.trim(),
+        nom               : document.getElementById('clientName').value.trim(),
+        telephone         : tel.trim(),
+        collection        : collVal || '',
+        reference         : refVal  || '',
+        taille            : sizeVal || '',
+        couleurTshirt     : color.n,
+        couleurTshirtHex  : color.h,
+        couleurLogoAvant  : logos.front.data && logos.front.data.type === 'atelier'
+                            ? logoColorName(logos.front.logoColor, LOGO_COLORS) : '',
+        couleurLogoArriere: logos.back.data  && logos.back.data.type  === 'atelier'
+                            ? logoColorName(logos.back.logoColor,  LOGO_COLORS) : '',
+        logoAvant         : logos.front.data ? (logos.front.data.type === 'atelier' ? logos.front.data.id : 'Custom') : '',
+        logoArriere       : logos.back.data  ? (logos.back.data.type  === 'atelier' ? logos.back.data.id  : 'Custom') : '',
+        note              : (document.getElementById('note').value || '').trim(),
+        prixTshirt        : document.getElementById('price').value        || '0',
+        personnalisation  : document.getElementById('customPrice').value  || '0',
+        total             : document.getElementById('totalLabel').textContent.trim(),
+        paye              : payStatus === 'oui' ? 'OUI' : 'NON'
     };
 
-    /* ── Build fiche URL (sans mockups pour garder l'URL légère) ── */
+    /* ── Build fiche URL (sans images = URL légère ~2 Ko) ── */
     const ATELIER_URL = 'https://ficheatelier.pages.dev';
     const ficheData = {
-        commande: payload.commande,
-        date: payload.date,
-        nom: payload.nom,
-        telephone: payload.telephone,
-        collection: payload.collection,
-        reference: payload.reference,
-        taille: payload.taille,
-        couleur: { nom: color.n, hex: color.h },
-        logoAvant: payload.logoAvant,
-        logoArriere: payload.logoArriere,
-        couleurLogoAvant: payload.couleurLogoAvant,
+        commande          : payload.commande,
+        date              : payload.date,
+        nom               : payload.nom,
+        telephone         : payload.telephone,
+        collection        : payload.collection,
+        reference         : payload.reference,
+        taille            : payload.taille,
+        couleur           : { nom: color.n, hex: color.h },
+        logoAvant         : payload.logoAvant,
+        logoArriere       : payload.logoArriere,
+        couleurLogoAvant  : payload.couleurLogoAvant,
         couleurLogoArriere: payload.couleurLogoArriere,
-        note: payload.note,
-        prix: { tshirt: payload.prixTshirt, personnalisation: payload.personnalisation, total: payload.total },
-        paiement: { statut: payload.paye }
+        note              : payload.note,
+        prix              : { tshirt: payload.prixTshirt, personnalisation: payload.personnalisation, total: payload.total },
+        paiement          : { statut: payload.paye }
     };
-
-    var ficheURL = ATELIER_URL + '#' + btoa(unescape(encodeURIComponent(JSON.stringify(ficheData))));
+    const ficheURL = ATELIER_URL + '#' + btoa(unescape(encodeURIComponent(JSON.stringify(ficheData))));
     payload.fiche = ficheURL;
 
-    if (atelierWin && !atelierWin.closed) {
-        atelierWin.location.href = ficheURL;
-    }
+    /* ── Envoi Google Sheets (best-effort, non-bloquant) ── */
+    fetch(API, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }).catch(() => {});
 
-    /* ── Send to Google Sheets (best effort, non-blocking) ── */
-    fetch(API, {method:'POST', mode:'no-cors', body:JSON.stringify(payload)}).catch(function(){});
-
-    alert('Commande validee !');
-    location.reload();
+    /* ── Apple success overlay ── */
+    const overlay = document.getElementById('successOverlay');
+    document.getElementById('sfOrderNo').textContent    = payload.commande;
+    document.getElementById('sfClientName').textContent = payload.nom || '';
+    document.getElementById('sfFicheBtn').onclick = () => window.open(ficheURL, '_blank');
+    overlay.classList.add('sf-on');
 
     } catch(e) {
-        console.error('Erreur validation commande:', e);
-        /* Close the blank window if it was opened */
-        if (atelierWin && !atelierWin.closed) { atelierWin.close(); }
-        alert('Erreur lors de la validation: ' + e.message + '\nVeuillez reessayer.');
-        /* Re-enable button so user can retry */
+        console.error('Erreur validation:', e);
         b.textContent = 'Valider la Commande'; b.disabled = false; b.style.opacity = '1';
+        /* Affichage erreur discret */
+        const err = document.createElement('p');
+        err.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#FF3B30;color:#fff;padding:12px 20px;border-radius:12px;font-size:14px;font-weight:600;z-index:9999;';
+        err.textContent = 'Erreur : ' + e.message;
+        document.body.appendChild(err);
+        setTimeout(() => err.remove(), 5000);
     }
 };
 
