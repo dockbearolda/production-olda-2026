@@ -228,15 +228,65 @@
             pointer-events: none; border-radius: var(--radius);
         }
 
+        /* ── Grille double t-shirt ── */
+        .shirts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            align-items: start;
+        }
+        .shirt-col { display: flex; flex-direction: column; align-items: stretch; }
+        .shirt-side-label {
+            font-size: 10px; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 1.5px; color: #86868b; text-align: center;
+            margin-bottom: 5px; transition: color 0.15s;
+        }
+        .shirt-col.active .shirt-side-label { color: var(--accent); }
+
+        /* svg-view : fluide, ratio t-shirt */
         .svg-view {
             position: relative;
-            display: flex; align-items: center; justify-content: center;
-            height: 360px;
-            transition: opacity 0.35s ease, transform 0.35s ease;
+            width: 100%;
+            aspect-ratio: 5 / 6;
+            overflow: hidden;
         }
-        #svgBox { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-        #svgBox svg { width: auto; height: 320px; filter: drop-shadow(0 8px 30px rgba(0,0,0,0.08)); }
-        .svg-view.fading { opacity: 0; transform: scale(0.96); }
+        .svg-box {
+            position: absolute; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .svg-box svg {
+            height: 100%; width: auto; max-width: 100%;
+            filter: drop-shadow(0 4px 18px rgba(0,0,0,0.09));
+        }
+
+        /* ── Sliders Y Apple-style ── */
+        .y-sliders-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+            padding: 10px 2px 2px;
+        }
+        .y-slider-col { display: flex; flex-direction: column; gap: 5px; }
+        .y-slider-label {
+            font-size: 10px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1px; color: #86868b; text-align: center;
+        }
+        .y-slider {
+            -webkit-appearance: none; appearance: none;
+            width: 100%; height: 3px;
+            background: rgba(0,0,0,0.13); border-radius: 2px;
+            outline: none; cursor: pointer;
+        }
+        .y-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px; height: 24px;
+            background: #fff; border-radius: 50%;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.22), 0 0 0 0.5px rgba(0,0,0,0.06);
+            cursor: grab; transition: transform 0.1s;
+        }
+        .y-slider:active::-webkit-slider-thumb { transform: scale(1.15); cursor: grabbing; }
+        .y-slider::-moz-range-thumb {
+            width: 24px; height: 24px; background: #fff; border-radius: 50%;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.22); border: none; cursor: grab;
+        }
 
         /* ═══════════════════════════════════
            LOGO ZONE (Keynote Interaction)
@@ -468,8 +518,7 @@
            RESPONSIVE
            ═══════════════════════════════════ */
         @media (min-width: 768px) {
-            .svg-view { height: 440px; }
-            #svgBox svg { height: 400px; }
+            /* svg-view sizing now via aspect-ratio, no override needed */
         }
 
         ::-webkit-scrollbar { width: 0; }
@@ -615,25 +664,60 @@
          ════════════════════════════════════════ -->
     <div id="s2" class="step mt-6">
 
-        <!-- Stage -->
+        <!-- Stage — grille double t-shirt -->
         <div class="stage p-4">
-            <div class="seg mx-auto mb-3" style="max-width:180px;">
-                <button class="seg-btn on" data-v="front" onclick="flipSide('front')">Avant</button>
-                <button class="seg-btn" data-v="back" onclick="flipSide('back')">Arriere</button>
-            </div>
-            <div class="svg-view" id="svgView">
-                <div id="svgBox"></div>
-                <div class="logo-zone empty" id="logoZone"
-                     style="left:50%;top:42%;width:24%;height:17%;">
-                    <div class="logo-inner" id="logoInner"></div>
-                    <div class="logo-frame"></div>
-                    <div class="logo-handle nw" data-corner="nw"></div>
-                    <div class="logo-handle ne" data-corner="ne"></div>
-                    <div class="logo-handle sw" data-corner="sw"></div>
-                    <div class="logo-handle se" data-corner="se"></div>
+
+            <!-- Grille invisible : 2 colonnes parfaitement alignées -->
+            <div class="shirts-grid" id="shirtsGrid">
+
+                <!-- ── Avant ── -->
+                <div class="shirt-col active" id="colFront">
+                    <p class="shirt-side-label">Avant</p>
+                    <div class="svg-view" id="svgViewFront">
+                        <div class="svg-box" id="svgBoxFront"></div>
+                        <div class="logo-zone empty" id="logoZoneFront" data-side="front"
+                             style="left:50%;top:42%;width:24%;height:17%;">
+                            <div class="logo-inner" id="logoInnerFront"></div>
+                            <div class="logo-frame"></div>
+                            <div class="logo-handle nw" data-corner="nw"></div>
+                            <div class="logo-handle ne" data-corner="ne"></div>
+                            <div class="logo-handle sw" data-corner="sw"></div>
+                            <div class="logo-handle se" data-corner="se"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Arrière ── -->
+                <div class="shirt-col" id="colBack">
+                    <p class="shirt-side-label">Arrière</p>
+                    <div class="svg-view" id="svgViewBack">
+                        <div class="svg-box" id="svgBoxBack"></div>
+                        <div class="logo-zone empty" id="logoZoneBack" data-side="back"
+                             style="left:50%;top:42%;width:24%;height:17%;">
+                            <div class="logo-inner" id="logoInnerBack"></div>
+                            <div class="logo-frame"></div>
+                            <div class="logo-handle nw" data-corner="nw"></div>
+                            <div class="logo-handle ne" data-corner="ne"></div>
+                            <div class="logo-handle sw" data-corner="sw"></div>
+                            <div class="logo-handle se" data-corner="se"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <p class="text-center mt-2 text-[13px] font-semibold" style="color:var(--text-2)" id="colorName">Blanc</p>
+
+            <!-- Sliders Y Apple-style -->
+            <div class="y-sliders-grid">
+                <div class="y-slider-col">
+                    <span class="y-slider-label">Hauteur Av</span>
+                    <input type="range" class="y-slider" id="sliderFrontY" min="15" max="85" value="42">
+                </div>
+                <div class="y-slider-col">
+                    <span class="y-slider-label">Hauteur Ar</span>
+                    <input type="range" class="y-slider" id="sliderBackY" min="15" max="85" value="42">
+                </div>
+            </div>
+
+            <p class="text-center mt-3 text-[13px] font-semibold" style="color:var(--text-2)" id="colorName">Blanc</p>
         </div>
 
         <!-- Collection -->
@@ -1022,7 +1106,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         'Couleur',
         (val) => {
             const c = COLORS.find(x => x.h === val);
-            if (c) { color = c; const v = document.getElementById('svgView'); v.classList.add('fading'); setTimeout(() => { renderSVG(); v.classList.remove('fading'); }, 180); }
+            if (c) { color = c; const g = document.getElementById('shirtsGrid'); g.style.opacity='0'; g.style.transform='scale(0.97)'; g.style.transition='opacity 0.18s,transform 0.18s'; setTimeout(() => { renderSVG(); g.style.opacity=''; g.style.transform=''; }, 180); }
         }
     );
     selects['selColor'].setValue(COLORS[0].h);
@@ -1127,60 +1211,78 @@ window.buildRefs = function() {
 /* ══════════════════════════════════════
    SVG RENDERING
    ══════════════════════════════════════ */
-function renderSVG() {
-    const raw = side === 'front' ? svgF : svgB;
-    const box = document.getElementById('svgBox');
+function renderSide(s) {
+    const raw = s === 'front' ? svgF : svgB;
+    const box = document.getElementById(s === 'front' ? 'svgBoxFront' : 'svgBoxBack');
+    if (!box) return;
     if (!raw) { box.innerHTML = ''; return; }
-
     box.innerHTML = raw.replace(FABRIC_RE, color.h);
-
     const el = box.querySelector('svg');
     if (el) {
         el.removeAttribute('width');
         el.removeAttribute('height');
         el.setAttribute('preserveAspectRatio', 'xMidYMid meet');
     }
+    renderLogoForSide(s);
+}
 
-    renderLogo();
+function renderSVG() {
+    renderSide('front');
+    renderSide('back');
     document.getElementById('colorName').textContent = color.n;
 }
 
-function applyLogoColor(svgStr) {
-    return svgStr.replace(/#1A1A1A/gi, cl().logoColor);
-}
+function renderLogoForSide(s) {
+    const cur = logos[s];
+    const zoneId = s === 'front' ? 'logoZoneFront' : 'logoZoneBack';
+    const innerId = s === 'front' ? 'logoInnerFront' : 'logoInnerBack';
+    const zone  = document.getElementById(zoneId);
+    const inner = document.getElementById(innerId);
+    if (!zone || !inner) return;
 
-function renderLogo() {
-    const inner = document.getElementById('logoInner');
-    const zone = document.getElementById('logoZone');
-    const cur = cl();
+    // Position toujours à jour
+    zone.style.left   = cur.x + '%';
+    zone.style.top    = cur.y + '%';
+    zone.style.width  = cur.w + '%';
+    zone.style.height = cur.h + '%';
 
     if (!cur.data) {
         inner.innerHTML = '';
         zone.classList.add('empty');
         zone.classList.remove('has-logo', 'selected');
-        logoSelected = false;
         return;
     }
-
     zone.classList.remove('empty');
     zone.classList.add('has-logo');
-
     if (cur.data.type === 'atelier') {
-        inner.innerHTML = applyLogoColor(cur.data.s);
+        inner.innerHTML = cur.data.s.replace(/#1A1A1A/gi, cur.logoColor || '#1A1A1A');
     } else {
         inner.innerHTML = `<img src="${cur.data.url}" alt="">`;
     }
+}
 
-    updateLogoPosition();
+/* renderLogo — appelé pour rafraîchir les deux côtés */
+function renderLogo() {
+    renderLogoForSide('front');
+    renderLogoForSide('back');
+}
+
+function updateLogoPositionForSide(s) {
+    const cur  = logos[s];
+    const zone = document.getElementById(s === 'front' ? 'logoZoneFront' : 'logoZoneBack');
+    if (!zone) return;
+    zone.style.left   = cur.x + '%';
+    zone.style.top    = cur.y + '%';
+    zone.style.width  = cur.w + '%';
+    zone.style.height = cur.h + '%';
+    // Sync slider Y
+    const slider = document.getElementById(s === 'front' ? 'sliderFrontY' : 'sliderBackY');
+    if (slider) slider.value = cur.y;
 }
 
 function updateLogoPosition() {
-    const zone = document.getElementById('logoZone');
-    const cur = cl();
-    zone.style.left = cur.x + '%';
-    zone.style.top = cur.y + '%';
-    zone.style.width = cur.w + '%';
-    zone.style.height = cur.h + '%';
+    updateLogoPositionForSide('front');
+    updateLogoPositionForSide('back');
 }
 
 /* ══════════════════════════════════════
@@ -1214,34 +1316,61 @@ function syncLogoUI() {
 }
 
 /* ══════════════════════════════════════
-   LOGO INTERACTION (Keynote Style)
+   LOGO INTERACTION — 2 zones indépendantes
    ══════════════════════════════════════ */
 function initLogoInteraction() {
-    const zone = document.getElementById('logoZone');
-    const stage = document.getElementById('svgView');
+    ['front', 'back'].forEach(s => {
+        const zoneId = s === 'front' ? 'logoZoneFront' : 'logoZoneBack';
+        const viewId = s === 'front' ? 'svgViewFront' : 'svgViewBack';
+        const zone   = document.getElementById(zoneId);
+        const stage  = document.getElementById(viewId);
+        if (!zone || !stage) return;
 
-    zone.addEventListener('pointerdown', onLogoDown);
+        zone.addEventListener('pointerdown', e => onLogoDown(e, s));
+
+        // Désélection au clic en dehors de la zone logo
+        stage.addEventListener('pointerdown', e => {
+            if (!e.target.closest('#' + zoneId)) {
+                logoSelected = false;
+                zone.classList.remove('selected');
+            }
+        });
+    });
+
     document.addEventListener('pointermove', onLogoMove);
-    document.addEventListener('pointerup', onLogoUp);
+    document.addEventListener('pointerup',   onLogoUp);
 
-    // Deselect on click outside logo
-    stage.addEventListener('pointerdown', (e) => {
-        if (!e.target.closest('#logoZone')) {
-            logoSelected = false;
-            zone.classList.remove('selected');
-        }
+    // Sliders Y
+    document.getElementById('sliderFrontY').addEventListener('input', e => {
+        logos.front.y = parseFloat(e.target.value);
+        updateLogoPositionForSide('front');
+    });
+    document.getElementById('sliderBackY').addEventListener('input', e => {
+        logos.back.y = parseFloat(e.target.value);
+        updateLogoPositionForSide('back');
     });
 }
 
-function onLogoDown(e) {
-    const cur = cl();
+function onLogoDown(e, activeSide) {
+    const cur = logos[activeSide];
     if (!cur.data) return;
     e.preventDefault();
     e.stopPropagation();
 
-    const zone = document.getElementById('logoZone');
-    const stage = document.getElementById('svgView');
-    const rect = stage.getBoundingClientRect();
+    /* Activer ce côté pour les sélecteurs */
+    if (side !== activeSide) {
+        side = activeSide;
+        document.getElementById('logoSectionLabel').textContent =
+            side === 'front' ? 'Design Logo Av' : 'Design Logo Ar';
+        document.getElementById('colFront').classList.toggle('active', side === 'front');
+        document.getElementById('colBack').classList.toggle('active',  side === 'back');
+        syncLogoUI();
+    }
+
+    const zoneId = activeSide === 'front' ? 'logoZoneFront' : 'logoZoneBack';
+    const viewId = activeSide === 'front' ? 'svgViewFront'  : 'svgViewBack';
+    const zone   = document.getElementById(zoneId);
+    const rect   = document.getElementById(viewId).getBoundingClientRect();
 
     logoSelected = true;
     zone.classList.add('selected');
@@ -1249,38 +1378,30 @@ function onLogoDown(e) {
     const handle = e.target.closest('.logo-handle');
     if (handle) {
         dragState = {
-            type: 'resize',
+            type: 'resize', side: activeSide,
             corner: handle.dataset.corner,
-            startX: e.clientX,
-            startY: e.clientY,
-            origW: cur.w,
-            origH: cur.h,
-            origX: cur.x,
-            origY: cur.y,
-            stageW: rect.width,
-            stageH: rect.height,
+            startX: e.clientX, startY: e.clientY,
+            origW: cur.w, origH: cur.h, origX: cur.x, origY: cur.y,
+            stageW: rect.width, stageH: rect.height,
             centerX: rect.left + (cur.x / 100) * rect.width,
-            centerY: rect.top + (cur.y / 100) * rect.height
+            centerY: rect.top  + (cur.y / 100) * rect.height
         };
     } else {
         dragState = {
-            type: 'drag',
-            startX: e.clientX,
-            startY: e.clientY,
-            origX: cur.x,
-            origY: cur.y,
-            stageW: rect.width,
-            stageH: rect.height
+            type: 'drag', side: activeSide,
+            startX: e.clientX, startY: e.clientY,
+            origX: cur.x, origY: cur.y,
+            stageW: rect.width, stageH: rect.height
         };
     }
-
     zone.setPointerCapture(e.pointerId);
 }
 
 function onLogoMove(e) {
     if (!dragState) return;
     e.preventDefault();
-    const cur = cl();
+    const cur = logos[dragState.side];
+    const s   = dragState.side;
 
     if (dragState.type === 'drag') {
         const dx = e.clientX - dragState.startX;
@@ -1289,23 +1410,17 @@ function onLogoMove(e) {
         cur.y = dragState.origY + (dy / dragState.stageH) * 100;
         cur.x = Math.max(cur.w / 2, Math.min(100 - cur.w / 2, cur.x));
         cur.y = Math.max(5, Math.min(95, cur.y));
-        requestAnimationFrame(updateLogoPosition);
+        requestAnimationFrame(() => updateLogoPositionForSide(s));
     }
 
     if (dragState.type === 'resize') {
-        const distNow = Math.sqrt(
-            (e.clientX - dragState.centerX) ** 2 +
-            (e.clientY - dragState.centerY) ** 2
-        );
-        const distStart = Math.sqrt(
-            (dragState.startX - dragState.centerX) ** 2 +
-            (dragState.startY - dragState.centerY) ** 2
-        );
+        const distNow   = Math.hypot(e.clientX - dragState.centerX, e.clientY - dragState.centerY);
+        const distStart = Math.hypot(dragState.startX - dragState.centerX, dragState.startY - dragState.centerY);
         if (distStart < 1) return;
         const scale = distNow / distStart;
-        cur.w = Math.max(8, Math.min(50, dragState.origW * scale));
-        cur.h = Math.max(6, Math.min(40, dragState.origH * scale));
-        requestAnimationFrame(updateLogoPosition);
+        cur.w = Math.max(8,  Math.min(50, dragState.origW * scale));
+        cur.h = Math.max(6,  Math.min(40, dragState.origH * scale));
+        requestAnimationFrame(() => updateLogoPositionForSide(s));
     }
 }
 
@@ -1317,17 +1432,11 @@ function onLogoUp(e) {
    SIDE TOGGLE
    ══════════════════════════════════════ */
 window.flipSide = function(s) {
-    if (side === s) return;
     side = s;
-    document.querySelectorAll('.seg-btn[data-v]').forEach(b => b.classList.toggle('on', b.dataset.v === s));
     document.getElementById('logoSectionLabel').textContent = s === 'front' ? 'Design Logo Av' : 'Design Logo Ar';
-    const v = document.getElementById('svgView');
-    v.classList.add('fading');
-    setTimeout(() => {
-        renderSVG();
-        syncLogoUI();
-        v.classList.remove('fading');
-    }, 200);
+    document.getElementById('colFront').classList.toggle('active', s === 'front');
+    document.getElementById('colBack').classList.toggle('active',  s === 'back');
+    syncLogoUI();
 };
 
 function showLogoColorSection(show) {
