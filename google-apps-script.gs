@@ -70,23 +70,18 @@ function doPost(e) {
     telCell.setNumberFormat('@');
     telCell.setValue(data.telephone || '');
 
-    // Ligne entière — fond pastel rose (Femme) ou bleu (Homme)
-    var collectionLower = (data.collection || '').toLowerCase();
-    var rowRange = sheet.getRange(lastRow, 1, 1, row.length);
-    if (collectionLower.indexOf('femme') !== -1) {
-      rowRange.setBackground('#FFE8F0');  // Rose pastel
-    } else if (collectionLower.indexOf('homme') !== -1) {
-      rowRange.setBackground('#DCE8FF');  // Bleu pastel
-    }
-
-    // Colonne P (col 16) — police colorée légère (fond = couleur de la ligne)
+    // Colonne P (col 16) — police colorée légère
     var payCell   = sheet.getRange(lastRow, 16);
     var payeUpper = (data.paye || '').toUpperCase();
     payCell.setFontColor(payeUpper === 'OUI' ? '#1A7A3C' : '#C0392B');
 
-    // Colonne Q (col 17) — lien vers la fiche atelier
+    // Colonne Q (col 17) — lien vers la fiche atelier (RichText pour éviter les limites de formule)
     if (data.fiche) {
-      sheet.getRange(lastRow, 17).setFormula('=HYPERLINK("' + data.fiche + '","Voir fiche")');
+      var richText = SpreadsheetApp.newRichTextValue()
+        .setText('Voir fiche')
+        .setLinkUrl(data.fiche)
+        .build();
+      sheet.getRange(lastRow, 17).setRichTextValue(richText);
     }
 
     return jsonResponse_({ status: 'ok', row: lastRow });
