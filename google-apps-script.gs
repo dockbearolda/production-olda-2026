@@ -18,7 +18,7 @@ function doPost(e) {
     var sheet = ss.getSheetByName(SHEET_NAME);
     if (!sheet) throw new Error('Feuille "' + SHEET_NAME + '" introuvable');
 
-    // Ligne A → Q (17 colonnes)
+    // Ligne A → R (18 colonnes)
     var row = [
       data.commande          || '',  // A  N° COMMANDE
       data.date              || '',  // B  DATE
@@ -36,7 +36,8 @@ function doPost(e) {
       data.personnalisation  || '',  // N  PERSONNALISATION
       data.total             || '',  // O  TOTAL
       data.paye              || '',  // P  PAYÉ
-      ''                             // Q  FICHE (lien, défini via setFormula)
+      '',                            // Q  FICHE (lien, défini via setFormula)
+      data.note              || ''   // R  NOTE
     ];
 
     // Force TÉLÉPHONE en texte — format AVANT pour conserve le + et le 0 initial
