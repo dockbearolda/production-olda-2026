@@ -18,30 +18,26 @@ function doPost(e) {
     var sheet = ss.getSheetByName(SHEET_NAME);
     if (!sheet) throw new Error('Feuille "' + SHEET_NAME + '" introuvable');
 
-    // Colonne E : "Collection — Référence" combiné
-    var collectionRef = [data.collection, data.reference]
-      .filter(function(v) { return v && v.trim(); })
-      .join(' — ');
-
-    // Ligne A → Q
+    // Ligne A → R (18 colonnes — collection et référence séparées)
     var row = [
       data.commande          || '',  // A  N° COMMANDE
       data.date              || '',  // B  DATE
       data.nom               || '',  // C  NOM
       data.telephone         || '',  // D  TÉLÉPHONE
-      collectionRef          || '',  // E  COLLECTION / RÉFÉRENCE
-      data.taille            || '',  // F  TAILLE
-      data.couleurTshirt     || '',  // G  COULEUR T-SHIRT
-      '',                            // H  T-SHIRT (manuel)
-      data.logoAvant         || '',  // I  LOGO AVANT
-      data.couleurLogoAvant  || '',  // J  COULEUR LOGO AVANT
-      data.logoArriere       || '',  // K  LOGO ARRIÈRE
-      data.couleurLogoArriere|| '',  // L  COULEUR LOGO ARRIÈRE
-      data.prixTshirt        || '',  // M  PRIX T-SHIRT
-      data.personnalisation  || '',  // N  PERSONNALISATION
-      data.total             || '',  // O  TOTAL
-      data.paye              || '',  // P  PAYÉ
-      ''                             // Q  FICHE (lien, défini via setFormula)
+      data.collection        || '',  // E  COLLECTION
+      data.reference         || '',  // F  RÉFÉRENCE
+      data.taille            || '',  // G  TAILLE
+      data.couleurTshirt     || '',  // H  COULEUR T-SHIRT
+      '',                            // I  T-SHIRT (manuel)
+      data.logoAvant         || '',  // J  LOGO AVANT
+      data.couleurLogoAvant  || '',  // K  COULEUR LOGO AVANT
+      data.logoArriere       || '',  // L  LOGO ARRIÈRE
+      data.couleurLogoArriere|| '',  // M  COULEUR LOGO ARRIÈRE
+      data.prixTshirt        || '',  // N  PRIX T-SHIRT
+      data.personnalisation  || '',  // O  PERSONNALISATION
+      data.total             || '',  // P  TOTAL
+      data.paye              || '',  // Q  PAYÉ
+      ''                             // R  FICHE (lien, défini via setFormula)
     ];
 
     // Force TÉLÉPHONE en texte — format AVANT pour conserve le + et le 0 initial
@@ -57,30 +53,39 @@ function doPost(e) {
     telCell.setNumberFormat('@');
     if (data.telephone) telCell.setValue(data.telephone);
 
-    // Colonne G (col 7) — fond = couleur du t-shirt
+    // Ligne entière — fond pastel rose (Femme) ou bleu (Homme)
+    var collectionLower = (data.collection || '').toLowerCase();
+    var rowRange = sheet.getRange(lastRow, 1, 1, row.length);
+    if (collectionLower.indexOf('femme') !== -1) {
+      rowRange.setBackground('#FFE8F0');  // Rose pastel
+    } else if (collectionLower.indexOf('homme') !== -1) {
+      rowRange.setBackground('#DCE8FF');  // Bleu pastel
+    }
+
+    // Colonne H (col 8) — fond = couleur réelle du t-shirt
     if (data.couleurTshirtHex) {
-      var tshirtCell = sheet.getRange(lastRow, 7);
+      var tshirtCell = sheet.getRange(lastRow, 8);
       tshirtCell.setBackground(data.couleurTshirtHex);
       tshirtCell.setFontColor(isColorDark_(data.couleurTshirtHex) ? '#FFFFFF' : '#1A1A1A');
       tshirtCell.setFontWeight('bold');
     }
 
-    // Colonne P (col 16) — couleur Apple selon statut paiement
-    var payCell   = sheet.getRange(lastRow, 16);
+    // Colonne Q (col 17) — couleur pastel Apple selon statut paiement
+    var payCell   = sheet.getRange(lastRow, 17);
     var payeUpper = (data.paye || '').toUpperCase();
     if (payeUpper === 'OUI') {
-      payCell.setBackground('#34C759');  // Apple green
-      payCell.setFontColor('#FFFFFF');
+      payCell.setBackground('#D9F5E4');  // Vert pastel Apple
+      payCell.setFontColor('#196030');
       payCell.setFontWeight('bold');
     } else {
-      payCell.setBackground('#FF3B30');  // Apple red
-      payCell.setFontColor('#FFFFFF');
+      payCell.setBackground('#FFE5E3');  // Rouge pastel Apple
+      payCell.setFontColor('#C01010');
       payCell.setFontWeight('bold');
     }
 
-    // Colonne Q (col 17) — lien vers la fiche atelier
+    // Colonne R (col 18) — lien vers la fiche atelier
     if (data.fiche) {
-      sheet.getRange(lastRow, 17).setFormula('=HYPERLINK("' + data.fiche + '","Voir fiche")');
+      sheet.getRange(lastRow, 18).setFormula('=HYPERLINK("' + data.fiche + '","Voir fiche")');
     }
 
     return jsonResponse_({ status: 'ok', row: lastRow });

@@ -591,9 +591,9 @@
                 <span class="w-[70px] shrink-0 text-[13px] font-medium text-gray-400 uppercase tracking-wide">TEL</span>
                 <select id="countryCode"
                         class="shrink-0 bg-gray-100 rounded-lg text-[12px] font-semibold text-gray-600 border-0 outline-none focus:ring-0 cursor-pointer py-1 px-2 appearance-none">
-                    <option value="+590" selected>🇸🇽 +590</option>
-                    <option value="+33">🇫🇷 +33</option>
-                    <option value="+1">🇺🇸 +1</option>
+                    <option value="+590" selected>+590</option>
+                    <option value="+33">+33</option>
+                    <option value="+1">+1</option>
                 </select>
                 <input type="tel" id="clientPhone"
                        class="flex-1 bg-transparent appearance-none rounded-none outline-none border-0 text-[15px] font-semibold text-gray-900 tracking-tight py-1.5 placeholder:text-gray-300 placeholder:font-normal focus:ring-0"
@@ -1403,8 +1403,8 @@ function renderSvgToImg(svgStr, w, h) {
     });
 }
 
-async function captureMockup(shirtSvg, sideData, fabricHex) {
-    var W = 400, H = 480;
+async function captureMockup(shirtSvg, sideData, fabricHex, W, H, Q) {
+    W = W || 400; H = H || 480; Q = Q || 0.65;
     var c = document.createElement('canvas'); c.width = W; c.height = H;
     var cx = c.getContext('2d');
     cx.fillStyle = '#F5F5F7'; cx.fillRect(0, 0, W, H);
@@ -1436,7 +1436,7 @@ async function captureMockup(shirtSvg, sideData, fabricHex) {
         if (logoImg) cx.drawImage(logoImg, lx - lw / 2, ly - lh / 2, lw, lh);
     }
 
-    return c.toDataURL('image/jpeg', 0.65);
+    return c.toDataURL('image/jpeg', Q);
 }
 
 /* ══════════════════════════════════════
@@ -1481,7 +1481,11 @@ window.submit = async function() {
         paye              : payStatus === 'oui' ? 'OUI' : 'NON'
     };
 
-    /* ── Build fiche URL (sans images = URL légère ~2 Ko) ── */
+    /* ── Capture mockups réduits (220×264, JPEG 0.48) pour la fiche atelier ── */
+    var mockupFront = await captureMockup(svgF, logos.front, color.h, 220, 264, 0.48);
+    var mockupBack  = await captureMockup(svgB, logos.back,  color.h, 220, 264, 0.48);
+
+    /* ── Build fiche URL (~150 Ko avec images compressées) ── */
     const ATELIER_URL = 'https://ficheatelier.pages.dev';
     const ficheData = {
         commande          : payload.commande,
@@ -1498,7 +1502,9 @@ window.submit = async function() {
         couleurLogoArriere: payload.couleurLogoArriere,
         note              : payload.note,
         prix              : { tshirt: payload.prixTshirt, personnalisation: payload.personnalisation, total: payload.total },
-        paiement          : { statut: payload.paye }
+        paiement          : { statut: payload.paye },
+        mockupFront       : mockupFront,
+        mockupBack        : mockupBack
     };
     const ficheURL = ATELIER_URL + '#' + btoa(unescape(encodeURIComponent(JSON.stringify(ficheData))));
     payload.fiche = ficheURL;
