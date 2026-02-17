@@ -667,15 +667,6 @@
                         style="--pay-color:#FF3B30;--pay-bg:rgba(255,59,48,0.04);--pay-border:rgba(255,59,48,0.12);--pay-bg-on:rgba(255,59,48,0.08);--pay-border-on:rgba(255,59,48,0.35);">
                         A regler
                     </button>
-                    <div>
-                        <button class="pay-opt" data-p="acompte" onclick="setPay('acompte')"
-                            style="--pay-color:#FF9500;--pay-bg:rgba(255,149,0,0.04);--pay-border:rgba(255,149,0,0.12);--pay-bg-on:rgba(255,149,0,0.08);--pay-border-on:rgba(255,149,0,0.35);">
-                            Acompte
-                        </button>
-                        <div id="acompteSection" style="display:none;margin-top:8px;">
-                            <input type="number" id="acompteAmount" class="input" placeholder="Montant de l'acompte" style="font-size:15px;border-color:rgba(255,149,0,0.25);" oninput="calcTotal()">
-                        </div>
-                    </div>
                     <button class="pay-opt" data-p="oui" onclick="setPay('oui')"
                         style="--pay-color:#34C759;--pay-bg:rgba(52,199,89,0.04);--pay-border:rgba(52,199,89,0.12);--pay-bg-on:rgba(52,199,89,0.08);--pay-border-on:rgba(52,199,89,0.35);">
                         Paye
@@ -1304,7 +1295,6 @@ window.rmUpload = function() {
 window.setPay = function(s) {
     payStatus = s;
     document.querySelectorAll('#payStatus .pay-opt').forEach(b => b.classList.toggle('on', b.dataset.p === s));
-    document.getElementById('acompteSection').style.display = s === 'acompte' ? 'block' : 'none';
 };
 
 window.calcTotal = function() {
@@ -1394,8 +1384,6 @@ window.submit = async function() {
     const collVal = selects['selCollection'] ? selects['selCollection'].value : '';
     const refVal = selects['selRef'] ? selects['selRef'].value : '';
     const sizeVal = selects['selSize'] ? selects['selSize'].value : '';
-    const acompteVal = document.getElementById('acompteAmount').value || '';
-
     const payload = {
         commande: document.getElementById('orderNo').textContent,
         date: document.getElementById('orderDate').textContent,
@@ -1413,8 +1401,7 @@ window.submit = async function() {
         prixTshirt: document.getElementById('price').value,
         personnalisation: document.getElementById('customPrice').value,
         total: document.getElementById('totalLabel').textContent,
-        paye: payStatus === 'oui' ? 'OUI' : (payStatus === 'acompte' ? 'ACOMPTE' : 'NON'),
-        acompte: acompteVal
+        paye: payStatus === 'oui' ? 'OUI' : 'NON'
     };
 
     /* ── Send fiche to Atelier FIRST (before async fetch, to avoid popup blocker) ── */
@@ -1434,7 +1421,7 @@ window.submit = async function() {
         couleurLogoArriere: payload.couleurLogoArriere,
         note: payload.note,
         prix: { tshirt: payload.prixTshirt, personnalisation: payload.personnalisation, total: payload.total },
-        paiement: { statut: payload.paye, acompte: payload.acompte },
+        paiement: { statut: payload.paye },
         mockupFront: mockupFront,
         mockupBack: mockupBack
     };
