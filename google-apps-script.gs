@@ -62,14 +62,6 @@ function doPost(e) {
       rowRange.setBackground('#DCE8FF');  // Bleu pastel
     }
 
-    // Colonne H (col 8) — fond = couleur réelle du t-shirt
-    if (data.couleurTshirtHex) {
-      var tshirtCell = sheet.getRange(lastRow, 8);
-      tshirtCell.setBackground(data.couleurTshirtHex);
-      tshirtCell.setFontColor(isColorDark_(data.couleurTshirtHex) ? '#FFFFFF' : '#1A1A1A');
-      tshirtCell.setFontWeight('bold');
-    }
-
     // Colonne Q (col 17) — couleur pastel Apple selon statut paiement
     var payCell   = sheet.getRange(lastRow, 17);
     var payeUpper = (data.paye || '').toUpperCase();
