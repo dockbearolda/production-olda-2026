@@ -294,23 +294,27 @@
         }
         .logo-zone.selected .logo-frame { display: block; }
 
-        /* Resize Handles — grossis pour le tactile */
-        .logo-handle {
+        /* Indicateur de resize — coin SE discret */
+        .logo-resize-corner {
             position: absolute;
-            width: 22px; height: 22px;
-            border-radius: 50%;
-            background: white;
-            box-shadow: 0 1px 6px rgba(0,0,0,0.25), 0 0 0 0.5px rgba(0,122,255,0.4);
-            border: 2px solid var(--accent);
+            bottom: 0; right: 0;
+            width: 32%; height: 32%;
+            min-width: 22px; min-height: 22px;
             z-index: 11;
-            display: none;
+            cursor: se-resize;
             touch-action: none;
+            display: none;
         }
-        .logo-zone.selected .logo-handle { display: block; }
-        .logo-handle.nw { top: -11px; left: -11px; cursor: nwse-resize; }
-        .logo-handle.ne { top: -11px; right: -11px; cursor: nesw-resize; }
-        .logo-handle.sw { bottom: -11px; left: -11px; cursor: nesw-resize; }
-        .logo-handle.se { bottom: -11px; right: -11px; cursor: nwse-resize; }
+        .logo-zone.selected .logo-resize-corner { display: block; }
+        .logo-resize-corner::after {
+            content: '';
+            position: absolute;
+            bottom: 3px; right: 3px;
+            width: 9px; height: 9px;
+            border-right: 2.5px solid var(--accent);
+            border-bottom: 2.5px solid var(--accent);
+            border-radius: 1px;
+        }
 
         /* ═══════════════════════════════════
            TAP OVERLAY (état vide du t-shirt)
@@ -864,10 +868,7 @@
                              style="left:50%;top:42%;width:24%;height:17%;">
                             <div class="logo-inner" id="logoInnerFront"></div>
                             <div class="logo-frame"></div>
-                            <div class="logo-handle nw" data-corner="nw"></div>
-                            <div class="logo-handle ne" data-corner="ne"></div>
-                            <div class="logo-handle sw" data-corner="sw"></div>
-                            <div class="logo-handle se" data-corner="se"></div>
+                            <div class="logo-resize-corner"></div>
                         </div>
                     </div>
                 </div>
@@ -887,10 +888,7 @@
                              style="left:50%;top:42%;width:24%;height:17%;">
                             <div class="logo-inner" id="logoInnerBack"></div>
                             <div class="logo-frame"></div>
-                            <div class="logo-handle nw" data-corner="nw"></div>
-                            <div class="logo-handle ne" data-corner="ne"></div>
-                            <div class="logo-handle sw" data-corner="sw"></div>
-                            <div class="logo-handle se" data-corner="se"></div>
+                            <div class="logo-resize-corner"></div>
                         </div>
                     </div>
                 </div>
@@ -1576,16 +1574,14 @@ function onLogoDown(e, activeSide) {
     logoSelected = true;
     zone.classList.add('selected');
 
-    const handle = e.target.closest('.logo-handle');
-    if (handle) {
+    const isResizeCorner = e.target.closest('.logo-resize-corner');
+    if (isResizeCorner) {
         dragState = {
             type: 'resize', side: activeSide,
-            corner: handle.dataset.corner,
+            corner: 'se',
             startX: e.clientX, startY: e.clientY,
             origW: cur.w, origH: cur.h, origX: cur.x, origY: cur.y,
-            stageW: rect.width, stageH: rect.height,
-            centerX: rect.left + (cur.x / 100) * rect.width,
-            centerY: rect.top  + (cur.y / 100) * rect.height
+            stageW: rect.width, stageH: rect.height
         };
     } else {
         dragState = {
