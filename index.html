@@ -667,46 +667,38 @@
 
                 <!-- ID — une ligne, mono -->
                 <div class="flex items-center py-3">
-                    <span class="w-20 shrink-0 text-[10px] font-black text-gray-300 uppercase tracking-[0.18em]">ID</span>
-                    <span class="text-[11px] font-mono font-medium text-gray-400 tracking-tight select-all truncate" id="orderNo">—</span>
+                    <span class="w-20 shrink-0 text-[12px] font-black text-gray-300 uppercase tracking-[0.18em]">ID</span>
+                    <span class="text-[13px] font-mono font-medium text-gray-400 tracking-tight select-all truncate" id="orderNo">—</span>
                 </div>
 
                 <!-- DATE — une ligne -->
                 <div class="flex items-center py-3">
-                    <span class="w-20 shrink-0 text-[10px] font-black text-gray-300 uppercase tracking-[0.18em]">DATE</span>
-                    <span class="text-[15px] font-semibold text-gray-900" id="orderDate">15/02/2026</span>
+                    <span class="w-20 shrink-0 text-[12px] font-black text-gray-300 uppercase tracking-[0.18em]">DATE</span>
+                    <span class="text-[17px] font-semibold text-gray-900" id="orderDate">15/02/2026</span>
                 </div>
 
                 <!-- NOM — une ligne -->
                 <div class="flex items-center py-3">
-                    <span class="w-20 shrink-0 text-[10px] font-black text-gray-300 uppercase tracking-[0.18em]">NOM</span>
+                    <span class="w-20 shrink-0 text-[12px] font-black text-gray-300 uppercase tracking-[0.18em]">NOM</span>
                     <input type="text" id="clientNom"
-                           class="flex-1 bg-transparent text-[15px] font-semibold text-gray-900 tracking-tight placeholder:text-gray-300 placeholder:font-normal outline-none border-0 focus:ring-0"
+                           class="flex-1 bg-transparent text-[17px] font-semibold text-gray-900 tracking-tight placeholder:text-gray-300 placeholder:font-normal outline-none border-0 focus:ring-0"
                            placeholder="Dubois" autocomplete="family-name">
                 </div>
 
                 <!-- PRÉNOM — une ligne -->
                 <div class="flex items-center py-3">
-                    <span class="w-20 shrink-0 text-[10px] font-black text-gray-300 uppercase tracking-[0.18em]">PRÉNOM</span>
+                    <span class="w-20 shrink-0 text-[12px] font-black text-gray-300 uppercase tracking-[0.18em]">PRÉNOM</span>
                     <input type="text" id="clientPrenom"
-                           class="flex-1 bg-transparent text-[15px] font-semibold text-gray-900 tracking-tight placeholder:text-gray-300 placeholder:font-normal outline-none border-0 focus:ring-0"
+                           class="flex-1 bg-transparent text-[17px] font-semibold text-gray-900 tracking-tight placeholder:text-gray-300 placeholder:font-normal outline-none border-0 focus:ring-0"
                            placeholder="Pierre" autocomplete="given-name">
                 </div>
 
                 <!-- TEL — une ligne -->
                 <div class="flex items-center py-3">
-                    <span class="w-20 shrink-0 text-[10px] font-black text-gray-300 uppercase tracking-[0.18em]">TEL</span>
-                    <div class="flex items-center gap-2 flex-1">
-                        <select id="countryCode"
-                                class="shrink-0 bg-gray-100 rounded-lg text-[13px] font-semibold text-gray-600 border-0 outline-none focus:ring-0 cursor-pointer py-1 px-2 appearance-none">
-                            <option value="+590" selected>+590</option>
-                            <option value="+33">+33</option>
-                            <option value="+1">+1</option>
-                        </select>
-                        <input type="tel" id="clientPhone"
-                               class="flex-1 bg-transparent text-[15px] font-semibold text-gray-900 tracking-tight placeholder:text-gray-300 placeholder:font-normal outline-none border-0 focus:ring-0"
-                               placeholder="06 00 00 00 00">
-                    </div>
+                    <span class="w-20 shrink-0 text-[12px] font-black text-gray-300 uppercase tracking-[0.18em]">TEL</span>
+                    <input type="tel" id="clientPhone"
+                           class="flex-1 bg-transparent text-[17px] font-semibold text-gray-900 tracking-tight placeholder:text-gray-300 placeholder:font-normal outline-none border-0 focus:ring-0"
+                           placeholder="0690 00 00 00">
                 </div>
 
             </div>
@@ -1680,8 +1672,7 @@ window.submit = async function() {
     const refVal  = selects['selRef']        ? selects['selRef'].value        : '';
     const sizeVal = selects['selSize']       ? selects['selSize'].value       : '';
 
-    const tel = (document.getElementById('countryCode').value || '') + ' ' +
-                (document.getElementById('clientPhone').value  || '');
+    const tel = document.getElementById('clientPhone').value || '';
 
     const logoColorName = (hex, arr) => (arr.find(c => c.h === hex) || { n: hex }).n;
 
