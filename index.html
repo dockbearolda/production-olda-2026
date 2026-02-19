@@ -1098,10 +1098,76 @@
 const API = "https://script.google.com/macros/s/AKfycbyzeU0tD22L8wZ94PW0f4s1a2LH7fNPhK74RtjcIXs0pWAP59anDV8EYtYlP8WX5iCk/exec";
 
 const COLORS = [
-    {n:'Blanc',h:'#FFFFFF'},{n:'Ivoire',h:'#FAF3E8'},{n:'Gris',h:'#C7C7CC'},{n:'Anthracite',h:'#4A4A4A'},
-    {n:'Noir',h:'#1A1A1A'},{n:'Marine',h:'#00205B'},{n:'Bleu',h:'#007AFF'},{n:'Ciel',h:'#64D2FF'},
-    {n:'Rouge',h:'#FF3B30'},{n:'Bordeaux',h:'#8B1A2B'},{n:'Vert',h:'#34C759'},{n:'Sauge',h:'#8DA67E'},
-    {n:'Jaune',h:'#FFCC00'},{n:'Orange',h:'#FF9500'},{n:'Rose',h:'#FF6482'},{n:'Lavande',h:'#BDB5D5'}
+    /* ── Basiques (les + commandés) ── */
+    {n:'Blanc',              h:'#FFFFFF'},
+    {n:'Noir',               h:'#1A1A1A'},
+    {n:'Black',              h:'#0D0D0D'},
+    {n:'Gris',               h:'#9B9B9B'},
+    {n:'Navy',               h:'#001F4D'},
+    {n:'Navy Blue',          h:'#003087'},
+    {n:'Sport Navy',         h:'#1F3A5F'},
+    {n:'Royal Blue',         h:'#0A3D91'},
+    {n:'True Royal',         h:'#2563EB'},
+    {n:'Royal',              h:'#1155CC'},
+    {n:'Rouge',              h:'#CC1517'},
+    {n:'Orange',             h:'#FF6600'},
+    /* ── Gris ── */
+    {n:'Dark Grey',          h:'#3D3D3D'},
+    {n:'Oxford Grey',        h:'#545454'},
+    {n:'Iron Grey',          h:'#666666'},
+    {n:'Heather Dark Grey',  h:'#4A4A4A'},
+    {n:'Fine Grey',          h:'#AEAEB2'},
+    /* ── Bleus ── */
+    {n:'Sky Blue',           h:'#87CEEB'},
+    {n:'Light Blue',         h:'#ADD8E6'},
+    {n:'Cool Blue',          h:'#4A90D9'},
+    {n:'Light Royal Blue',   h:'#4169E1'},
+    {n:'Baltic Blue',        h:'#2E5FA3'},
+    {n:'Sea Blue',           h:'#2C6E8A'},
+    {n:'Tropical Blue',      h:'#0077B6'},
+    {n:'Aqua Blue',          h:'#00B5CC'},
+    {n:'Aquamarine',         h:'#7FFFD4'},
+    {n:'Vintage Blue',       h:'#4A6D8C'},
+    /* ── Kakis / Olives ── */
+    {n:'Kaki',               h:'#8B8456'},
+    {n:'Khaki',              h:'#C3B091'},
+    {n:'Dark Kaki',          h:'#5C5A3A'},
+    {n:'Organic Kaki',       h:'#9C8E5A'},
+    {n:'Urban Kaki',         h:'#6E6A3D'},
+    {n:'Olive',              h:'#808000'},
+    {n:'Olive Green',        h:'#6B7C43'},
+    {n:'Light Olive Green',  h:'#A8BE8C'},
+    {n:'Light Army Green',   h:'#7D8A5C'},
+    /* ── Verts ── */
+    {n:'Forest Green',       h:'#228B22'},
+    {n:'Green Field',        h:'#5A8A3C'},
+    {n:'Jade Green',         h:'#00A86B'},
+    {n:'Almond Green',       h:'#8DB48E'},
+    {n:'Mint Green',         h:'#98FF98'},
+    {n:'Bright Seafoam',     h:'#3EFFC5'},
+    /* ── Sables / Naturels ── */
+    {n:'Sand',               h:'#C2A679'},
+    {n:'Light Sand',         h:'#EAD9B8'},
+    {n:'West Sand',          h:'#BCA98A'},
+    {n:'Wet Sand',           h:'#B0A08A'},
+    {n:'Union Beige',        h:'#D4C5A9'},
+    {n:'Driftwood',          h:'#B5A380'},
+    {n:'Raw Natural',        h:'#D9CBAD'},
+    {n:'Ivory',              h:'#FFFFF0'},
+    {n:'Ivoir',              h:'#F5EDD8'},
+    {n:'Coconut Milk',       h:'#FAF0E6'},
+    {n:'Washed Cream Coffee',h:'#C4A97A'},
+    /* ── Coraux / Rouges chauds ── */
+    {n:'Coral',              h:'#FF7F6E'},
+    {n:'Soft Coral',         h:'#F4845F'},
+    {n:'Terracotta Red',     h:'#C25B3C'},
+    {n:'Paprika',            h:'#A31D1D'},
+    {n:'Clementine Heather', h:'#D4603A'},
+    {n:'Washed Sienna',      h:'#A0522D'},
+    /* ── Pastel / Doux ── */
+    {n:'Peach',              h:'#FFCBA4'},
+    {n:'Petal Rose',         h:'#F4A7B9'},
+    {n:'Pineapple',          h:'#E8C84A'},
 ];
 
 const LOGO_COLORS = [
