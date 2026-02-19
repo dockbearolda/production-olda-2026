@@ -959,6 +959,8 @@
                 <button class="fbar-btn fbar-remove" onclick="dropLogo()">Retirer</button>
             </div>
 
+            <!-- Largeurs logo en mm (mise à jour dynamique) -->
+            <div id="logoMmInfo" class="text-center mt-2 text-[12px] font-semibold" style="color:var(--accent);min-height:20px;letter-spacing:0.01em;"></div>
 
         </div>
 
@@ -1210,6 +1212,11 @@ const LOGO_COLORS = [
     {n:'Rose',    h:'#FF69B4'},{n:'Orange',  h:'#FF6600'},{n:'Violet',  h:'#6B46C1'}
 ];
 
+/* ── Catalogue références ── */
+const REFERENCES = {
+    'H-001': { fournisseur: 'NS300', prix: 35, largeurs: { XS: 220, S: 250, M: 270, L: 300, XL: 320, XXL: 320 } }
+};
+
 const FABRIC_RE = /rgb\(100%,\s*100%,\s*100%\)/gi;
 
 const LOGOS = {
@@ -1450,9 +1457,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     );
     createSelect('selRef', [], 'Reference', () => {});
     createSelect('selSize',
-        [{v:'S',l:'S'},{v:'M',l:'M'},{v:'L',l:'L'},{v:'XL',l:'XL'},{v:'XXL',l:'XXL'}],
+        [{v:'XS',l:'XS'},{v:'S',l:'S'},{v:'M',l:'M'},{v:'L',l:'L'},{v:'XL',l:'XL'},{v:'XXL',l:'XXL'}],
         'Taille',
-        () => {}
+        () => updateLogoMmDisplay()
     );
     selects['selSize'].value = 'S';
     selects['selSize'].label = 'S';
@@ -1537,11 +1544,41 @@ window.buildRefs = function() {
         const prefix = c[0].toUpperCase();
         for (let i = 1; i <= 5; i++) {
             const code = prefix + '-' + String(i).padStart(3,'0');
-            opts.push({v: code, l: code});
+            const refData = REFERENCES[code];
+            const label = refData ? `${code}  ·  ${refData.fournisseur}` : code;
+            opts.push({v: code, l: label});
         }
     }
     updateSelectOptions('selRef', opts, 'Reference');
+    /* Auto-prix + affichage mm au choix de la référence */
+    selects['selRef'].onChange = function(v) {
+        const refData = REFERENCES[v];
+        if (refData) {
+            document.getElementById('price').value = refData.prix;
+            calcTotal();
+        }
+        updateLogoMmDisplay();
+    };
 };
+
+/* ══════════════════════════════════════
+   LARGEUR LOGO EN MM
+   ══════════════════════════════════════ */
+function updateLogoMmDisplay() {
+    const el = document.getElementById('logoMmInfo');
+    if (!el) return;
+    const refVal  = selects['selRef']  ? selects['selRef'].value  : '';
+    const sizeVal = selects['selSize'] ? selects['selSize'].value : '';
+    const refData = REFERENCES[refVal];
+    const shirtW  = refData && refData.largeurs ? refData.largeurs[sizeVal] : null;
+    if (!shirtW) { el.innerHTML = ''; return; }
+    const wF = Math.round(logos.front.w / 100 * shirtW);
+    const wB = Math.round(logos.back.w  / 100 * shirtW);
+    el.innerHTML =
+        `T-shirt <strong>${shirtW}&thinsp;mm</strong>`
+        + `&ensp;·&ensp;Logo Av <strong>${wF}&thinsp;mm</strong>`
+        + `&ensp;·&ensp;Logo Ar <strong>${wB}&thinsp;mm</strong>`;
+}
 
 /* ══════════════════════════════════════
    SVG RENDERING
@@ -1601,6 +1638,7 @@ function renderLogo() {
     renderLogoForSide('back');
     updateFloatBar();
     updateTapOverlays();
+    updateLogoMmDisplay();
 }
 
 function updateLogoPositionForSide(s) {
@@ -1616,6 +1654,7 @@ function updateLogoPositionForSide(s) {
 function updateLogoPosition() {
     updateLogoPositionForSide('front');
     updateLogoPositionForSide('back');
+    updateLogoMmDisplay();
 }
 
 /* ══════════════════════════════════════
