@@ -160,6 +160,7 @@
             padding: 0 22px 0 0; border-radius: 0;
             font-size: 17px; font-weight: 600; color: var(--text-1);
             text-align: right; letter-spacing: -0.02em;
+            min-height: 44px; display: flex; align-items: center; justify-content: flex-end;
         }
         .aselect-inline.open .aselect-trigger { box-shadow: none; border: none; }
         .aselect-inline .aselect-chevron { right: 0; opacity: 0.35; }
@@ -1012,8 +1013,7 @@
                 <!-- TOTAL -->
                 <div class="flex items-center py-3">
                     <span class="w-28 shrink-0 text-[12px] font-black text-gray-300 uppercase tracking-[0.18em]">Total</span>
-                    <span class="flex-1 text-[17px] font-black text-gray-900 tracking-tight text-right" id="totalLabel">25</span>
-                    <span class="ml-1 text-[17px] font-black text-gray-900">€</span>
+                    <span class="flex-1 text-[17px] font-black text-gray-900 tracking-tight text-right" id="totalLabel" style="padding-right:22px">25 €</span>
                 </div>
 
                 <!-- STATUT -->
@@ -1984,7 +1984,7 @@ window.setPay = function(s) {
 window.calcTotal = function() {
     const t = (parseFloat(selects['selPrice'] && selects['selPrice'].value) || 0)
             + (parseFloat(selects['selPerso'] && selects['selPerso'].value) || 0);
-    document.getElementById('totalLabel').textContent = t;
+    document.getElementById('totalLabel').textContent = t + ' €';
 };
 
 /* ══════════════════════════════════════
@@ -2075,7 +2075,7 @@ window.submit = async function() {
         note              : (document.getElementById('note').value || '').trim(),
         prixTshirt        : (selects['selPrice']  && selects['selPrice'].value)  || '0',
         personnalisation  : (selects['selPerso']  && selects['selPerso'].value)  || '0',
-        total             : document.getElementById('totalLabel').textContent.trim(),
+        total             : String((parseFloat(selects['selPrice']?.value)||0)+(parseFloat(selects['selPerso']?.value)||0)),
         paye              : payStatus === 'oui' ? 'OUI' : 'NON'
     };
 
