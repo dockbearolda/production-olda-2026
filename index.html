@@ -1812,7 +1812,14 @@ function onLogoMove(e) {
 }
 
 function onLogoUp(e) {
+    if (!dragState) return;
+    const moved   = Math.hypot(e.clientX - dragState.startX, e.clientY - dragState.startY);
+    const tapSide = dragState.side;
     dragState = null;
+    if (moved < 5) {
+        flipSide(tapSide);
+        openLogoSheet(tapSide);
+    }
 }
 
 /* ══════════════════════════════════════
