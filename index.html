@@ -995,44 +995,42 @@
          (M: Prix T-shirt, N: Personnalisation, O: Total, P: Paye, Q: Fiche)
          ════════════════════════════════════════ -->
     <div id="s3" class="step mt-6">
-        <div class="bg-white rounded-[32px] px-7 pt-7 pb-7" style="box-shadow:0 2px 16px rgba(0,0,0,0.04);">
-            <div class="divide-y divide-gray-100">
 
-                <!-- T-SHIRT -->
-                <div class="flex items-center py-3">
-                    <span class="w-28 shrink-0 text-[12px] font-black text-gray-300 uppercase tracking-[0.18em]">T-Shirt</span>
-                    <div class="aselect aselect-inline flex-1" id="selPrice"></div>
-                </div>
+        <!-- T-SHIRT -->
+        <div class="card p-5">
+            <label class="label ml-1 mb-2 block">T-Shirt</label>
+            <div class="aselect" id="selPrice"></div>
+        </div>
 
-                <!-- PERSO -->
-                <div class="flex items-center py-3">
-                    <span class="w-28 shrink-0 text-[12px] font-black text-gray-300 uppercase tracking-[0.18em]">Perso</span>
-                    <div class="aselect aselect-inline flex-1" id="selPerso"></div>
-                </div>
+        <!-- PERSO -->
+        <div class="card p-5">
+            <label class="label ml-1 mb-2 block">Perso</label>
+            <div class="aselect" id="selPerso"></div>
+        </div>
 
-                <!-- TOTAL -->
-                <div class="flex items-center py-3">
-                    <span class="w-28 shrink-0 text-[12px] font-black text-gray-300 uppercase tracking-[0.18em]">Total</span>
-                    <span class="flex-1 text-[17px] font-black text-gray-900 tracking-tight text-right" id="totalLabel" style="padding-right:22px">25 €</span>
-                </div>
-
-                <!-- STATUT -->
-                <div class="flex items-center py-3 gap-3">
-                    <span class="w-28 shrink-0 text-[12px] font-black text-gray-300 uppercase tracking-[0.18em]">Statut</span>
-                    <div class="flex gap-2 flex-1" id="payStatus">
-                        <button class="pay-opt on" data-p="non" onclick="setPay('non')"
-                            style="flex:1;--pay-color:#FF3B30;--pay-bg:rgba(255,59,48,0.04);--pay-border:rgba(255,59,48,0.12);--pay-bg-on:rgba(255,59,48,0.08);--pay-border-on:rgba(255,59,48,0.35);">
-                            A régler
-                        </button>
-                        <button class="pay-opt" data-p="oui" onclick="setPay('oui')"
-                            style="flex:1;--pay-color:#34C759;--pay-bg:rgba(52,199,89,0.04);--pay-border:rgba(52,199,89,0.12);--pay-bg-on:rgba(52,199,89,0.08);--pay-border-on:rgba(52,199,89,0.35);">
-                            Payé
-                        </button>
-                    </div>
-                </div>
-
+        <!-- TOTAL -->
+        <div class="card p-5">
+            <label class="label ml-1 mb-2 block">Total</label>
+            <div class="aselect" style="pointer-events:none;">
+                <div class="aselect-trigger" id="totalLabel">25 €</div>
             </div>
         </div>
+
+        <!-- STATUT -->
+        <div class="card p-5">
+            <label class="label ml-1 mb-2 block">Statut</label>
+            <div class="flex gap-2" id="payStatus">
+                <button class="pay-opt on" data-p="non" onclick="setPay('non')"
+                    style="flex:1;--pay-color:#FF3B30;--pay-bg:rgba(255,59,48,0.04);--pay-border:rgba(255,59,48,0.12);--pay-bg-on:rgba(255,59,48,0.08);--pay-border-on:rgba(255,59,48,0.35);">
+                    A régler
+                </button>
+                <button class="pay-opt" data-p="oui" onclick="setPay('oui')"
+                    style="flex:1;--pay-color:#34C759;--pay-bg:rgba(52,199,89,0.04);--pay-border:rgba(52,199,89,0.12);--pay-bg-on:rgba(52,199,89,0.08);--pay-border-on:rgba(52,199,89,0.35);">
+                    Payé
+                </button>
+            </div>
+        </div>
+
         <div class="flex gap-3">
             <button class="btn btn-ghost" onclick="go(2)" style="flex:0 0 auto;width:auto;padding:16px 20px;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
