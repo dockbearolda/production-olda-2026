@@ -337,9 +337,9 @@
             animation: tapPulse 2.4s ease-out infinite;
         }
         /* Position cœur pour l'avant (poitrine gauche du porteur = droite de l'image) */
-        .logo-tap-front .logo-tap-pip { left: 58%; top: 33%; }
-        /* Arrière décalé 5% à gauche */
-        .logo-tap-back  .logo-tap-pip { left: 45%; top: 33%; }
+        .logo-tap-front .logo-tap-pip { left: 60.5%; top: 33%; }
+        /* Arrière décalé 2.5% à gauche */
+        .logo-tap-back  .logo-tap-pip { left: 47.5%; top: 33%; }
 
         .logo-tap-overlay:active .logo-tap-pip {
             background: rgba(0,122,255,0.22);
@@ -874,7 +874,7 @@
                             </div>
                         </div>
                         <div class="logo-zone empty" id="logoZoneFront" data-side="front"
-                             style="left:58%;top:33%;width:24%;height:17%;">
+                             style="left:60.5%;top:33%;width:24%;height:17%;">
                             <div class="logo-inner" id="logoInnerFront"></div>
                             <div class="logo-frame"></div>
                         </div>
@@ -892,7 +892,7 @@
                             </div>
                         </div>
                         <div class="logo-zone empty" id="logoZoneBack" data-side="back"
-                             style="left:45%;top:33%;width:24%;height:17%;">
+                             style="left:47.5%;top:33%;width:24%;height:17%;">
                             <div class="logo-inner" id="logoInnerBack"></div>
                             <div class="logo-frame"></div>
                         </div>
@@ -1109,8 +1109,8 @@ let svgB  = null;
 
 /* Per-side logo state (J: Logo Avant, K: Logo Arriere) — logoColor per side */
 const logos = {
-    front: { data: null, x: 58, y: 33, w: 24, h: 17, logoColor: '#1A1A1A' },
-    back:  { data: null, x: 45, y: 33, w: 24, h: 17, logoColor: '#1A1A1A' }
+    front: { data: null, x: 60.5, y: 33, w: 24, h: 17, logoColor: '#1A1A1A' },
+    back:  { data: null, x: 47.5, y: 33, w: 24, h: 17, logoColor: '#1A1A1A' }
 };
 function cl() { return logos[side]; }
 
@@ -1705,7 +1705,7 @@ window.onUpload = function(e) {
         document.getElementById('upThumb').src = ev.target.result;
         document.getElementById('upName').textContent = f.name;
         document.getElementById('upPill').classList.add('show');
-        cur.x = side === 'front' ? 58 : 45;
+        cur.x = side === 'front' ? 60.5 : 47.5;
         cur.y = 33; cur.w = 24; cur.h = 17;
         renderLogo();
         closeLogoSheet();
@@ -1775,7 +1775,7 @@ function buildSheetLogoGrid() {
             thumb.appendChild(nameEl);
             thumb.addEventListener('click', () => {
                 cur.data = { type: 'atelier', id: l.id, s: l.s };
-                cur.x = _sheetSide === 'front' ? 58 : 45;
+                cur.x = _sheetSide === 'front' ? 60.5 : 47.5;
                 cur.y = 33; cur.w = 24; cur.h = 17;
                 renderLogo();
                 updateSheetColorSection();
