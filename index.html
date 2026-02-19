@@ -821,86 +821,15 @@
             font-family: inherit; transition: opacity .15s;
         }
         .sf-btn-secondary:active { opacity: .6; }
-        /* ═══════════════════════════════════
-           ZOOM LUXE OVERLAY
-           ═══════════════════════════════════ */
-        .shirt-zoom-overlay {
-            position: fixed; inset: 0; z-index: 6000;
-            display: flex; align-items: center; justify-content: center;
-            background: rgba(0,0,0,0);
-            backdrop-filter: blur(0px); -webkit-backdrop-filter: blur(0px);
-            pointer-events: none;
-            transition: background 0.38s ease,
-                        backdrop-filter 0.38s ease,
-                        -webkit-backdrop-filter 0.38s ease;
+        /* Zoom léger au survol — style Apple */
+        .svg-box svg, .svg-view .logo-zone {
+            transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform;
         }
-        .shirt-zoom-overlay.on {
-            background: rgba(8,8,12,0.74);
-            backdrop-filter: blur(22px) saturate(160%);
-            -webkit-backdrop-filter: blur(22px) saturate(160%);
-            pointer-events: auto;
+        .shirt-col:hover .svg-box svg,
+        .shirt-col:hover .svg-view .logo-zone {
+            transform: scale(1.06);
         }
-        .shirt-zoom-card {
-            width: min(78vw, 310px);
-            background: rgba(255,255,255,0.055);
-            border: 0.5px solid rgba(255,255,255,0.13);
-            border-radius: 32px;
-            padding: 22px 22px 26px;
-            box-shadow:
-                0 48px 96px rgba(0,0,0,0.6),
-                0 0 0 0.5px rgba(255,255,255,0.04) inset,
-                0 1px 0 rgba(255,255,255,0.09) inset;
-            transform: scale(0.80) translateY(32px);
-            opacity: 0;
-            transition: transform 0.52s cubic-bezier(0.34,1.56,0.64,1),
-                        opacity 0.32s ease;
-            will-change: transform, opacity;
-        }
-        .shirt-zoom-overlay.on .shirt-zoom-card {
-            transform: scale(1) translateY(0);
-            opacity: 1;
-        }
-        .shirt-zoom-label {
-            font-size: 9.5px; font-weight: 800;
-            letter-spacing: 0.26em; text-transform: uppercase;
-            color: rgba(212,180,120,0.82);
-            text-align: center; margin-bottom: 16px;
-        }
-        .shirt-zoom-view {
-            position: relative; width: 100%;
-            aspect-ratio: 5/6; overflow: hidden;
-            pointer-events: none;
-        }
-        .shirt-zoom-view .svg-box {
-            position: absolute; inset: 0;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .shirt-zoom-view .svg-box svg {
-            height: 100%; width: auto; max-width: 100%;
-            filter: drop-shadow(0 14px 44px rgba(0,0,0,0.52));
-        }
-        .shirt-zoom-view .logo-zone { pointer-events: none; }
-        .shirt-zoom-view .logo-tap-overlay { display: none !important; }
-        .shirt-zoom-view .logo-frame { display: none !important; }
-        .shirt-zoom-hint {
-            font-size: 9px; color: rgba(255,255,255,0.2);
-            text-align: center; margin-top: 14px;
-            letter-spacing: 0.14em; text-transform: uppercase;
-        }
-        /* Bouton loupe sur chaque shirt */
-        .shirt-zoom-btn {
-            position: absolute; bottom: 7px; right: 7px; z-index: 20;
-            width: 28px; height: 28px;
-            background: rgba(255,255,255,0.82);
-            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-            border: none; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.13);
-            transition: transform 0.14s, background 0.14s;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .shirt-zoom-btn:active { transform: scale(0.88); background: white; }
     </style>
 </head>
 <body>
@@ -990,9 +919,6 @@
                     <p class="shirt-side-label">Avant</p>
                     <div class="svg-view" id="svgViewFront">
                         <div class="svg-box" id="svgBoxFront"></div>
-                        <button class="shirt-zoom-btn" onclick="showZoom('front')" title="Zoom">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
-                        </button>
                         <div class="logo-tap-overlay logo-tap-front" id="logoTapFront">
                             <div class="logo-tap-pip">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
@@ -1011,9 +937,6 @@
                     <p class="shirt-side-label">Arrière</p>
                     <div class="svg-view" id="svgViewBack">
                         <div class="svg-box" id="svgBoxBack"></div>
-                        <button class="shirt-zoom-btn" onclick="showZoom('back')" title="Zoom">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
-                        </button>
                         <div class="logo-tap-overlay logo-tap-back" id="logoTapBack">
                             <div class="logo-tap-pip">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
@@ -1145,17 +1068,6 @@
         <p id="sfClientName" style="font-size:15px;color:#3A3A3C;margin:0 0 30px;font-weight:500;"></p>
         <button id="sfFicheBtn" class="sf-btn-primary">Voir la fiche atelier &rsaquo;</button>
         <button class="sf-btn-secondary" onclick="location.reload()">Nouvelle commande</button>
-    </div>
-</div>
-
-<!-- ═══════════════════════════════════════════
-     ZOOM LUXE (hover souris / long-press tactile)
-════════════════════════════════════════════ -->
-<div class="shirt-zoom-overlay" id="shirtZoomOverlay">
-    <div class="shirt-zoom-card" id="shirtZoomCard">
-        <div class="shirt-zoom-label" id="shirtZoomLabel">— Avant —</div>
-        <div class="shirt-zoom-view" id="shirtZoomView"></div>
-        <div class="shirt-zoom-hint">Toucher en dehors pour fermer</div>
     </div>
 </div>
 
@@ -2229,28 +2141,6 @@ window.submit = async function() {
     }
 };
 
-/* ══════════════════════════════════════
-   ZOOM LUXE — bouton loupe discret
-   ══════════════════════════════════════ */
-window.showZoom = function(side) {
-    const src = document.getElementById(side === 'front' ? 'svgViewFront' : 'svgViewBack');
-    if (!src) return;
-    const clone = src.cloneNode(true);
-    clone.querySelectorAll('.logo-tap-overlay, .logo-float-bar, .logo-frame, .shirt-zoom-btn').forEach(e => e.remove());
-    clone.querySelectorAll('.logo-zone.empty').forEach(e => { e.style.display = 'none'; });
-    clone.removeAttribute('id');
-    clone.style.cssText = 'position:relative;width:100%;aspect-ratio:5/6;overflow:hidden;';
-    document.getElementById('shirtZoomLabel').textContent = side === 'front' ? '— Avant —' : '— Arrière —';
-    const v = document.getElementById('shirtZoomView');
-    v.innerHTML = '';
-    v.appendChild(clone);
-    document.getElementById('shirtZoomOverlay').classList.add('on');
-};
-window.hideZoom = function() {
-    document.getElementById('shirtZoomOverlay').classList.remove('on');
-};
-document.getElementById('shirtZoomOverlay').addEventListener('click', window.hideZoom);
-document.getElementById('shirtZoomCard').addEventListener('click', e => e.stopPropagation());
 
 })();
 </script>
