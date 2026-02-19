@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Studio Olda</title>
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/svg+xml" href="olda-icon.svg">
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Studio Olda">
+    <meta name="theme-color" content="#1D1D1F">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
     tailwind.config = { theme: { extend: { fontFamily: { sans: ['-apple-system','BlinkMacSystemFont','SF Pro Display','SF Pro Text','Helvetica Neue','Helvetica','Arial','sans-serif'] } } } }
@@ -339,7 +347,7 @@
         /* Position cœur pour l'avant (poitrine gauche du porteur = droite de l'image) */
         .logo-tap-front .logo-tap-pip { left: 66.5%; top: 28%; }
         /* Arrière décalé */
-        .logo-tap-back  .logo-tap-pip { left: 47.5%; top: 31%; }
+        .logo-tap-back  .logo-tap-pip { left: 48.8%; top: 31%; }
 
         .logo-tap-overlay:active .logo-tap-pip {
             background: rgba(0,122,255,0.22);
@@ -892,7 +900,7 @@
                             </div>
                         </div>
                         <div class="logo-zone empty" id="logoZoneBack" data-side="back"
-                             style="left:50%;top:31%;width:56.7%;height:37.8%;">
+                             style="left:48.8%;top:31%;width:56.7%;height:37.8%;">
                             <div class="logo-inner" id="logoInnerBack"></div>
                             <div class="logo-frame"></div>
                         </div>
@@ -1110,7 +1118,7 @@ let svgB  = null;
 /* Per-side logo state (J: Logo Avant, K: Logo Arriere) — logoColor per side */
 const logos = {
     front: { data: null, x: 62.5, y: 31, w: 21, h: 14, logoColor: '#1A1A1A' },
-    back:  { data: null, x: 50,   y: 31, w: 56.7, h: 37.8, logoColor: '#1A1A1A' }
+    back:  { data: null, x: 48.8, y: 31, w: 56.7, h: 37.8, logoColor: '#1A1A1A' }
 };
 function cl() { return logos[side]; }
 
@@ -1705,7 +1713,7 @@ window.onUpload = function(e) {
         document.getElementById('upThumb').src = ev.target.result;
         document.getElementById('upName').textContent = f.name;
         document.getElementById('upPill').classList.add('show');
-        cur.x = side === 'front' ? 62.5 : 50;
+        cur.x = side === 'front' ? 62.5 : 48.8;
         cur.y = 31;
         cur.w = side === 'front' ? 21 : 56.7;
         cur.h = side === 'front' ? 14 : 37.8;
@@ -1777,7 +1785,7 @@ function buildSheetLogoGrid() {
             thumb.appendChild(nameEl);
             thumb.addEventListener('click', () => {
                 cur.data = { type: 'atelier', id: l.id, s: l.s };
-                cur.x = _sheetSide === 'front' ? 62.5 : 50;
+                cur.x = _sheetSide === 'front' ? 62.5 : 48.8;
                 cur.y = 31;
                 cur.w = _sheetSide === 'front' ? 21 : 56.7;
                 cur.h = _sheetSide === 'front' ? 14 : 37.8;
