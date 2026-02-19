@@ -482,6 +482,7 @@
             <div class="fiche-header-right">
                 <span class="badge" id="fBadge"></span>
                 <p class="fiche-date" id="fDate"></p>
+                <p class="fiche-date" id="fDeadline" style="display:none;color:var(--accent,#007AFF);font-weight:700;"></p>
             </div>
         </div>
 
@@ -526,7 +527,7 @@
                 <span class="detail-value" id="fLogoArriere"></span>
             </div>
             <div class="detail-row" id="fLogoArMmRow" style="display:none">
-                <span class="detail-label">Largeur logo Ar</span>
+                <span class="detail-label">Côte logo Ar</span>
                 <span class="detail-value" id="fLogoArMm"></span>
             </div>
         </div>
@@ -724,8 +725,14 @@ function renderFicheDetail(f) {
 
     var arMmRow = document.getElementById('fLogoArMmRow');
     var arMmEl  = document.getElementById('fLogoArMm');
-    if (arMmRow) arMmRow.style.display = f.largeurLogoAr ? '' : 'none';
-    if (arMmEl && f.largeurLogoAr) arMmEl.textContent = f.largeurLogoAr + ' mm';
+    if (arMmRow) arMmRow.style.display = f.coteLogoAr ? '' : 'none';
+    if (arMmEl && f.coteLogoAr) arMmEl.textContent = f.coteLogoAr + ' mm';
+
+    var deadlineEl = document.getElementById('fDeadline');
+    if (deadlineEl) {
+        if (f.deadline) { deadlineEl.textContent = '⏱ ' + f.deadline; deadlineEl.style.display = ''; }
+        else { deadlineEl.style.display = 'none'; }
+    }
 
     /* Note */
     var noteSection = document.getElementById('fNoteSection');

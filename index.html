@@ -894,6 +894,14 @@
                            placeholder="0690 00 00 00">
                 </div>
 
+                <!-- DEADLINE — une ligne -->
+                <div class="flex items-center py-3">
+                    <span class="w-20 shrink-0 text-[12px] font-black text-gray-300 uppercase tracking-[0.18em]">DEADLINE</span>
+                    <input type="text" id="clientDeadline"
+                           class="flex-1 bg-transparent text-[17px] font-semibold text-gray-900 tracking-tight placeholder:text-gray-300 placeholder:font-normal outline-none border-0 focus:ring-0"
+                           placeholder="ex : 25/02">
+                </div>
+
             </div>
         </div>
 
@@ -950,8 +958,15 @@
                             <div class="logo-frame"></div>
                         </div>
                     </div>
-                    <!-- Largeur logo arrière en mm (H-001 uniquement) -->
-                    <div id="logoMmInfo" class="text-center mt-1 text-[11px] font-semibold" style="color:var(--accent);min-height:16px;letter-spacing:0.01em;" onclick="event.stopPropagation()"></div>
+                    <!-- Côte logo arrière — saisie manuelle (H-001 : auto) -->
+                    <div class="flex items-center justify-center gap-1 mt-1" onclick="event.stopPropagation()">
+                        <input type="text" inputmode="numeric" id="coteLogoAr"
+                               class="w-14 text-center text-[11px] font-bold bg-transparent outline-none"
+                               style="color:var(--accent);border-bottom:1.5px solid var(--accent);"
+                               placeholder="— mm"
+                               onclick="event.stopPropagation()">
+                        <span class="text-[11px] font-semibold" style="color:var(--accent)">mm</span>
+                    </div>
                 </div>
 
             </div><!-- /shirts-grid -->
@@ -1565,14 +1580,13 @@ window.buildRefs = function() {
    LARGEUR LOGO EN MM
    ══════════════════════════════════════ */
 function updateLogoMmDisplay() {
-    const el = document.getElementById('logoMmInfo');
-    if (!el) return;
+    const input = document.getElementById('coteLogoAr');
+    if (!input) return;
     const refVal  = selects['selRef']  ? selects['selRef'].value  : '';
     const sizeVal = selects['selSize'] ? selects['selSize'].value : '';
     const refData = REFERENCES[refVal];
     const logoArW = refData && refData.largeurs ? refData.largeurs[sizeVal] : null;
-    if (!logoArW) { el.innerHTML = ''; return; }
-    el.innerHTML = `Logo Ar <strong>${logoArW}&thinsp;mm</strong>`;
+    if (logoArW) input.value = logoArW;   // pré-remplit ; ne vide pas si saisie manuelle
 }
 
 /* ══════════════════════════════════════
@@ -2160,13 +2174,14 @@ window.submit = async function() {
 
     /* ── Build fiche data ── */
     const ATELIER_URL = 'https://ficheatelier.pages.dev/ficheatelier-index.html';
-    const _refData = REFERENCES[refVal];
-    const largeurLogoAr = (_refData && _refData.largeurs && sizeVal) ? (_refData.largeurs[sizeVal] || '') : '';
+    const coteLogoAr = (document.getElementById('coteLogoAr')?.value || '').trim();
+    const deadline   = (document.getElementById('clientDeadline')?.value || '').trim();
     const ficheBase = {
         commande          : payload.commande,
         date              : payload.date,
         nom               : payload.nom,
         telephone         : payload.telephone,
+        deadline          : deadline,
         collection        : payload.collection,
         reference         : payload.reference,
         taille            : payload.taille,
@@ -2175,7 +2190,7 @@ window.submit = async function() {
         logoArriere       : payload.logoArriere,
         couleurLogoAvant  : payload.couleurLogoAvant,
         couleurLogoArriere: payload.couleurLogoArriere,
-        largeurLogoAr     : largeurLogoAr,
+        coteLogoAr        : coteLogoAr,
         note              : payload.note,
         prix              : { tshirt: payload.prixTshirt, personnalisation: payload.personnalisation, total: payload.total },
         paiement          : { statut: payload.paye }
