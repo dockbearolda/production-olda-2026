@@ -359,7 +359,7 @@
         /* Position cœur pour l'avant (poitrine gauche du porteur = droite de l'image) */
         .logo-tap-front .logo-tap-pip { left: 66.5%; top: 28%; }
         /* Arrière décalé */
-        .logo-tap-back  .logo-tap-pip { left: 48.1%; top: 31%; }
+        .logo-tap-back  .logo-tap-pip { left: 47.9%; top: 31%; }
 
         .logo-tap-overlay:active .logo-tap-pip {
             background: rgba(0,122,255,0.22);
@@ -934,7 +934,7 @@
                             </div>
                         </div>
                         <div class="logo-zone empty" id="logoZoneBack" data-side="back"
-                             style="left:48.1%;top:31%;width:67.2%;height:44.8%;">
+                             style="left:47.9%;top:31%;width:67.2%;height:44.8%;">
                             <div class="logo-inner" id="logoInnerBack"></div>
                             <div class="logo-frame"></div>
                         </div>
@@ -1228,7 +1228,7 @@ let svgB  = null;
 /* Per-side logo state (J: Logo Avant, K: Logo Arriere) — logoColor per side */
 const logos = {
     front: { data: null, x: 66.5, y: 28, w: 18.9, h: 12.6, logoColor: '#1A1A1A' },
-    back:  { data: null, x: 48.1, y: 31, w: 67.2, h: 44.8, logoColor: '#1A1A1A' }
+    back:  { data: null, x: 47.9, y: 31, w: 67.2, h: 44.8, logoColor: '#1A1A1A' }
 };
 function cl() { return logos[side]; }
 
@@ -1845,7 +1845,7 @@ window.onUpload = function(e) {
         document.getElementById('upThumb').src = ev.target.result;
         document.getElementById('upName').textContent = f.name;
         document.getElementById('upPill').classList.add('show');
-        cur.x = side === 'front' ? 66.5 : 48.1;
+        cur.x = side === 'front' ? 66.5 : 47.9;
         cur.y = side === 'front' ? 28 : 31;
         cur.w = side === 'front' ? 18.9 : 67.2;
         cur.h = side === 'front' ? 12.6 : 44.8;
@@ -1917,7 +1917,7 @@ function buildSheetLogoGrid() {
             thumb.appendChild(nameEl);
             thumb.addEventListener('click', () => {
                 cur.data = { type: 'atelier', id: l.id, s: l.s };
-                cur.x = _sheetSide === 'front' ? 66.5 : 48.1;
+                cur.x = _sheetSide === 'front' ? 66.5 : 47.9;
                 cur.y = _sheetSide === 'front' ? 28 : 31;
                 cur.w = _sheetSide === 'front' ? 18.9 : 67.2;
                 cur.h = _sheetSide === 'front' ? 12.6 : 44.8;
