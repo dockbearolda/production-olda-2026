@@ -472,6 +472,29 @@
             background: rgba(0,122,255,0.1);
             display: flex; align-items: center; justify-content: center; flex-shrink: 0;
         }
+        /* ═══════════════════════════════════
+           PASTILLES COULEUR T-SHIRT (Apple-style)
+           ═══════════════════════════════════ */
+        .color-dots-bar {
+            display: flex; justify-content: center; gap: 8px;
+            margin-top: 10px; flex-wrap: wrap;
+        }
+        .color-dot {
+            width: 18px; height: 18px; border-radius: 50%;
+            cursor: pointer; position: relative;
+            box-shadow: inset 0 0 0 0.5px rgba(0,0,0,0.15);
+            transition: transform 0.18s ease;
+            border: none; padding: 0; outline: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .color-dot::after {
+            content: ''; position: absolute; inset: -3px;
+            border-radius: 50%; border: 1.5px solid transparent;
+            transition: border-color 0.18s ease;
+        }
+        .color-dot.on { transform: scale(0.85); }
+        .color-dot.on::after { border-color: var(--accent); }
+
         .lsheet-color-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
         .lsheet-color-dot {
             width: 30px; height: 30px; border-radius: 50%;
@@ -915,7 +938,9 @@
             </div>
 
 
-            <p class="text-center mt-3 text-[13px] font-semibold" style="color:var(--text-2)" id="colorName">Blanc</p>
+            <!-- Pastilles couleur Apple-style -->
+            <div class="color-dots-bar" id="colorDotsBar"></div>
+            <p class="text-center mt-1.5 text-[12px]" style="color:var(--text-2)" id="colorName">Blanc</p>
         </div>
 
         <!-- Collection -->
@@ -936,11 +961,6 @@
             <div class="aselect" id="selSize"></div>
         </div>
 
-        <!-- Couleur du t-shirt -->
-        <div class="card p-5">
-            <label class="label ml-1 mb-2 block">Couleur du t-shirt</label>
-            <div class="aselect" id="selColor"></div>
-        </div>
 
         <!-- Note -->
         <div class="card p-5">
@@ -1239,6 +1259,24 @@ function colorDotHtml(hex, name) {
     return '<div style="display:flex;align-items:center;gap:10px;pointer-events:none;"><div style="width:22px;height:22px;border-radius:50%;background:' + hex + ';box-shadow:inset 0 0 0 0.5px rgba(0,0,0,0.12);flex-shrink:0;"></div><span>' + name + '</span></div>';
 }
 
+function initColorDots() {
+    const bar = document.getElementById('colorDotsBar');
+    if (!bar) return;
+    COLORS.forEach((c, i) => {
+        const dot = document.createElement('button');
+        dot.className = 'color-dot' + (i === 0 ? ' on' : '');
+        dot.style.background = c.h;
+        dot.setAttribute('aria-label', c.n);
+        dot.addEventListener('click', () => {
+            color = c;
+            renderSVG();
+            bar.querySelectorAll('.color-dot').forEach(d => d.classList.remove('on'));
+            dot.classList.add('on');
+        });
+        bar.appendChild(dot);
+    });
+}
+
 function createRichSelect(containerId, options, placeholder, onChange) {
     const container = document.getElementById(containerId);
     if (!container) return null;
@@ -1311,16 +1349,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.querySelector('#selSize .aselect-trigger').textContent = 'S';
     document.querySelector('#selSize .aselect-trigger').classList.remove('placeholder');
 
-    // Color dropdown (replaces swatches)
-    createRichSelect('selColor',
-        COLORS.map(c => ({ v: c.h, l: c.n, html: colorDotHtml(c.h, c.n), trigger: colorDotHtml(c.h, c.n) })),
-        'Couleur',
-        (val) => {
-            const c = COLORS.find(x => x.h === val);
-            if (c) { color = c; renderSVG(); }
-        }
-    );
-    selects['selColor'].setValue(COLORS[0].h);
+    // Color dots (Apple-style pastilles)
+    initColorDots();
 
     // Logo interaction — géré directement depuis le t-shirt (bottom sheet)
 
