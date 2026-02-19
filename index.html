@@ -2003,9 +2003,9 @@ window.submit = async function() {
     var mockupFront = await captureMockup(svgF, logos.front, color.h, 220, 264, 0.48);
     var mockupBack  = await captureMockup(svgB, logos.back,  color.h, 220, 264, 0.48);
 
-    /* ── Build fiche URL (~150 Ko avec images compressées) ── */
+    /* ── Build fiche data ── */
     const ATELIER_URL = 'https://ficheatelier.pages.dev';
-    const ficheData = {
+    const ficheBase = {
         commande          : payload.commande,
         date              : payload.date,
         nom               : payload.nom,
@@ -2020,17 +2020,20 @@ window.submit = async function() {
         couleurLogoArriere: payload.couleurLogoArriere,
         note              : payload.note,
         prix              : { tshirt: payload.prixTshirt, personnalisation: payload.personnalisation, total: payload.total },
-        paiement          : { statut: payload.paye },
-        mockupFront       : mockupFront,
-        mockupBack        : mockupBack
+        paiement          : { statut: payload.paye }
     };
-    const ficheURL = ATELIER_URL + '#' + btoa(unescape(encodeURIComponent(JSON.stringify(ficheData))));
 
-    /* URL complète avec mockups — setLinkUrl (RichText) n'a pas de limite de formule */
-    payload.fiche = ficheURL;
+    /* URL légère (sans mockups, ~2 Ko) pour Google Sheets — évite le dépassement de taille POST */
+    var ficheLite = ATELIER_URL + '#' + btoa(unescape(encodeURIComponent(JSON.stringify(ficheBase))));
+    payload.fiche = ficheLite;
 
     /* ── Envoi Google Sheets (best-effort, non-bloquant) ── */
     fetch(API, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }).catch(() => {});
+
+    /* URL complète avec mockups (~150 Ko) pour le bouton local « Voir fiche » */
+    var ficheURL = ATELIER_URL + '#' + btoa(unescape(encodeURIComponent(JSON.stringify(
+        Object.assign({}, ficheBase, { mockupFront: mockupFront, mockupBack: mockupBack })
+    ))));
 
     /* ── Apple success overlay ── */
     const overlay = document.getElementById('successOverlay');
