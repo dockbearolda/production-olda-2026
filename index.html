@@ -2092,9 +2092,9 @@ window.submit = async function() {
         paye              : payStatus === 'oui' ? 'OUI' : 'NON'
     };
 
-    /* ── Capture mockups réduits (220×264, JPEG 0.48) pour la fiche atelier ── */
-    var mockupFront = await captureMockup(svgF, logos.front, color.h, 220, 264, 0.48);
-    var mockupBack  = await captureMockup(svgB, logos.back,  color.h, 220, 264, 0.48);
+    /* ── Capture mockups haute qualité (480×576, JPEG 0.90) pour la fiche atelier ── */
+    var mockupFront = await captureMockup(svgF, logos.front, color.h, 480, 576, 0.90);
+    var mockupBack  = await captureMockup(svgB, logos.back,  color.h, 480, 576, 0.90);
 
     /* ── Build fiche data ── */
     const ATELIER_URL = 'https://ficheatelier.pages.dev';
