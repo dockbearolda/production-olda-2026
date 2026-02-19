@@ -1230,7 +1230,7 @@ const LOGOS = {
         {id:'cor-3',n:'Crest',s:`<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><ellipse cx="60" cy="58" rx="42" ry="45" stroke="#1A1A1A" stroke-width="2" fill="none"/><ellipse cx="60" cy="58" rx="35" ry="38" stroke="#1A1A1A" stroke-width="1" fill="none" opacity="0.3"/><text x="60" y="55" text-anchor="middle" font-family="Georgia,serif" font-size="22" font-weight="700" font-style="italic" fill="#1A1A1A">Cor</text><text x="60" y="72" text-anchor="middle" font-size="8" font-weight="600" fill="#1A1A1A" letter-spacing="5" font-family="sans-serif">PREMIERE</text><circle cx="60" cy="85" r="3" fill="#1A1A1A"/></svg>`}
     ],
     pay:[
-        {id:'pay-01',n:'Paysage 01',url:'pay01.svg'}
+        {id:'pay-01',n:'Paysage 01',url:'pay01.svg',back:{x:47.9,y:51,w:63.84,h:42.56}}
     ]
 };
 
@@ -1950,10 +1950,15 @@ function buildSheetLogoGrid() {
                 } else {
                     cur.data = { type: 'atelier', id: l.id, s: l.s };
                 }
-                cur.x = _sheetSide === 'front' ? 66.5 : 47.9;
-                cur.y = _sheetSide === 'front' ? 28 : 31;
-                cur.w = _sheetSide === 'front' ? 18.9 : 67.2;
-                cur.h = _sheetSide === 'front' ? 12.6 : 44.8;
+                if (_sheetSide === 'back' && l.back) {
+                    cur.x = l.back.x; cur.y = l.back.y;
+                    cur.w = l.back.w; cur.h = l.back.h;
+                } else {
+                    cur.x = _sheetSide === 'front' ? 66.5 : 47.9;
+                    cur.y = _sheetSide === 'front' ? 28 : 31;
+                    cur.w = _sheetSide === 'front' ? 18.9 : 67.2;
+                    cur.h = _sheetSide === 'front' ? 12.6 : 44.8;
+                }
                 renderLogo();
                 updateSheetColorSection();
                 buildSheetLogoGrid();
