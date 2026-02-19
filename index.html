@@ -1301,7 +1301,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         'Couleur',
         (val) => {
             const c = COLORS.find(x => x.h === val);
-            if (c) { color = c; const g = document.getElementById('shirtsGrid'); g.style.opacity='0'; g.style.transform='scale(0.97)'; g.style.transition='opacity 0.18s,transform 0.18s'; setTimeout(() => { renderSVG(); g.style.opacity=''; g.style.transform=''; }, 180); }
+            if (c) { color = c; renderSVG(); }
         }
     );
     selects['selColor'].setValue(COLORS[0].h);
