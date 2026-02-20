@@ -38,7 +38,8 @@
 
         * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; margin: 0; }
         input, select, textarea { -webkit-appearance: none; -moz-appearance: none; appearance: none; border-radius: 0; }
-        input[type="date"] { -webkit-appearance: textfield; appearance: auto; color: #111827; min-height: 44px; }
+        input[type="date"] { -webkit-appearance: none; appearance: none; color: #111827; }
+        input[type="date"]::-webkit-date-and-time-value { text-align: left; color: #111827; }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -396,27 +397,27 @@
             gap: 8px;
             animation: enterStep 0.2s ease;
         }
-        /* BIO badge — Apple-style */
+        /* BIO badge — discret */
         .bio-badge {
             position: absolute;
-            bottom: 10px;
-            left: 10px;
+            bottom: 7px;
+            left: 7px;
             display: inline-flex;
             align-items: center;
-            gap: 4px;
-            background: #1a8a3c;
-            color: #fff;
-            font-size: 9.5px;
-            font-weight: 700;
-            letter-spacing: 0.04em;
-            padding: 4px 9px 4px 7px;
-            border-radius: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.22);
+            gap: 3px;
+            background: rgba(34,139,34,0.13);
+            color: #1a6b32;
+            font-size: 8px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            padding: 2px 6px 2px 5px;
+            border-radius: 12px;
+            border: 0.5px solid rgba(34,139,34,0.28);
             pointer-events: none;
             z-index: 20;
             opacity: 0;
-            transform: scale(0.8);
-            transition: opacity 0.22s cubic-bezier(.4,0,.2,1), transform 0.22s cubic-bezier(.4,0,.2,1);
+            transform: scale(0.85);
+            transition: opacity 0.2s ease, transform 0.2s ease;
         }
         .bio-badge.visible { opacity: 1; transform: scale(1); }
         .bio-badge svg { flex-shrink: 0; }
