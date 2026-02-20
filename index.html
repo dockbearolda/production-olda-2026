@@ -1210,6 +1210,10 @@
    ══════════════════════════════════════ */
 const API = "https://script.google.com/macros/s/AKfycbyzeU0tD22L8wZ94PW0f4s1a2LH7fNPhK74RtjcIXs0pWAP59anDV8EYtYlP8WX5iCk/exec";
 
+/* ── Dashboard OLDA ── */
+const DASHBOARD_URL   = "https://dashboardolda.pages.dev";
+const DASHBOARD_TOKEN = "VOTRE_TOKEN_ICI"; // ⚠️ Remplacer par le vrai token avant déploiement
+
 const COLORS = [
     /* ── Basiques (les + commandés) ── */
     {n:'Blanc',              h:'#FFFFFF'},
@@ -2195,6 +2199,77 @@ async function captureMockup(shirtSvg, sideData, fabricHex, W, H, Q) {
 }
 
 /* ══════════════════════════════════════
+   DASHBOARD CALLBACK (après validation)
+   ══════════════════════════════════════ */
+
+/**
+ * Envoie les données de la commande validée vers le Dashboard OLDA.
+ * Appelée en best-effort : une erreur réseau ne bloque pas le flux client.
+ *
+ * @param {Object} orderPayload  – objet payload complet de la commande
+ */
+async function sendOrderToDashboard(orderPayload) {
+    /* ── Construire un objet JSON propre ── */
+    const orderData = {
+        commande          : orderPayload.commande,
+        date              : orderPayload.date,
+        nom               : orderPayload.nom,
+        telephone         : orderPayload.telephone,
+        collection        : orderPayload.collection,
+        reference         : orderPayload.reference,
+        taille            : orderPayload.taille,
+        couleurTshirt     : orderPayload.couleurTshirt,
+        couleurTshirtHex  : orderPayload.couleurTshirtHex,
+        logoAvant         : orderPayload.logoAvant,
+        logoArriere       : orderPayload.logoArriere,
+        couleurLogoAvant  : orderPayload.couleurLogoAvant,
+        couleurLogoArriere: orderPayload.couleurLogoArriere,
+        note              : orderPayload.note,
+        prix              : {
+            tshirt          : orderPayload.prixTshirt,
+            personnalisation: orderPayload.personnalisation,
+            total           : orderPayload.total
+        },
+        paiement          : { statut: orderPayload.paye },
+        fiche             : orderPayload.fiche || '',
+        source            : 'site-client',
+        timestamp         : new Date().toISOString()
+    };
+
+    try {
+        /* ── Requête POST vers le Dashboard ── */
+        const response = await fetch(DASHBOARD_URL + '/api/orders', {
+            method : 'POST',
+            headers: {
+                'Content-Type' : 'application/json',
+                'Authorization': 'Bearer ' + DASHBOARD_TOKEN
+            },
+            body: JSON.stringify(orderData)
+        });
+
+        if (!response.ok) {
+            /* Le dashboard a répondu mais avec une erreur HTTP */
+            console.error('[OLDA Dashboard] Réponse non-OK — statut:', response.status, response.statusText);
+        } else {
+            console.info('[OLDA Dashboard] Commande envoyée avec succès:', orderData.commande);
+        }
+    } catch (err) {
+        /* ── Dashboard inaccessible : logger localement, ne jamais bloquer l'UX ── */
+        console.error('[OLDA Dashboard] Envoi échoué (dashboard inaccessible):', err.message);
+
+        /* Sauvegarde locale des commandes en attente d'envoi */
+        try {
+            var _pending = JSON.parse(localStorage.getItem('olda_pending_dashboard') || '[]');
+            _pending.push(Object.assign({}, orderData, { _failedAt: new Date().toISOString() }));
+            localStorage.setItem('olda_pending_dashboard', JSON.stringify(_pending));
+            console.warn('[OLDA Dashboard] Commande mise en file locale (olda_pending_dashboard).');
+        } catch (storageErr) {
+            console.warn('[OLDA Dashboard] Impossible de sauvegarder localement:', storageErr.message);
+        }
+    }
+}
+
+/* ══════════════════════════════════════
    SUBMIT  (A-Q payload)
    ══════════════════════════════════════ */
 window.submit = async function() {
@@ -2280,6 +2355,9 @@ window.submit = async function() {
 
     /* ── Envoi Google Sheets (best-effort, non-bloquant) ── */
     fetch(API, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }).catch(() => {});
+
+    /* ── Envoi Dashboard OLDA (best-effort, non-bloquant) ── */
+    sendOrderToDashboard(payload).catch(e => console.error('[OLDA Dashboard] Erreur inattendue:', e));
 
     /* ── Sauvegarde fiche OBLIGATOIRE dans ficheatelier (triple mécanisme) ── */
     var ficheSaved = false;
