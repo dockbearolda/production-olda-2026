@@ -2363,9 +2363,20 @@ window.submit = async function() {
     /* ── Création automatique de la fiche sur le Dashboard OLDA ── */
     sendOrderToDashboard(payload, ficheComplete).catch(e => console.error('[OLDA Dashboard] Erreur inattendue:', e));
 
-    /* ── Bouton fiche → Dashboard OLDA ── */
+    /* ── Sauvegarde locale pour la fiche récapitulative ── */
+    try {
+        var ficheKey = ficheComplete.commande || ('cmd-' + Date.now());
+        var allFiches = JSON.parse(localStorage.getItem('olda_fiches') || '{}');
+        if (!ficheComplete.status) ficheComplete.status = 'en-attente';
+        allFiches[ficheKey] = ficheComplete;
+        localStorage.setItem('olda_fiches', JSON.stringify(allFiches));
+    } catch(ficheErr) {
+        console.warn('[OLDA Fiche] Erreur sauvegarde locale:', ficheErr.message);
+    }
+
+    /* ── Bouton fiche → fiche récapitulative ── */
     const ficheLink = document.getElementById('sfFicheBtn');
-    ficheLink.href = DASHBOARD_URL;
+    ficheLink.href = 'fiche.html#' + (ficheComplete.commande || '');
     ficheLink.textContent = 'Voir la fiche récapitulative ›';
 
     /* ── Success overlay ── */
