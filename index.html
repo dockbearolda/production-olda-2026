@@ -868,6 +868,7 @@
             animation: sfCheckDraw .5s .25s cubic-bezier(.4,0,.2,1) forwards;
         }
         .sf-btn-primary {
+            display: block; text-decoration: none; text-align: center;
             width: 100%; background: #007AFF; color: #fff;
             border: none; border-radius: 14px; padding: 16px;
             font-size: 16px; font-weight: 600; cursor: pointer;
@@ -1147,7 +1148,7 @@
         <p style="font-size:24px;font-weight:700;color:#1A1A1A;margin:0 0 6px;letter-spacing:-.4px;">Commande envoyée</p>
         <p id="sfOrderNo" style="font-size:13px;color:#8E8E93;margin:0 0 10px;letter-spacing:.3px;font-weight:300;"></p>
         <p id="sfClientName" style="font-size:15px;color:#3A3A3C;margin:0 0 30px;font-weight:500;"></p>
-        <button id="sfFicheBtn" class="sf-btn-primary">Voir la fiche atelier &rsaquo;</button>
+        <a id="sfFicheBtn" class="sf-btn-primary" target="_blank" rel="noopener">Voir la fiche atelier ›</a>
         <button class="sf-btn-secondary" onclick="location.reload()">Nouvelle commande</button>
     </div>
 </div>
@@ -2264,15 +2265,18 @@ window.submit = function() {
     /* ── Envoi Google Sheets (best-effort, non-bloquant) ── */
     fetch(API, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }).catch(() => {});
 
-    /* ── Ouverture automatique de la fiche (synchrone = jamais bloquée par iOS) ── */
-    window.open(ficheURL, '_blank');
+    /* ── Ouverture automatique (via <a> natif — jamais bloquée par iOS/Samsung/Chrome) ── */
+    const ficheLink = document.getElementById('sfFicheBtn');
+    ficheLink.href = ficheURL;
 
     /* ── Success overlay ── */
     const overlay = document.getElementById('successOverlay');
     document.getElementById('sfOrderNo').textContent    = payload.commande;
     document.getElementById('sfClientName').textContent = payload.nom || '';
-    document.getElementById('sfFicheBtn').onclick = () => window.open(ficheURL, '_blank');
     overlay.classList.add('sf-on');
+
+    /* Déclenche l'ouverture — appel synchrone depuis geste utilisateur, jamais bloqué ── */
+    ficheLink.click();
 
     /* ── Capture mockups en arrière-plan (best-effort, ne bloque pas la fiche) ── */
     (async () => {
@@ -2283,7 +2287,8 @@ window.submit = function() {
                 Object.assign({}, ficheBase, { mockupFront: mF, mockupBack: mB })
             ))));
             /* Mettre à jour le bouton overlay avec la version complète (mockups inclus) */
-            document.getElementById('sfFicheBtn').onclick = () => window.open(ficheWithMockups, '_blank');
+            /* Met à jour le lien avec la version complète (mockups inclus) */
+            document.getElementById('sfFicheBtn').href = ficheWithMockups;
         } catch(e) { /* silencieux — la fiche sans mockup est déjà ouverte */ }
     })();
 
