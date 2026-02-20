@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Olda Studio — Fiche Récapitulative</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300..900;1,14..32,300..900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+            background: #000; color: #fff;
+            -webkit-font-smoothing: antialiased;
+            margin: 0; padding: 20px 16px 40px;
+        }
+
+        /* ── Card principale ── */
+        .fiche-card {
+            background: #141414;
+            border-radius: 28px;
+            border: 1px solid rgba(255,255,255,0.08);
+            max-width: 640px; margin: 0 auto;
+            overflow: hidden;
+            box-shadow: 0 32px 80px rgba(0,0,0,0.7);
+        }
+
+        /* ── Bandeau marque ── */
+        .fiche-brand {
+            background: #0a0a0a;
+            padding: 18px 28px;
+            display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .fiche-brand-logo {
+            font-size: 20px; font-weight: 900; letter-spacing: 6px;
+            text-transform: uppercase; color: #fff;
+        }
+        .fiche-brand-logo span { color: #C9A84C; }
+        .fiche-brand-ref {
+            font-size: 11px; color: #555; font-weight: 700;
+            letter-spacing: 2px; text-transform: uppercase; text-align: right;
+        }
+
+        /* ── Header client ── */
+        .fiche-header {
+            padding: 28px 28px 22px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex; justify-content: space-between; align-items: flex-start;
+        }
+        .fiche-header-left h2 {
+            font-size: 26px; font-weight: 800; letter-spacing: -0.5px;
+            color: #fff; margin: 0 0 6px;
+        }
+        .fiche-header-left p {
+            font-size: 14px; color: #86868b; margin: 0;
+        }
+        .fiche-header-right { text-align: right; }
+        .fiche-header-right .fiche-date {
+            font-size: 12px; color: #555; margin-top: 8px; font-weight: 500;
+        }
+
+        /* ── Badges ── */
+        .badge { padding: 5px 12px; border-radius: 10px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+        .badge-paid { background: rgba(52,199,89,0.15); color: #32D74B; }
+        .badge-unpaid { background: rgba(255,69,58,0.15); color: #FF453A; }
+        .badge-acompte { background: rgba(255,149,0,0.15); color: #FF9F0A; }
+        .bio-tag { display:inline-flex; align-items:center; gap:3px; background:rgba(34,139,34,0.12); color:#1a6b32; font-size:9px; font-weight:700; letter-spacing:0.05em; padding:2px 6px 2px 5px; border-radius:10px; border:0.5px solid rgba(34,139,34,0.25); vertical-align:middle; margin-left:6px; }
+        .ref-desc { font-size:11px; color:#8E8E93; margin-top:2px; }
+
+        /* ── Mockups ── */
+        .fiche-mockups {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 1px; background: rgba(255,255,255,0.04);
+        }
+        .fiche-mockups .mockup-side {
+            background: #0d0d0d; padding: 24px 16px 18px;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .fiche-mockups img {
+            width: 100%; max-width: 240px; height: auto;
+            border-radius: 14px; object-fit: contain;
+        }
+        .fiche-mockups .side-label {
+            margin-top: 10px; font-size: 9px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 3px; color: #444;
+        }
+
+        /* ── Details table ── */
+        .fiche-details { padding: 8px 28px 4px; }
+        .detail-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 13px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        .detail-row:last-child { border-bottom: none; }
+        .detail-label {
+            font-size: 11px; color: #555; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1px; flex-shrink: 0;
+        }
+        .detail-value {
+            font-size: 15px; font-weight: 600; text-align: right;
+            color: #e5e5e5;
+        }
+
+        /* ── Note ── */
+        .fiche-note {
+            margin: 4px 28px 4px; padding: 16px 18px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 14px; border: 1px solid rgba(255,255,255,0.06);
+        }
+        .fiche-note-label {
+            font-size: 9px; color: #555; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px;
+        }
+        .fiche-note p { font-size: 14px; color: #aaa; margin: 0; line-height: 1.5; }
+
+        /* ── Total strip ── */
+        .fiche-total-strip {
+            margin: 16px 28px;
+            background: rgba(201,168,76,0.07);
+            border: 1px solid rgba(201,168,76,0.18);
+            border-radius: 18px; padding: 20px 24px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .fiche-total-left { font-size: 11px; color: #C9A84C; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; }
+        .fiche-total-sub { font-size: 12px; color: #555; margin-top: 4px; }
+        .fiche-total-amount { font-size: 36px; font-weight: 900; color: #fff; letter-spacing: -1px; }
+
+        /* ── Payment badge ── */
+        .fiche-payment {
+            margin: 0 28px 16px; padding: 14px 18px;
+            border-radius: 14px; display: flex; align-items: center; gap: 12px;
+        }
+        .fiche-payment.pay-oui { background: rgba(52,199,89,0.08); border: 1px solid rgba(52,199,89,0.2); }
+        .fiche-payment.pay-non { background: rgba(255,69,58,0.08); border: 1px solid rgba(255,69,58,0.2); }
+        .fiche-payment.pay-acompte { background: rgba(255,149,0,0.08); border: 1px solid rgba(255,149,0,0.2); }
+        .fiche-payment-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+        .pay-oui .fiche-payment-dot { background: #32D74B; box-shadow: 0 0 8px rgba(52,199,89,0.6); }
+        .pay-non .fiche-payment-dot { background: #FF453A; box-shadow: 0 0 8px rgba(255,69,58,0.6); }
+        .pay-acompte .fiche-payment-dot { background: #FF9F0A; box-shadow: 0 0 8px rgba(255,149,0,0.6); }
+        .fiche-payment-label { font-size: 12px; color: #86868b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .fiche-payment-statut { font-size: 16px; font-weight: 800; }
+        .pay-oui  .fiche-payment-statut { color: #32D74B; }
+        .pay-non  .fiche-payment-statut { color: #FF453A; }
+        .pay-acompte .fiche-payment-statut { color: #FF9F0A; }
+
+        /* ── QR code section ── */
+        .fiche-qr-section {
+            margin: 4px 28px 20px;
+            padding: 20px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 18px;
+            display: flex; align-items: center; gap: 20px;
+        }
+        .fiche-qr-box {
+            background: #fff; padding: 8px; border-radius: 10px;
+            flex-shrink: 0; width: 90px; height: 90px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        #ficheQrCode canvas, #ficheQrCode img { border-radius: 6px; }
+        .fiche-qr-title {
+            font-size: 13px; font-weight: 800; color: #fff;
+            letter-spacing: -0.2px; margin-bottom: 4px;
+        }
+        .fiche-qr-sub { font-size: 11px; color: #555; line-height: 1.4; }
+
+        /* ── WhatsApp button ── */
+        .fiche-wa-wrap { padding: 4px 28px 32px; }
+        .btn-wa-fiche {
+            display:flex; align-items:center; justify-content:center; gap:10px;
+            background:#25D366; color:#fff; border:none; border-radius:18px;
+            padding:18px 24px; font-size:17px; font-weight:700; font-family:inherit;
+            width:100%; cursor:pointer; transition:0.18s; letter-spacing:-0.3px;
+        }
+        .btn-wa-fiche:active { transform:scale(0.97); opacity:0.85; }
+
+        /* ── Divider ── */
+        .fiche-divider {
+            height: 1px; background: rgba(255,255,255,0.05);
+            margin: 4px 0;
+        }
+
+        /* ── Color dot ── */
+        .color-dot {
+            display: inline-block; width: 13px; height: 13px; border-radius: 50%;
+            vertical-align: middle; margin-right: 6px;
+            border: 1px solid rgba(255,255,255,0.12);
+        }
+
+        /* ── Back button ── */
+        .btn-back {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(255,255,255,0.08); color: #fff; border: none;
+            border-radius: 14px; padding: 12px 20px; font-weight: 600;
+            font-size: 14px; cursor: pointer; transition: 0.2s; font-family: inherit;
+            backdrop-filter: blur(10px); text-decoration: none;
+        }
+        .btn-back:active { transform: scale(0.96); opacity: 0.8; }
+
+        /* ── Empty state ── */
+        .empty-state {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; min-height: 60vh; color: #3a3a3c;
+        }
+
+        /* ══════════════════════════════════════
+           IMPRESSION
+           ══════════════════════════════════════ */
+        @media print {
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            body { background: #fff !important; color: #000 !important; margin: 0; }
+            .btn-back, .fiche-wa-wrap { display: none !important; }
+
+            .fiche-card {
+                background: #fff !important; color: #000 !important;
+                border-radius: 0 !important; border: none !important;
+                box-shadow: none !important; max-width: 100% !important;
+            }
+            .fiche-brand { background: #000 !important; padding: 14px 28px; }
+            .fiche-brand-logo { color: #fff !important; }
+            .fiche-brand-logo span { color: #C9A84C !important; }
+            .fiche-brand-ref { color: #aaa !important; }
+
+            .fiche-header { border-bottom: 1px solid #ddd !important; }
+            .fiche-header-left h2 { color: #000 !important; }
+            .fiche-header-left p { color: #555 !important; }
+            .fiche-header-right .fiche-date { color: #888 !important; }
+
+            .fiche-mockups { background: #f0f0f0 !important; }
+            .fiche-mockups .mockup-side { background: #fafafa !important; }
+            .fiche-mockups .side-label { color: #999 !important; }
+
+            .detail-label { color: #888 !important; }
+            .detail-value { color: #000 !important; }
+            .detail-row { border-bottom: 1px solid #eee !important; }
+
+            .fiche-note { background: #f8f8f8 !important; border-color: #ddd !important; }
+            .fiche-note-label { color: #999 !important; }
+            .fiche-note p { color: #444 !important; }
+
+            .fiche-total-strip {
+                background: rgba(201,168,76,0.08) !important;
+                border-color: rgba(201,168,76,0.35) !important;
+            }
+            .fiche-total-left { color: #A07830 !important; }
+            .fiche-total-amount { color: #000 !important; }
+            .fiche-total-sub { color: #888 !important; }
+
+            .fiche-payment.pay-oui { background: rgba(52,199,89,0.06) !important; border-color: rgba(52,199,89,0.3) !important; }
+            .fiche-payment.pay-non { background: rgba(255,69,58,0.06) !important; border-color: rgba(255,69,58,0.3) !important; }
+            .fiche-payment.pay-acompte { background: rgba(255,149,0,0.06) !important; border-color: rgba(255,149,0,0.3) !important; }
+            .fiche-payment-label { color: #666 !important; }
+
+            .fiche-qr-section {
+                background: #f8f8f8 !important; border-color: #ddd !important;
+            }
+            .fiche-qr-title { color: #000 !important; }
+            .fiche-qr-sub { color: #888 !important; }
+            .fiche-qr-box { border: 1px solid #ddd; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="ficheContent">
+    <div style="max-width:640px;margin:0 auto 16px;">
+        <a class="btn-back" href="index.html">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            Nouvelle commande
+        </a>
+    </div>
+
+    <div class="fiche-card">
+
+        <!-- Bandeau marque -->
+        <div class="fiche-brand">
+            <div class="fiche-brand-logo">OLD<span>A</span> STUDIO</div>
+            <div class="fiche-brand-ref" id="fCommande"></div>
+        </div>
+
+        <!-- Header client -->
+        <div class="fiche-header">
+            <div class="fiche-header-left">
+                <h2 id="fNom"></h2>
+                <p id="fTel"></p>
+            </div>
+            <div class="fiche-header-right">
+                <span class="badge" id="fBadge"></span>
+                <p class="fiche-date" id="fDate"></p>
+                <p class="fiche-date" id="fDeadline" style="display:none;color:#007AFF;font-weight:700;"></p>
+            </div>
+        </div>
+
+        <!-- Mockups -->
+        <div class="fiche-mockups" id="fMockupSection">
+            <div class="mockup-side">
+                <img id="fMockupFront" alt="Avant">
+                <span class="side-label">Avant</span>
+            </div>
+            <div class="mockup-side">
+                <img id="fMockupBack" alt="Arrière">
+                <span class="side-label">Arrière</span>
+            </div>
+        </div>
+
+        <div class="fiche-divider"></div>
+
+        <!-- Détails commande -->
+        <div class="fiche-details">
+            <div class="detail-row">
+                <span class="detail-label">Collection</span>
+                <span class="detail-value" id="fCollection"></span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Référence</span>
+                <span class="detail-value" id="fReference"></span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Taille</span>
+                <span class="detail-value" id="fTaille"></span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Couleur</span>
+                <span class="detail-value" id="fCouleur"></span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Logo avant</span>
+                <span class="detail-value" id="fLogoAvant"></span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Logo arrière</span>
+                <span class="detail-value" id="fLogoArriere"></span>
+            </div>
+            <div class="detail-row" id="fLogoArMmRow" style="display:none">
+                <span class="detail-label">Côte logo Ar</span>
+                <span class="detail-value" id="fLogoArMm"></span>
+            </div>
+        </div>
+
+        <!-- Note -->
+        <div class="fiche-note" id="fNoteSection" style="display:none">
+            <div class="fiche-note-label">Note atelier</div>
+            <p id="fNote"></p>
+        </div>
+
+        <div class="fiche-divider" style="margin:12px 0 0"></div>
+
+        <!-- Total -->
+        <div class="fiche-total-strip">
+            <div>
+                <div class="fiche-total-left">Total commande</div>
+                <div class="fiche-total-sub">
+                    T-Shirt <strong id="fPrixShirt"></strong> · Perso <strong id="fPrixPerso"></strong>
+                </div>
+            </div>
+            <div class="fiche-total-amount" id="fTotal"></div>
+        </div>
+
+        <!-- Statut paiement -->
+        <div class="fiche-payment" id="fPayment">
+            <div class="fiche-payment-dot"></div>
+            <div>
+                <div class="fiche-payment-label" id="fPayLabel"></div>
+                <div class="fiche-payment-statut" id="fPayStatut"></div>
+            </div>
+        </div>
+
+        <div class="fiche-divider"></div>
+
+        <!-- QR Code -->
+        <div class="fiche-qr-section">
+            <div class="fiche-qr-box">
+                <div id="ficheQrCode"></div>
+            </div>
+            <div class="fiche-qr-text">
+                <div class="fiche-qr-title">Scanner pour ouvrir la fiche</div>
+                <div class="fiche-qr-sub">Scannez avec votre téléphone pour accéder à cette fiche directement.</div>
+            </div>
+        </div>
+
+        <!-- WhatsApp -->
+        <div class="fiche-wa-wrap">
+            <button class="btn-wa-fiche" id="fWaBtn" onclick="envoyerWhatsApp()">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                Envoyer sur WhatsApp
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Empty state si pas de fiche -->
+<div id="emptyState" class="empty-state" style="display:none;">
+    <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24" style="margin-bottom:12px;opacity:0.4;"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+    <p style="font-size:15px;font-weight:600;color:#555;">Aucune fiche trouvée</p>
+    <a class="btn-back" href="index.html" style="margin-top:16px;">Créer une commande</a>
+</div>
+
+<script>
+(function() {
+'use strict';
+
+var STORAGE_KEY = 'olda_fiches';
+var currentFiche = null;
+
+function getFiche(key) {
+    try {
+        var fiches = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+        return fiches[key] || null;
+    } catch(e) { return null; }
+}
+
+function getLastFiche() {
+    try {
+        var fiches = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+        var keys = Object.keys(fiches);
+        if (keys.length === 0) return null;
+        return { key: keys[keys.length - 1], data: fiches[keys[keys.length - 1]] };
+    } catch(e) { return null; }
+}
+
+function init() {
+    var hash = window.location.hash.slice(1);
+    var f = null;
+
+    if (hash) {
+        f = getFiche(hash);
+    }
+
+    if (!f) {
+        var last = getLastFiche();
+        if (last) f = last.data;
+    }
+
+    if (!f) {
+        document.getElementById('ficheContent').style.display = 'none';
+        document.getElementById('emptyState').style.display = 'flex';
+        return;
+    }
+
+    currentFiche = f;
+    renderFiche(f);
+}
+
+function renderFiche(f) {
+    /* Header */
+    document.getElementById('fCommande').textContent = f.commande || '';
+    document.getElementById('fNom').textContent = f.nom || '';
+    document.getElementById('fTel').textContent = f.telephone || '';
+    document.getElementById('fDate').textContent = f.date || '';
+
+    /* Badge paiement */
+    var badge = document.getElementById('fBadge');
+    var statut = (f.paiement && f.paiement.statut) || 'NON';
+    if (statut === 'OUI') {
+        badge.textContent = 'PAYE'; badge.className = 'badge badge-paid';
+    } else if (statut === 'ACOMPTE') {
+        badge.textContent = 'ACOMPTE'; badge.className = 'badge badge-acompte';
+    } else {
+        badge.textContent = 'A REGLER'; badge.className = 'badge badge-unpaid';
+    }
+
+    /* Deadline */
+    var deadlineEl = document.getElementById('fDeadline');
+    if (f.deadline) {
+        var dp = f.deadline.split('-');
+        var dfr = dp.length === 3 ? dp[2] + '/' + dp[1] + '/' + dp[0] : f.deadline;
+        deadlineEl.textContent = '\u23F1 ' + dfr;
+        deadlineEl.style.display = '';
+    } else {
+        deadlineEl.style.display = 'none';
+    }
+
+    /* Mockups */
+    var mockupSection = document.getElementById('fMockupSection');
+    if (f.mockupFront) {
+        mockupSection.style.display = '';
+        document.getElementById('fMockupFront').src = f.mockupFront;
+        document.getElementById('fMockupBack').src  = f.mockupBack || '';
+    } else {
+        mockupSection.style.display = 'none';
+    }
+
+    /* Details */
+    document.getElementById('fCollection').textContent = f.collection || '\u2014';
+
+    var refEl = document.getElementById('fReference');
+    var refHtml = f.reference || '\u2014';
+    if (f.bio) refHtml += '<span class="bio-tag"><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M17 8C8 10 5.9 16.17 3.82 21.34L5.71 22l1-2.3A4.49 4.49 0 008 20C19 20 22 3 22 3c-1 2-8 2-8 2z"/></svg>BIO</span>';
+    if (f.refDesc) refHtml += '<div class="ref-desc">' + f.refDesc + '</div>';
+    refEl.innerHTML = refHtml;
+
+    document.getElementById('fTaille').textContent = f.taille || '\u2014';
+
+    var couleurHtml = '';
+    if (f.couleur) {
+        couleurHtml = '<span class="color-dot" style="background:' + (f.couleur.hex || '#fff') + '"></span>' + (f.couleur.nom || '');
+    }
+    document.getElementById('fCouleur').innerHTML = couleurHtml || '\u2014';
+
+    document.getElementById('fLogoAvant').textContent =
+        f.logoAvant ? (f.couleurLogoAvant ? f.logoAvant + ' / ' + f.couleurLogoAvant : f.logoAvant) : 'Aucun';
+    document.getElementById('fLogoArriere').textContent =
+        f.logoArriere ? (f.couleurLogoArriere ? f.logoArriere + ' / ' + f.couleurLogoArriere : f.logoArriere) : 'Aucun';
+
+    var arMmRow = document.getElementById('fLogoArMmRow');
+    var arMmEl  = document.getElementById('fLogoArMm');
+    if (arMmRow) arMmRow.style.display = f.coteLogoAr ? '' : 'none';
+    if (arMmEl && f.coteLogoAr) arMmEl.textContent = f.coteLogoAr + ' mm';
+
+    /* Note */
+    var noteSection = document.getElementById('fNoteSection');
+    if (f.note && f.note.trim()) {
+        noteSection.style.display = '';
+        document.getElementById('fNote').textContent = f.note;
+    } else {
+        noteSection.style.display = 'none';
+    }
+
+    /* Prix */
+    var prix = f.prix || {};
+    document.getElementById('fTotal').textContent = prix.total ? prix.total + ' \u20AC' : '0 \u20AC';
+    document.getElementById('fPrixShirt').textContent = (prix.tshirt || '0') + ' \u20AC';
+    document.getElementById('fPrixPerso').textContent = (prix.personnalisation || '0') + ' \u20AC';
+
+    /* Payment block */
+    var payDiv = document.getElementById('fPayment');
+    payDiv.className = 'fiche-payment';
+    if (statut === 'OUI') {
+        payDiv.classList.add('pay-oui');
+        document.getElementById('fPayLabel').textContent = 'Paiement';
+        document.getElementById('fPayStatut').textContent = 'PAY\u00C9';
+    } else if (statut === 'ACOMPTE') {
+        payDiv.classList.add('pay-acompte');
+        document.getElementById('fPayLabel').textContent = 'Paiement partiel';
+        document.getElementById('fPayStatut').textContent = 'ACOMPTE';
+    } else {
+        payDiv.classList.add('pay-non');
+        document.getElementById('fPayLabel').textContent = 'Paiement';
+        document.getElementById('fPayStatut').textContent = '\u00C0 R\u00C9GLER';
+    }
+
+    /* QR Code — pointe vers cette fiche */
+    var qrBox = document.getElementById('ficheQrCode');
+    qrBox.innerHTML = '';
+    try {
+        var ficheURL = window.location.origin + window.location.pathname + '#' + (f.commande || '');
+        new QRCode(qrBox, {
+            text     : ficheURL,
+            width    : 74,
+            height   : 74,
+            colorDark: '#000000',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.M
+        });
+    } catch(qrErr) { console.warn('QR Code:', qrErr); }
+}
+
+/* ── WhatsApp ── */
+function formatPhone(tel) {
+    if (!tel) return '';
+    var cleaned = tel.replace(/[\s\-\.\(\)]/g, '');
+    if (cleaned.charAt(0) === '0') cleaned = '33' + cleaned.slice(1);
+    if (cleaned.charAt(0) === '+') cleaned = cleaned.slice(1);
+    return cleaned;
+}
+
+window.envoyerWhatsApp = function() {
+    if (!currentFiche) return;
+    var f = currentFiche;
+    var lignes = [];
+    if (f.collection) lignes.push('\u2726 ' + f.collection + (f.reference ? ' \u00B7 ' + f.reference : ''));
+    if (f.taille)      lignes.push('\u2726 Taille ' + f.taille + (f.couleur && f.couleur.nom ? ' \u00B7 ' + f.couleur.nom : ''));
+    if (f.logoAvant && f.logoAvant !== 'Aucun')   lignes.push('\u2726 Logo avant : ' + f.logoAvant);
+    if (f.logoArriere && f.logoArriere !== 'Aucun') lignes.push('\u2726 Logo arri\u00E8re : ' + f.logoArriere);
+
+    var msg = 'Bonjour ' + (f.nom || 'Client') + ' \uD83D\uDDA4\n\n' +
+        'Votre commande OLDA est pr\u00EAte.\n' +
+        lignes.join('\n') + '\n' +
+        'ID ' + (f.commande || '') + '\n\n' +
+        'Vous pouvez venir la r\u00E9cup\u00E9rer quand vous le souhaitez. \uD83D\uDE0A\n\n' +
+        '\u2014 OLDA Studio';
+
+    var url = 'https://wa.me/' + formatPhone(f.telephone) + '?text=' + encodeURIComponent(msg);
+    window.open(url, '_blank');
+};
+
+/* ── Init ── */
+init();
+window.addEventListener('hashchange', init);
+
+})();
+</script>
+
+</body>
+</html>
