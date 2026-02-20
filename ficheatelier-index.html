@@ -917,7 +917,7 @@ function renderFicheDetail(f) {
         delete ficheLight.mockupFront;
         delete ficheLight.mockupBack;
         var lightEncoded = btoa(unescape(encodeURIComponent(JSON.stringify(ficheLight))));
-        var lightURL = 'https://ficheatelier.pages.dev/ficheatelier-index.html#' + lightEncoded;
+        var lightURL = 'https://dashboardolda-production.up.railway.app';
         new QRCode(qrBox, {
             text     : lightURL,
             width    : 74,

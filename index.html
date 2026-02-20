@@ -1148,7 +1148,7 @@
         <p style="font-size:24px;font-weight:700;color:#1A1A1A;margin:0 0 6px;letter-spacing:-.4px;">Commande envoyée</p>
         <p id="sfOrderNo" style="font-size:13px;color:#8E8E93;margin:0 0 10px;letter-spacing:.3px;font-weight:300;"></p>
         <p id="sfClientName" style="font-size:15px;color:#3A3A3C;margin:0 0 30px;font-weight:500;"></p>
-        <a id="sfFicheBtn" class="sf-btn-primary" target="_blank" rel="noopener">Voir la fiche atelier ›</a>
+        <a id="sfFicheBtn" class="sf-btn-primary" target="_blank" rel="noopener">Voir le Dashboard ›</a>
         <button class="sf-btn-secondary" onclick="location.reload()">Nouvelle commande</button>
     </div>
 </div>
@@ -2199,18 +2199,18 @@ async function captureMockup(shirtSvg, sideData, fabricHex, W, H, Q) {
 }
 
 /* ══════════════════════════════════════
-   DASHBOARD CALLBACK (après validation)
+   DASHBOARD — Création automatique de fiche
    ══════════════════════════════════════ */
 
 /**
- * Envoie les données de la commande validée vers le Dashboard OLDA.
- * Appelée en best-effort : une erreur réseau ne bloque pas le flux client.
+ * Envoie la commande + fiche complète vers le Dashboard OLDA.
+ * Best-effort : une erreur réseau ne bloque pas le flux client.
  *
- * @param {Object} orderPayload  – objet payload complet de la commande
+ * @param {Object} orderPayload  – payload commande
+ * @param {Object} ficheData     – données complètes de la fiche (avec mockups si dispo)
  */
-async function sendOrderToDashboard(orderPayload) {
-    /* ── Construire un objet JSON propre ── */
-    const orderData = {
+async function sendOrderToDashboard(orderPayload, ficheData) {
+    var orderData = {
         commande          : orderPayload.commande,
         date              : orderPayload.date,
         nom               : orderPayload.nom,
@@ -2231,14 +2231,25 @@ async function sendOrderToDashboard(orderPayload) {
             total           : orderPayload.total
         },
         paiement          : { statut: orderPayload.paye },
-        fiche             : orderPayload.fiche || '',
         source            : 'site-client',
         timestamp         : new Date().toISOString()
     };
 
+    /* ── Ajouter les données de fiche complètes ── */
+    if (ficheData) {
+        orderData.fiche = {
+            deadline          : ficheData.deadline || '',
+            refDesc           : ficheData.refDesc || '',
+            bio               : ficheData.bio || false,
+            couleur           : ficheData.couleur || {},
+            coteLogoAr        : ficheData.coteLogoAr || '',
+            mockupFront       : ficheData.mockupFront || null,
+            mockupBack        : ficheData.mockupBack || null
+        };
+    }
+
     try {
-        /* ── Requête POST vers le Dashboard ── */
-        const response = await fetch(DASHBOARD_URL + '/api/orders', {
+        var response = await fetch(DASHBOARD_URL + '/api/orders', {
             method : 'POST',
             headers: {
                 'Content-Type' : 'application/json',
@@ -2248,21 +2259,19 @@ async function sendOrderToDashboard(orderPayload) {
         });
 
         if (!response.ok) {
-            /* Le dashboard a répondu mais avec une erreur HTTP */
             console.error('[OLDA Dashboard] Réponse non-OK — statut:', response.status, response.statusText);
         } else {
-            console.info('[OLDA Dashboard] Commande envoyée avec succès:', orderData.commande);
+            console.info('[OLDA Dashboard] Fiche créée avec succès:', orderData.commande);
         }
     } catch (err) {
-        /* ── Dashboard inaccessible : logger localement, ne jamais bloquer l'UX ── */
-        console.error('[OLDA Dashboard] Envoi échoué (dashboard inaccessible):', err.message);
+        console.error('[OLDA Dashboard] Envoi échoué:', err.message);
 
-        /* Sauvegarde locale des commandes en attente d'envoi */
+        /* Sauvegarde locale si le dashboard est inaccessible */
         try {
             var _pending = JSON.parse(localStorage.getItem('olda_pending_dashboard') || '[]');
             _pending.push(Object.assign({}, orderData, { _failedAt: new Date().toISOString() }));
             localStorage.setItem('olda_pending_dashboard', JSON.stringify(_pending));
-            console.warn('[OLDA Dashboard] Commande mise en file locale (olda_pending_dashboard).');
+            console.warn('[OLDA Dashboard] Commande mise en file locale.');
         } catch (storageErr) {
             console.warn('[OLDA Dashboard] Impossible de sauvegarder localement:', storageErr.message);
         }
@@ -2311,7 +2320,6 @@ window.submit = async function() {
     };
 
     /* ── Build fiche data (synchrone) ── */
-    const ATELIER_URL = 'https://ficheatelier.pages.dev/ficheatelier-index.html';
     const coteLogoAr = (document.getElementById('coteLogoAr')?.value || '').trim();
     const deadline   = (document.getElementById('clientDeadline')?.value || '').trim();
     const ficheBase = {
@@ -2348,86 +2356,16 @@ window.submit = async function() {
     if (mockupFront) ficheComplete.mockupFront = mockupFront;
     if (mockupBack)  ficheComplete.mockupBack  = mockupBack;
 
-    /* ── URLs ── */
-    var ficheURL     = ATELIER_URL + '#' + btoa(unescape(encodeURIComponent(JSON.stringify(ficheBase))));
-    var ficheFullURL = ATELIER_URL + '#' + btoa(unescape(encodeURIComponent(JSON.stringify(ficheComplete))));
-    payload.fiche = ficheURL;
-
     /* ── Envoi Google Sheets (best-effort, non-bloquant) ── */
+    payload.fiche = DASHBOARD_URL;
     fetch(API, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }).catch(() => {});
 
-    /* ── Envoi Dashboard OLDA (best-effort, non-bloquant) ── */
-    sendOrderToDashboard(payload).catch(e => console.error('[OLDA Dashboard] Erreur inattendue:', e));
+    /* ── Création automatique de la fiche sur le Dashboard OLDA ── */
+    sendOrderToDashboard(payload, ficheComplete).catch(e => console.error('[OLDA Dashboard] Erreur inattendue:', e));
 
-    /* ── Sauvegarde fiche OBLIGATOIRE dans ficheatelier (triple mécanisme) ── */
-    var ficheSaved = false;
-
-    /* Mécanisme 1 : localStorage direct (si même domaine) */
-    try {
-        var _fiches = JSON.parse(localStorage.getItem('olda_fiches') || '{}');
-        var _key = ficheComplete.commande || ('cmd-' + Date.now());
-        var _f = JSON.parse(JSON.stringify(ficheComplete));
-        if (_fiches[_key] && _fiches[_key].status) { _f.status = _fiches[_key].status; }
-        else { _f.status = 'en-attente'; }
-        _fiches[_key] = _f;
-        localStorage.setItem('olda_fiches', JSON.stringify(_fiches));
-        ficheSaved = true;
-    } catch(e) {}
-
-    /* Mécanisme 2 + 3 : Iframe caché + postMessage
-       L'iframe charge ficheatelier-index.html (hash = fiche encodée)
-       → route() appelle showFiche() qui sauvegarde dans le bon origin
-       + postMessage envoie les données directement après chargement */
-    await new Promise(function(resolve) {
-        var timeout = setTimeout(function() { resolve(); }, 5000);
-
-        /* Écouter la confirmation de sauvegarde du dashboard */
-        function onSaveConfirm(evt) {
-            if (evt.data && evt.data.type === 'olda-fiche-saved') {
-                ficheSaved = true;
-                window.removeEventListener('message', onSaveConfirm);
-                clearTimeout(timeout);
-                resolve();
-            }
-        }
-        window.addEventListener('message', onSaveConfirm);
-
-        var fr = document.getElementById('ficheSaveFrame');
-        if (!fr) {
-            fr = document.createElement('iframe');
-            fr.id = 'ficheSaveFrame';
-            fr.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;border:none;';
-            document.body.appendChild(fr);
-        }
-        /* Quand l'iframe est chargé, envoyer aussi via postMessage */
-        fr.onload = function() {
-            try {
-                fr.contentWindow.postMessage({
-                    type: 'olda-save-fiche',
-                    fiche: ficheComplete
-                }, '*');
-            } catch(e) {}
-        };
-        fr.src = ficheFullURL;
-    });
-
-    /* Vérification obligatoire : la fiche DOIT être créée */
-    if (!ficheSaved) {
-        /* Dernière tentative : forcer localStorage direct */
-        try {
-            var _f2 = JSON.parse(localStorage.getItem('olda_fiches') || '{}');
-            var _k2 = ficheComplete.commande || ('cmd-' + Date.now());
-            var _d2 = JSON.parse(JSON.stringify(ficheComplete));
-            _d2.status = (_f2[_k2] && _f2[_k2].status) || 'en-attente';
-            _f2[_k2] = _d2;
-            localStorage.setItem('olda_fiches', JSON.stringify(_f2));
-            ficheSaved = true;
-        } catch(e) {}
-    }
-
-    /* ── Bouton fiche (lien complet avec mockups) ── */
+    /* ── Bouton fiche → Dashboard ── */
     const ficheLink = document.getElementById('sfFicheBtn');
-    ficheLink.href = ficheFullURL;
+    ficheLink.href = DASHBOARD_URL;
 
     /* ── Success overlay ── */
     const overlay = document.getElementById('successOverlay');
