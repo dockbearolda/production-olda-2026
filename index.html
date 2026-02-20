@@ -2197,7 +2197,7 @@ async function captureMockup(shirtSvg, sideData, fabricHex, W, H, Q) {
 /* ══════════════════════════════════════
    SUBMIT  (A-Q payload)
    ══════════════════════════════════════ */
-window.submit = function() {
+window.submit = async function() {
     const b = document.getElementById('subBtn');
     b.textContent = 'Envoi...'; b.disabled = true; b.style.opacity = '0.6';
 
@@ -2235,7 +2235,7 @@ window.submit = function() {
         paye              : payStatus === 'oui' ? 'OUI' : 'NON'
     };
 
-    /* ── Build fiche data (synchrone, sans mockups) ── */
+    /* ── Build fiche data (synchrone) ── */
     const ATELIER_URL = 'https://ficheatelier.pages.dev/ficheatelier-index.html';
     const coteLogoAr = (document.getElementById('coteLogoAr')?.value || '').trim();
     const deadline   = (document.getElementById('clientDeadline')?.value || '').trim();
@@ -2261,7 +2261,21 @@ window.submit = function() {
         paiement          : { statut: payload.paye }
     };
 
-    var ficheURL = ATELIER_URL + '#' + btoa(unescape(encodeURIComponent(JSON.stringify(ficheBase))));
+    /* ── Capture mockups AVANT l'envoi (garantit que la fiche part complète) ── */
+    var mockupFront = null, mockupBack = null;
+    try {
+        mockupFront = await captureMockup(svgF, logos.front, color.h, 480, 576, 0.90);
+        mockupBack  = await captureMockup(svgB, logos.back,  color.h, 480, 576, 0.90);
+    } catch(e) { /* la fiche fonctionne sans mockups */ }
+
+    /* ── Fiche complète (avec mockups si disponibles) ── */
+    var ficheComplete = JSON.parse(JSON.stringify(ficheBase));
+    if (mockupFront) ficheComplete.mockupFront = mockupFront;
+    if (mockupBack)  ficheComplete.mockupBack  = mockupBack;
+
+    /* ── URLs ── */
+    var ficheURL     = ATELIER_URL + '#' + btoa(unescape(encodeURIComponent(JSON.stringify(ficheBase))));
+    var ficheFullURL = ATELIER_URL + '#' + btoa(unescape(encodeURIComponent(JSON.stringify(ficheComplete))));
     payload.fiche = ficheURL;
 
     /* ── Envoi Google Sheets (best-effort, non-bloquant) ── */
@@ -2271,8 +2285,8 @@ window.submit = function() {
     /* 1. localStorage direct (si même domaine que ficheatelier.pages.dev) */
     try {
         var _fiches = JSON.parse(localStorage.getItem('olda_fiches') || '{}');
-        var _key = ficheBase.commande || ('cmd-' + Date.now());
-        var _f = JSON.parse(JSON.stringify(ficheBase)); /* deep copy */
+        var _key = ficheComplete.commande || ('cmd-' + Date.now());
+        var _f = JSON.parse(JSON.stringify(ficheComplete));
         if (_fiches[_key] && _fiches[_key].status) { _f.status = _fiches[_key].status; }
         else { _f.status = 'en-attente'; }
         _fiches[_key] = _f;
@@ -2286,44 +2300,18 @@ window.submit = function() {
         if (!fr) { fr = document.createElement('iframe'); fr.id = 'ficheSaveFrame';
             fr.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;border:none;';
             document.body.appendChild(fr); }
-        fr.src = ficheURL;
+        fr.src = ficheFullURL;
     })();
 
-    /* ── Bouton fiche (lien prêt, ouverture manuelle uniquement) ── */
+    /* ── Bouton fiche (lien complet avec mockups) ── */
     const ficheLink = document.getElementById('sfFicheBtn');
-    ficheLink.href = ficheURL;
+    ficheLink.href = ficheFullURL;
 
     /* ── Success overlay ── */
     const overlay = document.getElementById('successOverlay');
     document.getElementById('sfOrderNo').textContent    = payload.commande;
     document.getElementById('sfClientName').textContent = payload.nom || '';
     overlay.classList.add('sf-on');
-
-    /* ── Capture mockups en arrière-plan (best-effort, ne bloque pas la fiche) ── */
-    (async () => {
-        try {
-            var mF = await captureMockup(svgF, logos.front, color.h, 480, 576, 0.90);
-            var mB = await captureMockup(svgB, logos.back,  color.h, 480, 576, 0.90);
-            var ficheWithMockups = ATELIER_URL + '#' + btoa(unescape(encodeURIComponent(JSON.stringify(
-                Object.assign({}, ficheBase, { mockupFront: mF, mockupBack: mB })
-            ))));
-            /* Met à jour le lien et re-sauvegarde avec mockups */
-            document.getElementById('sfFicheBtn').href = ficheWithMockups;
-            /* localStorage direct */
-            try {
-                var _fm = JSON.parse(localStorage.getItem('olda_fiches') || '{}');
-                var _km = ficheBase.commande || ('cmd-' + Date.now());
-                var _dm = JSON.parse(JSON.stringify(ficheBase));
-                _dm.mockupFront = mF; _dm.mockupBack = mB;
-                if (_fm[_km]) _dm.status = _fm[_km].status;
-                _fm[_km] = _dm;
-                localStorage.setItem('olda_fiches', JSON.stringify(_fm));
-            } catch(e) {}
-            /* iframe */
-            var _fr2 = document.getElementById('ficheSaveFrame');
-            if (_fr2) _fr2.src = ficheWithMockups;
-        } catch(e) { /* silencieux — la fiche sans mockup reste disponible via le bouton */ }
-    })();
 
     } catch(e) {
         console.error('Erreur validation:', e);
