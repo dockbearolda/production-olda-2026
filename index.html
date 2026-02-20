@@ -2265,21 +2265,27 @@ window.submit = function() {
     /* ── Envoi Google Sheets (best-effort, non-bloquant) ── */
     fetch(API, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }).catch(() => {});
 
-    /* ── Sauvegarde directe dans localStorage (même domaine que ficheatelier) ── */
-    (function saveFicheLocale(f) {
-        try {
-            var STORAGE_KEY = 'olda_fiches';
-            var fiches = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-            var key = f.commande || ('cmd-' + Date.now());
-            if (fiches[key] && fiches[key].status) {
-                f.status = fiches[key].status;
-            } else {
-                f.status = 'en-attente';
-            }
-            fiches[key] = f;
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(fiches));
-        } catch(e) {}
-    })(Object.assign({}, ficheBase));
+    /* ── Sauvegarde fiche dans ficheatelier (double mécanisme) ── */
+    /* 1. localStorage direct (si même domaine que ficheatelier.pages.dev) */
+    try {
+        var _fiches = JSON.parse(localStorage.getItem('olda_fiches') || '{}');
+        var _key = ficheBase.commande || ('cmd-' + Date.now());
+        var _f = JSON.parse(JSON.stringify(ficheBase)); /* deep copy */
+        if (_fiches[_key] && _fiches[_key].status) { _f.status = _fiches[_key].status; }
+        else { _f.status = 'en-attente'; }
+        _fiches[_key] = _f;
+        localStorage.setItem('olda_fiches', JSON.stringify(_fiches));
+    } catch(e) {}
+    /* 2. Iframe caché pointant vers ficheatelier-index.html avec le hash
+          → showFiche() est appelé, ce qui déclenche saveFiche() dans le
+            contexte de ficheatelier.pages.dev (garantit la bonne origine) */
+    (function() {
+        var fr = document.getElementById('ficheSaveFrame');
+        if (!fr) { fr = document.createElement('iframe'); fr.id = 'ficheSaveFrame';
+            fr.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;border:none;';
+            document.body.appendChild(fr); }
+        fr.src = ficheURL;
+    })();
 
     /* ── Bouton fiche (lien prêt, ouverture manuelle uniquement) ── */
     const ficheLink = document.getElementById('sfFicheBtn');
@@ -2301,15 +2307,19 @@ window.submit = function() {
             ))));
             /* Met à jour le lien et re-sauvegarde avec mockups */
             document.getElementById('sfFicheBtn').href = ficheWithMockups;
+            /* localStorage direct */
             try {
-                var STORAGE_KEY = 'olda_fiches';
-                var fiches = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-                var key = ficheBase.commande || ('cmd-' + Date.now());
-                var ficheWithMockupsData = Object.assign({}, ficheBase, { mockupFront: mF, mockupBack: mB });
-                if (fiches[key]) ficheWithMockupsData.status = fiches[key].status;
-                fiches[key] = ficheWithMockupsData;
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(fiches));
+                var _fm = JSON.parse(localStorage.getItem('olda_fiches') || '{}');
+                var _km = ficheBase.commande || ('cmd-' + Date.now());
+                var _dm = JSON.parse(JSON.stringify(ficheBase));
+                _dm.mockupFront = mF; _dm.mockupBack = mB;
+                if (_fm[_km]) _dm.status = _fm[_km].status;
+                _fm[_km] = _dm;
+                localStorage.setItem('olda_fiches', JSON.stringify(_fm));
             } catch(e) {}
+            /* iframe */
+            var _fr2 = document.getElementById('ficheSaveFrame');
+            if (_fr2) _fr2.src = ficheWithMockups;
         } catch(e) { /* silencieux — la fiche sans mockup reste disponible via le bouton */ }
     })();
 
