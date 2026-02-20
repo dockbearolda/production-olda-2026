@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Olda Studio — Atelier</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -343,18 +343,44 @@
             .fiche-qr-box { border: 1px solid #ddd; }
         }
 
-        /* ── Segmented tabs ── */
-        .tabs { display:flex; gap:4px; background:#1c1c1e; border-radius:16px; padding:4px; margin-bottom:28px; }
-        .tab-btn {
-            flex:1; padding:10px 8px; border:none; border-radius:12px; font-size:13px;
-            font-weight:700; font-family:inherit; cursor:pointer; transition:0.2s;
-            background:transparent; color:#86868b;
+        /* ── Scrollable category pills ── */
+        .tabs-scroll {
+            display: flex; gap: 8px;
+            overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+            padding: 0 0 16px; margin-bottom: 12px;
         }
-        .tab-btn.active { background:#2c2c2e; color:#fff; }
+        .tabs-scroll::-webkit-scrollbar { display: none; }
+        .tab-btn {
+            flex-shrink: 0; padding: 9px 18px;
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 24px;
+            font-size: 13px; font-weight: 600; font-family: inherit;
+            cursor: pointer; transition: background 0.18s, color 0.18s, border-color 0.18s;
+            background: #1c1c1e; color: #86868b; white-space: nowrap;
+            touch-action: manipulation;
+        }
+        .tab-btn.active { background: #fff; color: #000; border-color: #fff; font-weight: 700; }
         .tab-count {
-            display:inline-flex; align-items:center; justify-content:center;
-            background:rgba(255,255,255,0.13); color:inherit; border-radius:8px;
-            font-size:10px; font-weight:800; padding:1px 6px; margin-left:5px;
+            display: inline-flex; align-items: center; justify-content: center;
+            border-radius: 8px; font-size: 10px; font-weight: 800;
+            padding: 1px 6px; margin-left: 4px;
+            background: rgba(255,255,255,0.12); color: inherit;
+        }
+        .tab-btn.active .tab-count { background: rgba(0,0,0,0.1); }
+
+        /* ── Status selector sheet ── */
+        .status-opt {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 15px 0; border-bottom: 1px solid #2c2c2e;
+            font-size: 16px; font-weight: 600; color: #fff;
+            cursor: pointer; touch-action: manipulation;
+        }
+        .status-opt:last-child { border-bottom: none; }
+        .status-opt:active { opacity: 0.5; }
+        .status-opt.current { color: #0A84FF; }
+        .status-opt.current::after {
+            content: '';
+            width: 20px; height: 20px; flex-shrink: 0;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%230A84FF' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E") center/contain no-repeat;
         }
 
         /* ── Bottom sheet Apple-style ── */
@@ -407,15 +433,8 @@
         </div>
     </header>
 
-    <!-- Tabs -->
-    <div class="tabs">
-        <button class="tab-btn active" id="tabActive" onclick="setTab('active')">
-            En cours <span class="tab-count" id="tabActiveCount"></span>
-        </button>
-        <button class="tab-btn" id="tabContacted" onclick="setTab('contacted')">
-            Clients contactés <span class="tab-count" id="tabContactedCount"></span>
-        </button>
-    </div>
+    <!-- Scrollable category tabs — générés par JS -->
+    <div class="tabs-scroll" id="tabsContainer"></div>
 
     <!-- Mosaic grid -->
     <div id="mosaicGrid" class="mosaic-grid"></div>
@@ -439,7 +458,7 @@
 </div>
 
 <!-- ════════════════════════════════════
-     BOTTOM SHEET — confirmation WhatsApp
+     BOTTOM SHEET — confirmation WhatsApp → Client prévenu
      ════════════════════════════════════ -->
 <div class="bs-backdrop" id="bsBackdrop" onclick="fermerBottomSheet()">
     <div class="bs-sheet" onclick="event.stopPropagation()">
@@ -448,11 +467,22 @@
             <div style="width:60px;height:60px;border-radius:50%;background:rgba(37,211,102,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
             </div>
-            <h3 style="font-size:22px;font-weight:800;letter-spacing:-0.5px;color:#fff;">Client contacté ✓</h3>
-            <p style="color:#86868b;font-size:15px;margin-top:8px;">Déplacer vers « Clients contactés » ?</p>
+            <h3 style="font-size:22px;font-weight:800;letter-spacing:-0.5px;color:#fff;">WhatsApp envoyé ✓</h3>
+            <p style="color:#86868b;font-size:15px;margin-top:8px;">Marquer comme « Client prévenu » ?</p>
         </div>
-        <button onclick="archiverFicheContactee()" style="background:#fff;color:#000;border:none;border-radius:16px;padding:18px;width:100%;font-size:17px;font-weight:700;font-family:inherit;cursor:pointer;margin-bottom:10px;letter-spacing:-0.3px;">Archiver</button>
-        <button onclick="fermerBottomSheet()" style="background:#2c2c2e;color:#fff;border:none;border-radius:16px;padding:18px;width:100%;font-size:17px;font-weight:600;font-family:inherit;cursor:pointer;letter-spacing:-0.3px;">Plus tard</button>
+        <button onclick="appliquerStatutWa('prevenu')" style="background:#fff;color:#000;border:none;border-radius:16px;padding:18px;width:100%;font-size:17px;font-weight:700;font-family:inherit;cursor:pointer;margin-bottom:10px;letter-spacing:-0.3px;touch-action:manipulation;">Client prévenu ✓</button>
+        <button onclick="fermerBottomSheet()" style="background:#2c2c2e;color:#fff;border:none;border-radius:16px;padding:18px;width:100%;font-size:17px;font-weight:600;font-family:inherit;cursor:pointer;letter-spacing:-0.3px;touch-action:manipulation;">Plus tard</button>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════
+     BOTTOM SHEET — sélecteur de statut atelier
+     ════════════════════════════════════ -->
+<div class="bs-backdrop" id="bsStatusBackdrop" onclick="fermerStatusSheet()">
+    <div class="bs-sheet" onclick="event.stopPropagation()" style="max-height:80dvh;overflow-y:auto;">
+        <div class="bs-handle"></div>
+        <p style="font-size:13px;font-weight:800;color:#86868b;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;">Changer le statut</p>
+        <div id="statusOptList"></div>
     </div>
 </div>
 
@@ -461,9 +491,9 @@
      ════════════════════════════════════ -->
 <div id="ficheView" class="fiche-view">
     <div style="max-width:600px;margin:0 auto 16px;">
-        <button class="btn-back" onclick="goToDashboard()">
+        <button class="btn-back" onclick="goToDashboard()" style="touch-action:manipulation;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-            Dashboard
+            Retour
         </button>
     </div>
 
@@ -504,6 +534,14 @@
 
         <!-- Détails commande -->
         <div class="fiche-details">
+            <!-- Statut atelier — tappable pour changer -->
+            <div class="detail-row" id="fStatusRow" onclick="ouvrirStatusSheet()" style="cursor:pointer;touch-action:manipulation;">
+                <span class="detail-label">Statut atelier</span>
+                <span id="fStatus" style="font-size:14px;font-weight:700;color:#0A84FF;text-align:right;display:flex;align-items:center;gap:6px;">
+                    —
+                    <svg width="14" height="14" fill="none" stroke="#0A84FF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+                </span>
+            </div>
             <div class="detail-row">
                 <span class="detail-label">Collection</span>
                 <span class="detail-value" id="fCollection"></span>
@@ -593,9 +631,24 @@
    LOCAL STORAGE — persistence des fiches
    ══════════════════════════════════════ */
 var STORAGE_KEY = 'olda_fiches';
-var currentTab = 'active';   /* 'active' | 'contacted' */
-var bsCurrentKey = '';       /* clé fiche en attente d'archivage */
-var ficheViewKey = '';       /* clé fiche affichée dans ficheView */
+
+/* ── 10 catégories atelier (dans l'ordre du workflow) ── */
+var CATEGORIES = [
+    { id: 'en-attente',  label: 'Commande en Attente' },
+    { id: 'a-preparer',  label: 'Commande à préparer' },
+    { id: 'maquette',    label: 'Maquette à faire' },
+    { id: 'prt',         label: 'PRT à faire' },
+    { id: 'validation',  label: 'En attente validation' },
+    { id: 'impression',  label: 'En cours d\'Impression' },
+    { id: 'pressage',    label: 'Pressage à faire' },
+    { id: 'contacter',   label: 'Client à contacter' },
+    { id: 'prevenu',     label: 'Client prévenu' },
+    { id: 'archives',    label: 'Archives' }
+];
+
+var currentTab = 'en-attente';
+var bsCurrentKey = '';   /* clé fiche pour bottom sheets */
+var ficheViewKey = '';   /* clé fiche affichée dans ficheView */
 
 function getAllFiches() {
     try {
@@ -607,10 +660,23 @@ function saveFiche(f) {
     var fiches = getAllFiches();
     var key = f.commande || ('cmd-' + Date.now());
     /* Conserver le statut existant si la fiche est déjà enregistrée */
-    if (fiches[key] && fiches[key].status) f.status = fiches[key].status;
+    if (fiches[key] && fiches[key].status) {
+        f.status = fiches[key].status;
+    } else {
+        /* Nouvelle fiche → catégorie par défaut */
+        if (!f.status || f.status === 'active') f.status = 'en-attente';
+        if (f.status === 'contacted') f.status = 'prevenu';
+    }
     fiches[key] = f;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(fiches));
     return key;
+}
+
+/* Retrocompatibilité : normalise les anciens statuts en mémoire */
+function normaliserStatut(s) {
+    if (!s || s === 'active') return 'en-attente';
+    if (s === 'contacted')    return 'prevenu';
+    return s;
 }
 
 function deleteFiche(key) {
@@ -631,15 +697,42 @@ function route() {
     }
 }
 
+/* ── Rendu des onglets ── */
+function renderTabs() {
+    var container = document.getElementById('tabsContainer');
+    if (!container) return;
+    var fiches = getAllFiches();
+    /* Compter les fiches par catégorie */
+    var counts = {};
+    Object.keys(fiches).forEach(function(k) {
+        var s = normaliserStatut(fiches[k].status);
+        counts[s] = (counts[s] || 0) + 1;
+    });
+    container.innerHTML = CATEGORIES.map(function(cat) {
+        var n = counts[cat.id] || 0;
+        var isActive = currentTab === cat.id;
+        return '<button class="tab-btn' + (isActive ? ' active' : '') + '" ' +
+               'onclick="setTab(\'' + cat.id + '\')" data-tab="' + cat.id + '">' +
+               cat.label +
+               (n > 0 ? '<span class="tab-count">' + n + '</span>' : '') +
+               '</button>';
+    }).join('');
+    /* Scroll l'onglet actif dans la vue */
+    var active = container.querySelector('.tab-btn.active');
+    if (active) active.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+}
+
 function showDashboard() {
     document.getElementById('ficheView').classList.remove('active');
     document.getElementById('dashboardView').style.display = '';
+    renderTabs();
     loadOrders();
 }
 
 window.goToDashboard = function() {
-    history.pushState(null, '', window.location.pathname);
+    history.pushState({ view: 'dashboard' }, '', window.location.pathname);
     fermerBottomSheet();
+    fermerStatusSheet();
     ficheViewKey = '';
     showDashboard();
 };
@@ -674,9 +767,12 @@ function showFicheFromStorage(key) {
     if (!f) return;
 
     ficheViewKey = key;
+    /* Pousser un état dans l'historique → bouton retour navigateur fonctionne */
+    history.pushState({ view: 'fiche', key: key }, '', window.location.pathname);
     document.getElementById('dashboardView').style.display = 'none';
     var view = document.getElementById('ficheView');
     view.classList.add('active');
+    view.scrollTop = 0;
 
     renderFicheDetail(f);
 }
@@ -687,6 +783,15 @@ function renderFicheDetail(f) {
     document.getElementById('fNom').textContent = f.nom || '';
     document.getElementById('fTel').textContent = f.telephone || '';
     document.getElementById('fDate').textContent = f.date || '';
+
+    /* Statut atelier */
+    var ficheStatut = normaliserStatut(f.status);
+    var catObj = CATEGORIES.find(function(c) { return c.id === ficheStatut; });
+    var fStatusEl = document.getElementById('fStatus');
+    if (fStatusEl && catObj) {
+        fStatusEl.innerHTML = catObj.label +
+            '<svg width="14" height="14" fill="none" stroke="#0A84FF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>';
+    }
 
     /* Badge paiement */
     var badge = document.getElementById('fBadge');
@@ -850,8 +955,7 @@ window.envoyerWhatsAppFiche = function() {
 
 window.setTab = function(tab) {
     currentTab = tab;
-    document.getElementById('tabActive').classList.toggle('active', tab === 'active');
-    document.getElementById('tabContacted').classList.toggle('active', tab === 'contacted');
+    renderTabs();
     loadOrders();
 };
 
@@ -866,18 +970,66 @@ window.fermerBottomSheet = function() {
     bsCurrentKey = '';
 };
 
-window.archiverFicheContactee = function() {
+/* Appelé depuis le bottom sheet WhatsApp */
+window.appliquerStatutWa = function(newStatus) {
     if (!bsCurrentKey) return;
-    var fiches = getAllFiches();
-    if (fiches[bsCurrentKey]) {
-        fiches[bsCurrentKey].status = 'contacted';
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(fiches));
-    }
+    _applyStatus(bsCurrentKey, newStatus);
     fermerBottomSheet();
     fermerOverlay();
-    /* Revenir au dashboard sur l'onglet "Clients contactés" */
     goToDashboard();
-    setTimeout(function() { setTab('contacted'); }, 80);
+    setTimeout(function() { setTab(newStatus); }, 80);
+};
+
+/* Applique un statut à une fiche en localStorage */
+function _applyStatus(key, newStatus) {
+    var fiches = getAllFiches();
+    if (fiches[key]) {
+        fiches[key].status = newStatus;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(fiches));
+    }
+}
+
+/* ── Sélecteur de statut (bottom sheet) ── */
+var bsStatusKey = '';
+
+window.ouvrirStatusSheet = function() {
+    var key = ficheViewKey;
+    if (!key) return;
+    bsStatusKey = key;
+    var fiches = getAllFiches();
+    var f = fiches[key];
+    var currentStatus = f ? normaliserStatut(f.status) : 'en-attente';
+
+    var list = document.getElementById('statusOptList');
+    list.innerHTML = CATEGORIES.map(function(cat) {
+        var isCur = cat.id === currentStatus;
+        return '<div class="status-opt' + (isCur ? ' current' : '') + '" onclick="setStatut(\'' + cat.id + '\')">' +
+               cat.label + '</div>';
+    }).join('');
+
+    document.getElementById('bsStatusBackdrop').classList.add('open');
+    document.body.style.overflow = 'hidden';
+};
+
+window.fermerStatusSheet = function() {
+    document.getElementById('bsStatusBackdrop').classList.remove('open');
+    document.body.style.overflow = '';
+    bsStatusKey = '';
+};
+
+window.setStatut = function(newStatus) {
+    if (!bsStatusKey) return;
+    _applyStatus(bsStatusKey, newStatus);
+    /* Mettre à jour l'affichage dans la fiche ouverte */
+    var cat = CATEGORIES.find(function(c) { return c.id === newStatus; });
+    var el = document.getElementById('fStatus');
+    if (el && cat) {
+        el.innerHTML = cat.label +
+            '<svg width="14" height="14" fill="none" stroke="#0A84FF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>';
+    }
+    fermerStatusSheet();
+    /* Mettre à jour les compteurs des onglets */
+    renderTabs();
 };
 
 window.supprimerFiche = function(key) {
@@ -974,22 +1126,9 @@ window.loadOrders = function() {
 
     var allKeys = Object.keys(fiches);
 
-    /* Comptes par onglet */
-    var nActive = 0, nContacted = 0;
-    allKeys.forEach(function(k) {
-        var s = fiches[k].status;
-        if (!s || s === 'active') nActive++; else if (s === 'contacted') nContacted++;
-    });
-    var elA = document.getElementById('tabActiveCount');
-    var elC = document.getElementById('tabContactedCount');
-    if (elA) elA.textContent = nActive > 0 ? nActive : '';
-    if (elC) elC.textContent = nContacted > 0 ? nContacted : '';
-
-    /* Filtrage selon l'onglet courant */
+    /* Filtrage selon la catégorie courante (avec rétrocompat anciens statuts) */
     var filtered = allKeys.filter(function(k) {
-        var s = fiches[k].status;
-        if (currentTab === 'active') return !s || s === 'active';
-        return s === 'contacted';
+        return normaliserStatut(fiches[k].status) === currentTab;
     });
 
     if (filtered.length === 0) {
@@ -1002,7 +1141,6 @@ window.loadOrders = function() {
             var statut = (f.paiement && f.paiement.statut) || 'NON';
             var badgeClass = statut === 'OUI' ? 'badge-paid' : (statut === 'ACOMPTE' ? 'badge-acompte' : 'badge-unpaid');
             var badgeText = statut === 'OUI' ? 'PAYÉ' : (statut === 'ACOMPTE' ? 'ACOMPTE' : 'À RÉGLER');
-            var isContacted = f.status === 'contacted';
 
             var tile = document.createElement('div');
             tile.className = 'mosaic-tile';
@@ -1013,7 +1151,6 @@ window.loadOrders = function() {
                     '<p class="text-lg font-black text-white truncate">' + (f.nom || 'Sans nom') + '</p>' +
                     '<div class="flex items-center gap-2 mt-1">' +
                         '<span class="badge ' + badgeClass + '">' + badgeText + '</span>' +
-                        (isContacted ? '<span class="badge badge-contacted">Contacté</span>' : '') +
                         '<span class="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">' + (f.commande || '') + '</span>' +
                     '</div>' +
                 '</div>' +
@@ -1049,6 +1186,20 @@ window.voirFiche = function(key) {
 /* ── Init ── */
 route();
 window.addEventListener('hashchange', route);
+
+/* ── Bouton retour navigateur (iOS Safari, Android Chrome) ── */
+window.addEventListener('popstate', function(e) {
+    var ficheActive = document.getElementById('ficheView').classList.contains('active');
+    if (ficheActive) {
+        fermerBottomSheet();
+        fermerStatusSheet();
+        ficheViewKey = '';
+        document.getElementById('ficheView').classList.remove('active');
+        document.getElementById('dashboardView').style.display = '';
+        renderTabs();
+        loadOrders();
+    }
+});
 
 })();
 </script>
