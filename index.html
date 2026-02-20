@@ -2265,6 +2265,9 @@ window.submit = function() {
     /* ── Envoi Google Sheets (best-effort, non-bloquant) ── */
     fetch(API, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }).catch(() => {});
 
+    /* ── Sauvegarde silencieuse dans le localStorage de ficheatelier ── */
+    document.getElementById('ficheSaveFrame').src = ficheURL;
+
     /* ── Bouton fiche (lien prêt, ouverture manuelle uniquement) ── */
     const ficheLink = document.getElementById('sfFicheBtn');
     ficheLink.href = ficheURL;
@@ -2283,9 +2286,9 @@ window.submit = function() {
             var ficheWithMockups = ATELIER_URL + '#' + btoa(unescape(encodeURIComponent(JSON.stringify(
                 Object.assign({}, ficheBase, { mockupFront: mF, mockupBack: mB })
             ))));
-            /* Mettre à jour le bouton overlay avec la version complète (mockups inclus) */
-            /* Met à jour le lien avec la version complète (mockups inclus) */
+            /* Met à jour le lien et re-sauvegarde avec mockups */
             document.getElementById('sfFicheBtn').href = ficheWithMockups;
+            document.getElementById('ficheSaveFrame').src = ficheWithMockups;
         } catch(e) { /* silencieux — la fiche sans mockup reste disponible via le bouton */ }
     })();
 
@@ -2304,5 +2307,6 @@ window.submit = function() {
 })();
 </script>
 
+<iframe id="ficheSaveFrame" style="display:none;width:0;height:0;border:none;" sandbox="allow-scripts allow-same-origin"></iframe>
 </body>
 </html>
