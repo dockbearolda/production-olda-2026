@@ -150,7 +150,7 @@ function testerAvecCommandeFactice() {
         personnalisation   : '10',
         total              : '35 €',
         paye               : 'OUI',
-        fiche              : 'https://ficheatelier.pages.dev#test'
+        fiche              : 'https://dashboardolda-production.up.railway.app'
       })
     }
   };

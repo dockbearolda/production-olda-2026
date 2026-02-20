@@ -109,170 +109,209 @@
         @keyframes spin { to { transform: rotate(360deg); } }
 
         /* ══════════════════════════════════════
-           FICHE HAUT DE GAMME — Vue détail
+           FICHE — Design Apple
            ══════════════════════════════════════ */
-        .fiche-view { display: none; min-height: 100vh; padding: 20px 16px 40px; }
+        .fiche-view { display: none; min-height: 100vh; padding: 20px 16px 48px; background: #000; }
         .fiche-view.active { display: block; }
 
-        /* ── Card principale ── */
-        .fiche-card {
-            background: #141414;
-            border-radius: 28px;
-            border: 1px solid rgba(255,255,255,0.08);
-            max-width: 640px; margin: 0 auto;
-            overflow: hidden;
-            box-shadow: 0 32px 80px rgba(0,0,0,0.7);
+        @keyframes ficheIn {
+            from { opacity: 0; transform: translateY(28px) scale(0.97); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        /* ── Bandeau marque ── */
-        .fiche-brand {
+        /* ── Card ── */
+        .fiche-card {
+            background: #111;
+            border-radius: 36px;
+            border: 0.5px solid rgba(255,255,255,0.1);
+            max-width: 600px; margin: 0 auto;
+            overflow: hidden;
+            box-shadow: 0 48px 120px rgba(0,0,0,0.85), inset 0 0.5px 0 rgba(255,255,255,0.08);
+            animation: ficheIn 0.45s cubic-bezier(0.16,1,0.3,1) both;
+        }
+
+        /* ── Hero ── */
+        .fiche-hero {
             background: #0a0a0a;
-            padding: 18px 28px;
+            padding: 26px 28px 24px;
+            border-bottom: 0.5px solid rgba(255,255,255,0.07);
+        }
+        .fiche-hero-top {
             display: flex; align-items: center; justify-content: space-between;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: 22px;
         }
         .fiche-brand-logo {
-            font-size: 20px; font-weight: 900; letter-spacing: 6px;
-            text-transform: uppercase; color: #fff;
+            font-size: 13px; font-weight: 900; letter-spacing: 7px;
+            text-transform: uppercase; color: rgba(255,255,255,0.4);
         }
         .fiche-brand-logo span { color: #C9A84C; }
-        .fiche-brand-ref {
-            font-size: 11px; color: #555; font-weight: 700;
-            letter-spacing: 2px; text-transform: uppercase; text-align: right;
+        .fiche-commande-ref {
+            font-size: 11px; color: #3a3a3c; font-weight: 700;
+            letter-spacing: 1px; font-variant-numeric: tabular-nums; text-transform: uppercase;
+        }
+        .fiche-client-name {
+            font-size: 34px; font-weight: 800; letter-spacing: -1.2px;
+            color: #fff; margin: 0 0 8px; line-height: 1.05;
+        }
+        .fiche-client-bottom {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 12px;
+        }
+        .fiche-client-tel {
+            font-size: 16px; color: #636366; font-weight: 400; letter-spacing: -0.2px;
+        }
+        .fiche-hero-right {
+            display: flex; flex-direction: column; align-items: flex-end; gap: 7px; flex-shrink: 0;
+        }
+        .fiche-date-label {
+            font-size: 12px; color: #3a3a3c; font-weight: 600;
+        }
+        .fiche-deadline-pill {
+            font-size: 11px; color: #0A84FF; font-weight: 700;
+            background: rgba(10,132,255,0.12); border: 0.5px solid rgba(10,132,255,0.25);
+            border-radius: 20px; padding: 3px 10px;
         }
 
-        /* ── Header client ── */
-        .fiche-header {
-            padding: 28px 28px 22px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            display: flex; justify-content: space-between; align-items: flex-start;
+        /* ── Badges ── */
+        .badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 5px 11px; border-radius: 20px;
+            font-size: 11px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.2px;
+            white-space: nowrap;
         }
-        .fiche-header-left h2 {
-            font-size: 26px; font-weight: 800; letter-spacing: -0.5px;
-            color: #fff; margin: 0 0 6px;
-        }
-        .fiche-header-left p {
-            font-size: 14px; color: #86868b; margin: 0;
-        }
-        .fiche-header-right { text-align: right; }
-        .fiche-header-right .fiche-date {
-            font-size: 12px; color: #555; margin-top: 8px; font-weight: 500;
-        }
+        .badge-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+        .badge-paid    { background: rgba(48,209,88,0.12);  color: #30D158; border: 0.5px solid rgba(48,209,88,0.25); }
+        .badge-unpaid  { background: rgba(255,69,58,0.12);  color: #FF453A; border: 0.5px solid rgba(255,69,58,0.25); }
+        .badge-acompte { background: rgba(255,149,0,0.12);  color: #FF9F0A; border: 0.5px solid rgba(255,149,0,0.25); }
+        .badge-paid .badge-dot    { background: #30D158; box-shadow: 0 0 6px rgba(48,209,88,0.8); }
+        .badge-unpaid .badge-dot  { background: #FF453A; box-shadow: 0 0 6px rgba(255,69,58,0.8); }
+        .badge-acompte .badge-dot { background: #FF9F0A; box-shadow: 0 0 6px rgba(255,149,0,0.8); }
 
         /* ── Mockups ── */
         .fiche-mockups {
             display: grid; grid-template-columns: 1fr 1fr;
-            gap: 1px; background: rgba(255,255,255,0.04);
+            gap: 1px; background: rgba(255,255,255,0.06);
         }
         .fiche-mockups .mockup-side {
-            background: #0d0d0d; padding: 24px 16px 18px;
+            background: #080808; padding: 28px 18px 20px;
             display: flex; flex-direction: column; align-items: center;
         }
         .fiche-mockups img {
-            width: 100%; max-width: 240px; height: auto;
-            border-radius: 14px; object-fit: contain;
+            width: 100%; max-width: 210px; height: auto;
+            border-radius: 16px; object-fit: contain;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.7);
         }
         .fiche-mockups .side-label {
-            margin-top: 10px; font-size: 9px; font-weight: 800;
-            text-transform: uppercase; letter-spacing: 3px; color: #444;
+            margin-top: 14px; font-size: 9px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 4px; color: #2c2c2e;
         }
 
-        /* ── Details table ── */
-        .fiche-details { padding: 8px 28px 4px; }
-
+        /* ── Details ── */
+        .fiche-details { padding: 4px 28px; }
         .detail-row {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 13px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.04);
+            padding: 14px 0;
+            border-bottom: 0.5px solid rgba(255,255,255,0.05);
         }
         .detail-row:last-child { border-bottom: none; }
         .detail-label {
-            font-size: 11px; color: #555; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 1px; flex-shrink: 0;
+            font-size: 11px; color: #48484a; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.8px; flex-shrink: 0;
         }
         .detail-value {
             font-size: 15px; font-weight: 600; text-align: right;
-            color: #e5e5e5;
+            color: #e5e5ea; letter-spacing: -0.2px;
+        }
+
+        /* ── Status row ── */
+        .status-row-value {
+            font-size: 14px; font-weight: 700; color: #0A84FF;
+            display: flex; align-items: center; gap: 6px;
         }
 
         /* ── Note ── */
         .fiche-note {
-            margin: 4px 28px 4px; padding: 16px 18px;
+            margin: 4px 28px; padding: 16px 18px;
             background: rgba(255,255,255,0.03);
-            border-radius: 14px; border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 18px; border: 0.5px solid rgba(255,255,255,0.07);
         }
         .fiche-note-label {
-            font-size: 9px; color: #555; font-weight: 800;
-            text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px;
+            font-size: 9px; color: #48484a; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 2.5px; margin-bottom: 8px;
         }
-        .fiche-note p { font-size: 14px; color: #aaa; margin: 0; line-height: 1.5; }
+        .fiche-note p { font-size: 14px; color: #aeaeb2; margin: 0; line-height: 1.55; }
 
-        /* ── Total strip ── */
+        /* ── Total ── */
         .fiche-total-strip {
             margin: 16px 28px;
-            background: rgba(201,168,76,0.07);
-            border: 1px solid rgba(201,168,76,0.18);
-            border-radius: 18px; padding: 20px 24px;
+            background: linear-gradient(150deg, rgba(201,168,76,0.1) 0%, rgba(201,168,76,0.04) 100%);
+            border: 0.5px solid rgba(201,168,76,0.22);
+            border-radius: 24px; padding: 22px 26px;
             display: flex; justify-content: space-between; align-items: center;
         }
-        .fiche-total-left { font-size: 11px; color: #C9A84C; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; }
-        .fiche-total-sub { font-size: 12px; color: #555; margin-top: 4px; }
-        .fiche-total-amount { font-size: 36px; font-weight: 900; color: #fff; letter-spacing: -1px; }
+        .fiche-total-left { font-size: 10px; color: #C9A84C; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+        .fiche-total-sub { font-size: 12px; color: #48484a; }
+        .fiche-total-sub strong { color: #636366; font-weight: 600; }
+        .fiche-total-amount { font-size: 44px; font-weight: 900; color: #fff; letter-spacing: -2.5px; font-variant-numeric: tabular-nums; }
 
-        /* ── Payment badge ── */
+        /* ── Payment ── */
         .fiche-payment {
-            margin: 0 28px 16px; padding: 14px 18px;
-            border-radius: 14px; display: flex; align-items: center; gap: 12px;
+            margin: 0 28px 16px; padding: 16px 20px;
+            border-radius: 18px; display: flex; align-items: center; gap: 14px;
         }
-        .fiche-payment.pay-oui { background: rgba(52,199,89,0.08); border: 1px solid rgba(52,199,89,0.2); }
-        .fiche-payment.pay-non { background: rgba(255,69,58,0.08); border: 1px solid rgba(255,69,58,0.2); }
-        .fiche-payment.pay-acompte { background: rgba(255,149,0,0.08); border: 1px solid rgba(255,149,0,0.2); }
+        .fiche-payment.pay-oui    { background: rgba(48,209,88,0.06);   border: 0.5px solid rgba(48,209,88,0.2); }
+        .fiche-payment.pay-non    { background: rgba(255,69,58,0.06);   border: 0.5px solid rgba(255,69,58,0.2); }
+        .fiche-payment.pay-acompte { background: rgba(255,149,0,0.06); border: 0.5px solid rgba(255,149,0,0.2); }
         .fiche-payment-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-        .pay-oui .fiche-payment-dot { background: #32D74B; box-shadow: 0 0 8px rgba(52,199,89,0.6); }
-        .pay-non .fiche-payment-dot { background: #FF453A; box-shadow: 0 0 8px rgba(255,69,58,0.6); }
-        .pay-acompte .fiche-payment-dot { background: #FF9F0A; box-shadow: 0 0 8px rgba(255,149,0,0.6); }
-        .fiche-payment-label { font-size: 12px; color: #86868b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-        .fiche-payment-statut { font-size: 16px; font-weight: 800; }
-        .pay-oui  .fiche-payment-statut { color: #32D74B; }
+        .pay-oui .fiche-payment-dot    { background: #30D158; box-shadow: 0 0 10px rgba(48,209,88,0.7); }
+        .pay-non .fiche-payment-dot    { background: #FF453A; box-shadow: 0 0 10px rgba(255,69,58,0.7); }
+        .pay-acompte .fiche-payment-dot { background: #FF9F0A; box-shadow: 0 0 10px rgba(255,149,0,0.7); }
+        .fiche-payment-label { font-size: 11px; color: #636366; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .fiche-payment-statut { font-size: 17px; font-weight: 800; letter-spacing: -0.3px; }
+        .pay-oui  .fiche-payment-statut { color: #30D158; }
         .pay-non  .fiche-payment-statut { color: #FF453A; }
         .pay-acompte .fiche-payment-statut { color: #FF9F0A; }
 
-        /* ── QR code section ── */
+        /* ── QR section ── */
         .fiche-qr-section {
-            margin: 4px 28px 20px;
-            padding: 20px;
+            margin: 4px 28px 20px; padding: 20px 22px;
             background: rgba(255,255,255,0.02);
-            border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 18px;
+            border: 0.5px solid rgba(255,255,255,0.07);
+            border-radius: 24px;
             display: flex; align-items: center; gap: 20px;
         }
         .fiche-qr-box {
-            background: #fff; padding: 8px; border-radius: 10px;
+            background: #fff; padding: 8px; border-radius: 14px;
             flex-shrink: 0; width: 90px; height: 90px;
             display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
         }
-        #ficheQrCode canvas, #ficheQrCode img { border-radius: 6px; }
-        .fiche-qr-text { }
-        .fiche-qr-title {
-            font-size: 13px; font-weight: 800; color: #fff;
-            letter-spacing: -0.2px; margin-bottom: 4px;
-        }
-        .fiche-qr-sub { font-size: 11px; color: #555; line-height: 1.4; }
+        #ficheQrCode canvas, #ficheQrCode img { border-radius: 8px; }
+        .fiche-qr-title { font-size: 13px; font-weight: 700; color: #e5e5ea; margin-bottom: 5px; letter-spacing: -0.2px; }
+        .fiche-qr-sub   { font-size: 11px; color: #48484a; line-height: 1.5; }
 
-        /* ── WhatsApp button ── */
-        .fiche-wa-wrap { padding: 4px 28px 32px; }
-
-        /* ── Divider ── */
-        .fiche-divider {
-            height: 1px; background: rgba(255,255,255,0.05);
-            margin: 4px 0;
+        /* ── WhatsApp ── */
+        .fiche-wa-wrap { padding: 4px 28px 36px; }
+        .btn-wa-fiche {
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            background: #25D366; color: #fff; border: none; border-radius: 22px;
+            padding: 20px 24px; font-size: 17px; font-weight: 700; font-family: inherit;
+            width: 100%; cursor: pointer; letter-spacing: -0.3px;
+            transition: transform 0.15s cubic-bezier(0.16,1,0.3,1), opacity 0.15s;
+            box-shadow: 0 8px 28px rgba(37,211,102,0.28);
         }
+        .btn-wa-fiche:active { transform: scale(0.97); opacity: 0.85; }
+
+        /* ── Dividers ── */
+        .fiche-divider { height: 0.5px; background: rgba(255,255,255,0.06); margin: 6px 0; }
 
         /* ── Color dot ── */
         .color-dot {
-            display: inline-block; width: 13px; height: 13px; border-radius: 50%;
-            vertical-align: middle; margin-right: 6px;
-            border: 1px solid rgba(255,255,255,0.12);
+            display: inline-block; width: 12px; height: 12px; border-radius: 50%;
+            vertical-align: middle; margin-right: 7px;
+            border: 0.5px solid rgba(255,255,255,0.18);
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.4);
         }
 
         /* ── Back button ── */
@@ -280,66 +319,36 @@
             display: inline-flex; align-items: center; gap: 6px;
             background: rgba(255,255,255,0.08); color: #fff; border: none;
             border-radius: 14px; padding: 12px 20px; font-weight: 600;
-            font-size: 14px; cursor: pointer; transition: 0.2s; font-family: inherit;
-            backdrop-filter: blur(10px);
+            font-size: 14px; cursor: pointer; font-family: inherit;
+            -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+            transition: transform 0.15s, opacity 0.15s;
         }
         .btn-back:active { transform: scale(0.96); opacity: 0.8; }
 
         /* ══════════════════════════════════════
-           IMPRESSION — fiche haut de gamme
+           IMPRESSION
            ══════════════════════════════════════ */
         @media print {
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
             body { background: #fff !important; color: #000 !important; margin: 0; }
             .fiche-view { padding: 0 !important; background: #fff; }
-            .btn-back, #dashboardView, .fiche-wa-wrap,
-            .overlay, .bs-backdrop { display: none !important; }
-
-            .fiche-card {
-                background: #fff !important; color: #000 !important;
-                border-radius: 0 !important; border: none !important;
-                box-shadow: none !important; max-width: 100% !important;
-            }
-            .fiche-brand { background: #000 !important; padding: 14px 28px; }
-            .fiche-brand-logo { color: #fff !important; }
-            .fiche-brand-logo span { color: #C9A84C !important; }
-            .fiche-brand-ref { color: #aaa !important; }
-
-            .fiche-header { border-bottom: 1px solid #ddd !important; }
-            .fiche-header-left h2 { color: #000 !important; }
-            .fiche-header-left p { color: #555 !important; }
-            .fiche-header-right .fiche-date { color: #888 !important; }
-
-            .fiche-mockups { background: #f0f0f0 !important; }
-            .fiche-mockups .mockup-side { background: #fafafa !important; }
-            .fiche-mockups .side-label { color: #999 !important; }
-
+            .btn-back, #dashboardView, .fiche-wa-wrap, .overlay, .bs-backdrop { display: none !important; }
+            .fiche-card { background: #fff !important; border-radius: 0 !important; border: none !important; box-shadow: none !important; max-width: 100% !important; animation: none !important; }
+            .fiche-hero { background: #000 !important; }
+            .fiche-brand-logo { color: rgba(255,255,255,0.5) !important; }
+            .fiche-client-name { color: #fff !important; }
+            .fiche-client-tel { color: #666 !important; }
+            .fiche-mockups { background: #eee !important; }
+            .fiche-mockups .mockup-side { background: #f5f5f5 !important; }
+            .fiche-mockups .side-label { color: #bbb !important; }
             .detail-label { color: #888 !important; }
             .detail-value { color: #000 !important; }
-            .detail-row { border-bottom: 1px solid #eee !important; }
-
+            .detail-row { border-bottom: 0.5px solid #eee !important; }
             .fiche-note { background: #f8f8f8 !important; border-color: #ddd !important; }
-            .fiche-note-label { color: #999 !important; }
-            .fiche-note p { color: #444 !important; }
-
-            .fiche-total-strip {
-                background: rgba(201,168,76,0.08) !important;
-                border-color: rgba(201,168,76,0.35) !important;
-            }
+            .fiche-total-strip { background: rgba(201,168,76,0.06) !important; border-color: rgba(201,168,76,0.3) !important; }
             .fiche-total-left { color: #A07830 !important; }
             .fiche-total-amount { color: #000 !important; }
-            .fiche-total-sub { color: #888 !important; }
-
-            .fiche-payment.pay-oui { background: rgba(52,199,89,0.06) !important; border-color: rgba(52,199,89,0.3) !important; }
-            .fiche-payment.pay-non { background: rgba(255,69,58,0.06) !important; border-color: rgba(255,69,58,0.3) !important; }
-            .fiche-payment.pay-acompte { background: rgba(255,149,0,0.06) !important; border-color: rgba(255,149,0,0.3) !important; }
-            .fiche-payment-label { color: #666 !important; }
-
-            .fiche-qr-section {
-                background: #f8f8f8 !important; border-color: #ddd !important;
-            }
-            .fiche-qr-title { color: #000 !important; }
-            .fiche-qr-sub { color: #888 !important; }
+            .fiche-qr-section { background: #f8f8f8 !important; border-color: #ddd !important; }
             .fiche-qr-box { border: 1px solid #ddd; }
         }
 
@@ -509,26 +518,24 @@
 
     <div class="fiche-card">
 
-        <!-- Bandeau marque -->
-        <div class="fiche-brand">
-            <div class="fiche-brand-logo">OLD<span>A</span> STUDIO</div>
-            <div class="fiche-brand-ref" id="fCommande"></div>
-        </div>
-
-        <!-- Header client -->
-        <div class="fiche-header">
-            <div class="fiche-header-left">
-                <h2 id="fNom"></h2>
-                <p id="fTel"></p>
+        <!-- Hero : marque + client -->
+        <div class="fiche-hero">
+            <div class="fiche-hero-top">
+                <div class="fiche-brand-logo">OLD<span>A</span> STUDIO</div>
+                <div class="fiche-commande-ref" id="fCommande"></div>
             </div>
-            <div class="fiche-header-right">
-                <span class="badge" id="fBadge"></span>
-                <p class="fiche-date" id="fDate"></p>
-                <p class="fiche-date" id="fDeadline" style="display:none;color:var(--accent,#007AFF);font-weight:700;"></p>
+            <div class="fiche-client-name" id="fNom"></div>
+            <div class="fiche-client-bottom">
+                <div class="fiche-client-tel" id="fTel"></div>
+                <div class="fiche-hero-right">
+                    <span class="badge" id="fBadge"><span class="badge-dot"></span><span id="fBadgeText"></span></span>
+                    <span class="fiche-date-label" id="fDate"></span>
+                    <span class="fiche-deadline-pill" id="fDeadline" style="display:none;"></span>
+                </div>
             </div>
         </div>
 
-        <!-- Mockups haute résolution -->
+        <!-- Mockups avant / arrière -->
         <div class="fiche-mockups" id="fMockupSection">
             <div class="mockup-side">
                 <img id="fMockupFront" alt="Avant">
@@ -544,10 +551,9 @@
 
         <!-- Détails commande -->
         <div class="fiche-details">
-            <!-- Statut atelier — tappable pour changer -->
             <div class="detail-row" id="fStatusRow" onclick="ouvrirStatusSheet()" style="cursor:pointer;touch-action:manipulation;">
                 <span class="detail-label">Statut atelier</span>
-                <span id="fStatus" style="font-size:14px;font-weight:700;color:#0A84FF;text-align:right;display:flex;align-items:center;gap:6px;">
+                <span id="fStatus" class="status-row-value">
                     —
                     <svg width="14" height="14" fill="none" stroke="#0A84FF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
                 </span>
@@ -582,26 +588,24 @@
             </div>
         </div>
 
-        <!-- Note -->
+        <!-- Note atelier -->
         <div class="fiche-note" id="fNoteSection" style="display:none">
             <div class="fiche-note-label">Note atelier</div>
             <p id="fNote"></p>
         </div>
 
-        <div class="fiche-divider" style="margin:12px 0 0"></div>
+        <div class="fiche-divider" style="margin:14px 0 0"></div>
 
         <!-- Total -->
         <div class="fiche-total-strip">
             <div>
                 <div class="fiche-total-left">Total commande</div>
-                <div class="fiche-total-sub">
-                    T-Shirt <strong id="fPrixShirt"></strong> · Perso <strong id="fPrixPerso"></strong>
-                </div>
+                <div class="fiche-total-sub">T-Shirt <strong id="fPrixShirt"></strong> · Perso <strong id="fPrixPerso"></strong></div>
             </div>
             <div class="fiche-total-amount" id="fTotal"></div>
         </div>
 
-        <!-- Statut paiement -->
+        <!-- Paiement -->
         <div class="fiche-payment" id="fPayment">
             <div class="fiche-payment-dot"></div>
             <div>
@@ -614,18 +618,16 @@
 
         <!-- QR Code -->
         <div class="fiche-qr-section">
-            <div class="fiche-qr-box">
-                <div id="ficheQrCode"></div>
-            </div>
-            <div class="fiche-qr-text">
+            <div class="fiche-qr-box"><div id="ficheQrCode"></div></div>
+            <div>
                 <div class="fiche-qr-title">Scanner pour ouvrir la fiche</div>
-                <div class="fiche-qr-sub">Scannez avec votre iPhone pour ouvrir cette fiche et envoyer un WhatsApp au client directement.</div>
+                <div class="fiche-qr-sub">Scannez avec votre iPhone pour retrouver cette fiche et contacter le client directement.</div>
             </div>
         </div>
 
         <!-- WhatsApp -->
         <div class="fiche-wa-wrap">
-            <button class="btn-wa-fiche" id="fWaBtn" onclick="envoyerWhatsAppFiche()">
+            <button class="btn-wa-fiche" onclick="envoyerWhatsAppFiche()">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
                 Envoyer sur WhatsApp
             </button>
@@ -805,11 +807,12 @@ function showFicheFromStorage(key) {
 }
 
 function renderFicheDetail(f) {
-    /* Header */
+    /* Hero */
     document.getElementById('fCommande').textContent = f.commande || '';
     document.getElementById('fNom').textContent = f.nom || '';
     document.getElementById('fTel').textContent = f.telephone || '';
     document.getElementById('fDate').textContent = f.date || '';
+    document.getElementById('fBadgeText').textContent = '';
 
     /* Statut atelier */
     var ficheStatut = normaliserStatut(f.status);
@@ -822,13 +825,14 @@ function renderFicheDetail(f) {
 
     /* Badge paiement */
     var badge = document.getElementById('fBadge');
+    var badgeTextEl = document.getElementById('fBadgeText');
     var statut = (f.paiement && f.paiement.statut) || 'NON';
     if (statut === 'OUI') {
-        badge.textContent = 'PAYE'; badge.className = 'badge badge-paid';
+        badgeTextEl.textContent = 'PAYÉ'; badge.className = 'badge badge-paid';
     } else if (statut === 'ACOMPTE') {
-        badge.textContent = 'ACOMPTE'; badge.className = 'badge badge-acompte';
+        badgeTextEl.textContent = 'ACOMPTE'; badge.className = 'badge badge-acompte';
     } else {
-        badge.textContent = 'A REGLER'; badge.className = 'badge badge-unpaid';
+        badgeTextEl.textContent = 'À RÉGLER'; badge.className = 'badge badge-unpaid';
     }
 
     /* Mockups — masquer si absents (fiche lite depuis Google Sheets) */
@@ -871,7 +875,7 @@ function renderFicheDetail(f) {
         if (f.deadline) {
             var dp = f.deadline.split('-');
             var dfr = dp.length === 3 ? dp[2] + '/' + dp[1] + '/' + dp[0] : f.deadline;
-            deadlineEl.textContent = '⏱ ' + dfr;
+            deadlineEl.textContent = '⏱  ' + dfr;
             deadlineEl.style.display = '';
         } else { deadlineEl.style.display = 'none'; }
     }
@@ -917,7 +921,7 @@ function renderFicheDetail(f) {
         delete ficheLight.mockupFront;
         delete ficheLight.mockupBack;
         var lightEncoded = btoa(unescape(encodeURIComponent(JSON.stringify(ficheLight))));
-        var lightURL = 'https://ficheatelier.pages.dev/ficheatelier-index.html#' + lightEncoded;
+        var lightURL = window.location.origin + '/ficheatelier-index.html#' + lightEncoded;
         new QRCode(qrBox, {
             text     : lightURL,
             width    : 74,
