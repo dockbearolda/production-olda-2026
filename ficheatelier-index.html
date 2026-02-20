@@ -343,29 +343,36 @@
             .fiche-qr-box { border: 1px solid #ddd; }
         }
 
-        /* ── Scrollable category pills ── */
-        .tabs-scroll {
-            display: flex; gap: 8px;
+        /* ── Pipeline cards ── */
+        .pipeline-scroll {
+            display: flex; gap: 10px;
             overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
-            padding: 0 0 16px; margin-bottom: 12px;
+            padding: 4px 2px 20px; margin-bottom: 4px;
         }
-        .tabs-scroll::-webkit-scrollbar { display: none; }
-        .tab-btn {
-            flex-shrink: 0; padding: 9px 18px;
-            border: 1px solid rgba(255,255,255,0.1); border-radius: 24px;
-            font-size: 13px; font-weight: 600; font-family: inherit;
-            cursor: pointer; transition: background 0.18s, color 0.18s, border-color 0.18s;
-            background: #1c1c1e; color: #86868b; white-space: nowrap;
-            touch-action: manipulation;
+        .pipeline-scroll::-webkit-scrollbar { display: none; }
+        .pipeline-card {
+            flex-shrink: 0; width: 92px;
+            background: #141414; border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 20px; padding: 16px 10px 14px;
+            cursor: pointer; touch-action: manipulation;
+            transition: background 0.18s, border-color 0.18s, transform 0.15s;
+            display: flex; flex-direction: column; align-items: center; gap: 6px;
         }
-        .tab-btn.active { background: #fff; color: #000; border-color: #fff; font-weight: 700; }
-        .tab-count {
-            display: inline-flex; align-items: center; justify-content: center;
-            border-radius: 8px; font-size: 10px; font-weight: 800;
-            padding: 1px 6px; margin-left: 4px;
-            background: rgba(255,255,255,0.12); color: inherit;
+        .pipeline-card:active { transform: scale(0.93); }
+        .pipeline-card.active { background: #fff; border-color: #fff; }
+        .pipeline-count {
+            font-size: 32px; font-weight: 900; letter-spacing: -2px;
+            color: #3a3a3c; line-height: 1;
         }
-        .tab-btn.active .tab-count { background: rgba(0,0,0,0.1); }
+        .pipeline-card.active .pipeline-count { color: #000; }
+        .pipeline-count.live { color: #fff; }
+        .pipeline-card.active .pipeline-count.live { color: #000; }
+        .pipeline-label {
+            font-size: 9px; font-weight: 700; color: #484848;
+            text-transform: uppercase; letter-spacing: 0.3px;
+            text-align: center; line-height: 1.35; word-break: break-word;
+        }
+        .pipeline-card.active .pipeline-label { color: #555; }
 
         /* ── Status selector sheet ── */
         .status-opt {
@@ -417,32 +424,35 @@
 <body>
 
 <!-- ════════════════════════════════════
-     DASHBOARD VIEW (existing)
+     DASHBOARD VIEW
      ════════════════════════════════════ -->
-<div id="dashboardView" class="p-6 md:p-10">
-    <header class="flex justify-between items-center mb-12">
-        <div>
-            <h1 class="text-4xl font-black tracking-tight">Olda Studio</h1>
-            <p class="text-zinc-500 font-medium">Production textile en temps réel</p>
-        </div>
-        <div class="flex items-center gap-4">
+<div id="dashboardView" style="padding:24px 16px 0;">
+
+    <!-- Header épuré -->
+    <header style="display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;padding:0 2px;">
+        <h1 style="font-size:26px;font-weight:900;letter-spacing:-0.5px;color:#fff;margin:0;">Atelier</h1>
+        <div style="display:flex;align-items:center;gap:10px;">
             <div id="loader" class="loader"></div>
-            <button onclick="loadOrders()" class="bg-zinc-800 hover:bg-zinc-700 p-3 rounded-full transition-colors cursor-pointer">
-                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+            <button onclick="loadOrders()" style="background:#1c1c1e;border:1px solid #2c2c2e;color:#86868b;border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:manipulation;transition:0.2s;">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
             </button>
         </div>
     </header>
 
-    <!-- Scrollable category tabs — générés par JS -->
-    <div class="tabs-scroll" id="tabsContainer"></div>
+    <!-- Cartes de production — générées par JS (sans label "Pipeline") -->
+    <div class="pipeline-scroll" id="tabsContainer"></div>
 
-    <!-- Mosaic grid -->
+    <!-- Titre de la catégorie active -->
+    <p id="activeCatLabel" style="font-size:11px;font-weight:800;color:#555;text-transform:uppercase;letter-spacing:1.5px;margin:0 2px 16px;"></p>
+
+    <!-- Grille commandes -->
     <div id="mosaicGrid" class="mosaic-grid"></div>
 
-    <div id="emptyState" class="hidden flex-col items-center justify-center py-20 text-zinc-600">
-        <svg width="64" height="64" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24" class="mb-4"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
-        <p class="text-xl font-medium">Aucune commande en cours</p>
+    <div id="emptyState" class="hidden flex-col items-center justify-center py-20" style="color:#3a3a3c;">
+        <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24" style="margin-bottom:12px;opacity:0.4;"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        <p style="font-size:15px;font-weight:600;color:#555;">Aucune commande</p>
     </div>
+
 </div>
 
 <!-- ════════════════════════════════════
@@ -697,7 +707,7 @@ function route() {
     }
 }
 
-/* ── Rendu des onglets ── */
+/* ── Rendu des cartes de production (pipeline) ── */
 function renderTabs() {
     var container = document.getElementById('tabsContainer');
     if (!container) return;
@@ -711,14 +721,19 @@ function renderTabs() {
     container.innerHTML = CATEGORIES.map(function(cat) {
         var n = counts[cat.id] || 0;
         var isActive = currentTab === cat.id;
-        return '<button class="tab-btn' + (isActive ? ' active' : '') + '" ' +
+        var countClass = 'pipeline-count' + (n > 0 ? ' live' : '');
+        return '<button class="pipeline-card' + (isActive ? ' active' : '') + '" ' +
                'onclick="setTab(\'' + cat.id + '\')" data-tab="' + cat.id + '">' +
-               cat.label +
-               (n > 0 ? '<span class="tab-count">' + n + '</span>' : '') +
+               '<span class="' + countClass + '">' + n + '</span>' +
+               '<span class="pipeline-label">' + cat.label + '</span>' +
                '</button>';
     }).join('');
-    /* Scroll l'onglet actif dans la vue */
-    var active = container.querySelector('.tab-btn.active');
+    /* Mise à jour du label de la catégorie active */
+    var activeCat = CATEGORIES.find(function(c) { return c.id === currentTab; });
+    var labelEl = document.getElementById('activeCatLabel');
+    if (labelEl && activeCat) labelEl.textContent = activeCat.label;
+    /* Scroll la carte active dans la vue */
+    var active = container.querySelector('.pipeline-card.active');
     if (active) active.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
 }
 
