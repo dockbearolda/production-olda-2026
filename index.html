@@ -2265,7 +2265,7 @@ window.submit = function() {
     /* ── Envoi Google Sheets (best-effort, non-bloquant) ── */
     fetch(API, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }).catch(() => {});
 
-    /* ── Ouverture automatique (via <a> natif — jamais bloquée par iOS/Samsung/Chrome) ── */
+    /* ── Bouton fiche (lien prêt, ouverture manuelle uniquement) ── */
     const ficheLink = document.getElementById('sfFicheBtn');
     ficheLink.href = ficheURL;
 
@@ -2274,9 +2274,6 @@ window.submit = function() {
     document.getElementById('sfOrderNo').textContent    = payload.commande;
     document.getElementById('sfClientName').textContent = payload.nom || '';
     overlay.classList.add('sf-on');
-
-    /* Déclenche l'ouverture — appel synchrone depuis geste utilisateur, jamais bloqué ── */
-    ficheLink.click();
 
     /* ── Capture mockups en arrière-plan (best-effort, ne bloque pas la fiche) ── */
     (async () => {
@@ -2289,7 +2286,7 @@ window.submit = function() {
             /* Mettre à jour le bouton overlay avec la version complète (mockups inclus) */
             /* Met à jour le lien avec la version complète (mockups inclus) */
             document.getElementById('sfFicheBtn').href = ficheWithMockups;
-        } catch(e) { /* silencieux — la fiche sans mockup est déjà ouverte */ }
+        } catch(e) { /* silencieux — la fiche sans mockup reste disponible via le bouton */ }
     })();
 
     } catch(e) {
