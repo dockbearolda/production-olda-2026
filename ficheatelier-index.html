@@ -102,6 +102,8 @@
         .badge-paid { background: rgba(52,199,89,0.15); color: #32D74B; }
         .badge-unpaid { background: rgba(255,69,58,0.15); color: #FF453A; }
         .badge-acompte { background: rgba(255,149,0,0.15); color: #FF9F0A; }
+        .bio-tag { display:inline-flex; align-items:center; gap:3px; background:rgba(34,139,34,0.12); color:#1a6b32; font-size:9px; font-weight:700; letter-spacing:0.05em; padding:2px 6px 2px 5px; border-radius:10px; border:0.5px solid rgba(34,139,34,0.25); vertical-align:middle; margin-left:6px; }
+        .ref-desc { font-size:11px; color:#8E8E93; margin-top:2px; }
 
         .loader { width: 20px; height: 20px; border: 3px solid #333; border-top: 3px solid #007AFF; border-radius: 50%; animation: spin 1s linear infinite; display: none; }
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -709,7 +711,11 @@ function renderFicheDetail(f) {
 
     /* Details */
     document.getElementById('fCollection').textContent = f.collection || '\u2014';
-    document.getElementById('fReference').textContent = f.reference || '\u2014';
+    var refEl = document.getElementById('fReference');
+    var refHtml = f.reference || '\u2014';
+    if (f.bio) refHtml += '<span class="bio-tag"><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M17 8C8 10 5.9 16.17 3.82 21.34L5.71 22l1-2.3A4.49 4.49 0 008 20C19 20 22 3 22 3c-1 2-8 2-8 2z"/></svg>BIO</span>';
+    if (f.refDesc) refHtml += '<div class="ref-desc">' + f.refDesc + '</div>';
+    refEl.innerHTML = refHtml;
     document.getElementById('fTaille').textContent = f.taille || '\u2014';
 
     var couleurHtml = '';

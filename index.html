@@ -2219,6 +2219,8 @@ window.submit = async function() {
         deadline          : deadline,
         collection        : payload.collection,
         reference         : payload.reference,
+        refDesc           : (REFERENCES[payload.reference] && REFERENCES[payload.reference].desc) || '',
+        bio               : !!(REFERENCES[payload.reference] && REFERENCES[payload.reference].bio),
         taille            : payload.taille,
         couleur           : { nom: color.n, hex: color.h },
         logoAvant         : payload.logoAvant,
