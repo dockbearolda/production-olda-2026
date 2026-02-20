@@ -215,57 +215,83 @@
 
 </div>
 
+<script src="/socket.io/socket.io.js"></script>
 <script>
-    // Correspondance statut → id HTML
     const STATS_IDS = [
-        'en_attente',
-        'a_preparer',
-        'maquette_a_faire',
-        'prt_a_faire',
-        'validation',
-        'impression',
-        'pressage',
-        'client_a_contacter',
-        'client_prevenu',
-        'archives'
+        'en_attente', 'a_preparer', 'maquette_a_faire', 'prt_a_faire',
+        'validation', 'impression', 'pressage', 'client_a_contacter',
+        'client_prevenu', 'archives'
     ];
 
-    async function chargerStats() {
-        try {
-            const resp = await fetch('/api/stats');
-            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-            const data = await resp.json();
-
-            // Mettre à jour chaque compteur
-            STATS_IDS.forEach(statut => {
-                const el = document.getElementById('stat-' + statut);
-                if (el) {
-                    el.textContent = data.stats[statut] ?? 0;
-                    el.classList.remove('chargement');
-                }
-            });
-
-            // Mettre à jour le badge total
-            const badge = document.getElementById('badge-total');
-            badge.textContent = data.total + ' commande' + (data.total !== 1 ? 's' : '');
-
-            // Indicateur de sync
-            const sync = document.getElementById('sync-status');
-            const heure = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            sync.textContent = 'Mis à jour à ' + heure;
-            sync.classList.remove('erreur');
-
-        } catch (err) {
-            const sync = document.getElementById('sync-status');
-            sync.textContent = 'Erreur de connexion — nouvelle tentative dans 30 s';
-            sync.classList.add('erreur');
-        }
+    function appliquerStats(data) {
+        STATS_IDS.forEach(statut => {
+            const el = document.getElementById('stat-' + statut);
+            if (el) {
+                el.textContent = data.stats[statut] ?? 0;
+                el.classList.remove('chargement');
+            }
+        });
+        const badge = document.getElementById('badge-total');
+        badge.textContent = data.total + ' commande' + (data.total !== 1 ? 's' : '');
     }
 
-    // Chargement immédiat puis toutes les 30 secondes
-    chargerStats();
-    setInterval(chargerStats, 30000);
+    function afficherSync(texte, erreur) {
+        const sync = document.getElementById('sync-status');
+        sync.textContent = texte;
+        erreur ? sync.classList.add('erreur') : sync.classList.remove('erreur');
+    }
+
+    function heureNow() {
+        return new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }
+
+    /* ── Connexion Socket.io ── */
+    const socket = io({ transports: ['websocket', 'polling'] });
+
+    socket.on('connect', () => {
+        afficherSync('Connecté — en attente de commandes…', false);
+    });
+
+    socket.on('disconnect', () => {
+        afficherSync('Connexion perdue — reconnexion…', true);
+    });
+
+    /* Mise à jour instantanée des compteurs à chaque commande reçue */
+    socket.on('stats-update', (data) => {
+        appliquerStats(data);
+        afficherSync('Mis à jour à ' + heureNow(), false);
+    });
+
+    /* Notification visuelle à chaque nouvelle commande */
+    socket.on('new-order', (order) => {
+        const notif = document.createElement('div');
+        notif.style.cssText = [
+            'position:fixed', 'bottom:24px', 'left:50%', 'transform:translateX(-50%)',
+            'background:#1c1c1e', 'color:#fff', 'padding:14px 22px',
+            'border-radius:14px', 'font-size:14px', 'font-weight:600',
+            'box-shadow:0 4px 20px rgba(0,0,0,0.3)', 'z-index:9999',
+            'animation:fadeIn .25s ease'
+        ].join(';');
+        notif.textContent = '🆕 Nouvelle commande — ' + order.nom + ' (' + order.commande + ')';
+        document.body.appendChild(notif);
+        setTimeout(() => notif.remove(), 4500);
+    });
+
+    /* ── Fallback HTTP : chargement initial si socket lent ── */
+    async function chargerStatsFallback() {
+        try {
+            const resp = await fetch('/api/stats');
+            if (!resp.ok) return;
+            const data = await resp.json();
+            appliquerStats(data);
+            afficherSync('Chargé à ' + heureNow(), false);
+        } catch (_) { /* socket prend le relais */ }
+    }
+    chargerStatsFallback();
 </script>
+<style>
+    @keyframes fadeIn { from { opacity:0; transform:translateX(-50%) translateY(8px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
+</style>
 
 </body>
 </html>
