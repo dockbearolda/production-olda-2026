@@ -7,7 +7,8 @@ const app    = express();
 const server = http.createServer(app);
 const PORT   = process.env.PORT || 3000;
 
-const IS_DASHBOARD    = process.env.SITE_MODE === 'dashboard';
+/* Dashboard actif par défaut — mettre SITE_MODE=form pour le site formulaire */
+const IS_DASHBOARD    = process.env.SITE_MODE !== 'form';
 const DASHBOARD_TOKEN = process.env.DASHBOARD_TOKEN || 'd1e9c4cd170eb57f8ce6254b5aa70b7f708e465d48daefc7f3b0b7e16bd9f4dc';
 const CLIENT_ORIGIN   = process.env.CLIENT_ORIGIN  || 'https://oldastudio.up.railway.app';
 
