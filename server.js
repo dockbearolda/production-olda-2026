@@ -12,7 +12,7 @@ const DASHBOARD_TOKEN = process.env.DASHBOARD_TOKEN || 'd1e9c4cd170eb57f8ce6254b
 const CLIENT_ORIGIN   = process.env.CLIENT_ORIGIN  || 'https://oldastudio.up.railway.app';
 
 /* ── Configuration DASHOLDA (transfert automatique des commandes) ── */
-const DASHOLDA_URL    = process.env.DASHOLDA_URL              || '';
+const DASHOLDA_URL    = process.env.DASHOLDA_URL              || 'https://dasholda.up.railway.app';
 const DASHOLDA_SECRET = process.env.DASHOLDA_WEBHOOK_SECRET   || '';
 
 /* ── Log en mémoire des envois échoués vers DASHOLDA ── */
