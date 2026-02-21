@@ -2277,61 +2277,17 @@ async function captureMockup(shirtSvg, sideData, fabricHex, W, H, Q) {
    DASHBOARD — Envoi commande
    ══════════════════════════════════════ */
 async function sendOrderToDashboard(payload) {
-    // Nettoie un prix : "29,90 €" → 29.90
-    const parsePrice = v =>
-        parseFloat(String(v).replace(/[^\d.,]/g, '').replace(',', '.')) || 0;
-    const prixTshirt = parsePrice(payload.prixTshirt);
-    const prixPerso  = parsePrice(payload.personnalisation);
-    const total      = parsePrice(payload.total) || (prixTshirt + prixPerso);
-    // Articles
-    const items = [];
-    if (prixTshirt > 0) {
-        items.push({
-            name:     [payload.reference, payload.collection, payload.couleurTshirt, payload.taille]
-                        .filter(Boolean).join(' – '),
-            quantity: 1,
-            price:    prixTshirt,
-        });
-    }
-    if (prixPerso > 0) {
-        items.push({
-            name:     'Personnalisation',
-            quantity: 1,
-            price:    prixPerso,
-        });
-    }
-    if (items.length === 0) {
-        items.push({ name: 'Commande textile', quantity: 1, price: total });
-    }
-    // Notes : commentaire + date butoir
-    const deadline = document.getElementById('clientDeadline')?.value;
-    const noteParts = [payload.note, deadline ? `Butoir : ${deadline}` : '']
-        .filter(Boolean);
-    const body = {
-        orderNumber:   payload.commande,
-        customerName:  payload.nom,
-        customerEmail: `${String(payload.telephone).replace(/[\s.]/g, '')}@client.olda.fr`,
-        customerPhone: payload.telephone,
-        status:        'COMMANDE_EN_ATTENTE',
-        paymentStatus: payload.paye === 'oui' ? 'PAID' : 'PENDING',
-        total,
-        subtotal:      prixTshirt,
-        shipping:      0,
-        tax:           0,
-        currency:      'EUR',
-        notes:         noteParts.join(' | ') || null,
-        items,
-    };
     try {
-        const res = await fetch(`${DASHBOARD_URL}/api/orders`, {
+        await fetch('https://dasholda.up.railway.app/api/orders', {
             method:  'POST',
-            headers: {
-                'Content-Type':  'application/json',
-                'Authorization': `Bearer ${DASHBOARD_TOKEN}`,
-            },
-            body: JSON.stringify(body),
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                id_commande: payload.commande,
+                client_nom:  payload.nom,
+                total:       payload.total,
+                date:        payload.date,
+            }),
         });
-        if (!res.ok) console.warn('Dashboard OLDA erreur:', await res.json().catch(() => res.status));
     } catch (e) {
         console.error('Dashboard OLDA injoignable:', e);
     }
