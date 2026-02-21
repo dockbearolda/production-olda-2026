@@ -45,7 +45,7 @@
         button, a, label[for],
         .aselect-trigger, .aselect-opt, .seg-btn, .swatch,
         .pay-opt, .lsheet-close-btn, .fbar-btn, .shirt-col,
-        .logo-tap-overlay, .lsheet-upload-row, .sf-btn-primary, .sf-btn-secondary {
+        .logo-tap-overlay, .lsheet-upload-row {
             touch-action: manipulation;
         }
         /* ── Overscroll (empêche le scroll parent de se déclencher sur Android) ── */
@@ -822,68 +822,6 @@
 
         ::-webkit-scrollbar { width: 0; }
 
-        /* ── Apple Success Overlay ── */
-        @keyframes sfOverlayIn {
-            from { opacity: 0; }
-            to   { opacity: 1; }
-        }
-        @keyframes sfCardIn {
-            from { opacity: 0; transform: scale(.86) translateY(32px); }
-            to   { opacity: 1; transform: scale(1)  translateY(0); }
-        }
-        @keyframes sfCheckDraw {
-            to { stroke-dashoffset: 0; }
-        }
-        @keyframes sfCheckBg {
-            0%   { transform: scale(.6); opacity: 0; }
-            60%  { transform: scale(1.12); opacity: 1; }
-            100% { transform: scale(1); }
-        }
-        #successOverlay { display:none; }
-        #successOverlay.sf-on {
-            display: flex;
-            position: fixed; inset: 0; z-index: 9999;
-            align-items: center; justify-content: center;
-            background: rgba(0,0,0,.52);
-            backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
-            animation: sfOverlayIn .22s ease;
-            padding: env(safe-area-inset-top,0px) env(safe-area-inset-right,0px)
-                     env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px);
-        }
-        #successCard {
-            background: #fff; border-radius: 28px;
-            padding: 40px 32px 32px; width: min(370px, calc(100vw - 40px));
-            text-align: center;
-            box-shadow: 0 48px 120px rgba(0,0,0,.38);
-            animation: sfCardIn .42s cubic-bezier(.34,1.44,.64,1);
-        }
-        .sf-check-circle {
-            width: 80px; height: 80px; border-radius: 50%;
-            background: #34C759; margin: 0 auto 24px;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 10px 28px rgba(52,199,89,.38);
-            animation: sfCheckBg .42s cubic-bezier(.34,1.44,.64,1);
-        }
-        .sf-check-path {
-            stroke-dasharray: 52; stroke-dashoffset: 52;
-            animation: sfCheckDraw .5s .25s cubic-bezier(.4,0,.2,1) forwards;
-        }
-        .sf-btn-primary {
-            display: block; text-decoration: none; text-align: center;
-            width: 100%; background: #007AFF; color: #fff;
-            border: none; border-radius: 14px; padding: 16px;
-            font-size: 16px; font-weight: 600; cursor: pointer;
-            margin-bottom: 10px; font-family: inherit;
-            transition: opacity .15s;
-        }
-        .sf-btn-primary:active { opacity: .8; }
-        .sf-btn-secondary {
-            width: 100%; background: #F2F2F7; color: #1A1A1A;
-            border: none; border-radius: 14px; padding: 16px;
-            font-size: 16px; font-weight: 600; cursor: pointer;
-            font-family: inherit; transition: opacity .15s;
-        }
-        .sf-btn-secondary:active { opacity: .6; }
         /* Zoom léger au survol — style Apple */
         .svg-view {
             transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1277,27 +1215,6 @@
         </div>
     </div>
 
-</div>
-
-<!-- ═══════════════════════════════════════════
-     APPLE SUCCESS OVERLAY
-════════════════════════════════════════════ -->
-<div id="successOverlay">
-    <div id="successCard">
-        <div class="sf-check-circle">
-            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                <path class="sf-check-path"
-                      d="M10 21L17 28L30 13"
-                      stroke="white" stroke-width="3.4"
-                      stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-        </div>
-        <p style="font-size:24px;font-weight:700;color:#1A1A1A;margin:0 0 6px;letter-spacing:-.4px;">Commande envoyée</p>
-        <p id="sfOrderNo" style="font-size:13px;color:#8E8E93;margin:0 0 10px;letter-spacing:.3px;font-weight:300;"></p>
-        <p id="sfClientName" style="font-size:15px;color:#3A3A3C;margin:0 0 30px;font-weight:500;"></p>
-        <a id="sfFicheBtn" class="sf-btn-primary" target="_blank" rel="noopener">Voir le Dashboard ›</a>
-        <button class="sf-btn-secondary" onclick="location.reload()">Nouvelle commande</button>
-    </div>
 </div>
 
 <!-- ═══════════════════════════════════════════
@@ -2598,16 +2515,7 @@ window.submit = async function() {
         console.warn('[OLDA Fiche] Erreur sauvegarde:', ficheErr.message);
     }
 
-    /* ── Bouton fiche → dashboard atelier (même domaine) ── */
-    const ficheLink = document.getElementById('sfFicheBtn');
-    ficheLink.href = 'ficheatelier-index.html';
-    ficheLink.textContent = 'Voir la fiche récapitulative ›';
-
-    /* ── Success overlay ── */
-    const overlay = document.getElementById('successOverlay');
-    document.getElementById('sfOrderNo').textContent    = payload.commande;
-    document.getElementById('sfClientName').textContent = payload.nom || '';
-    overlay.classList.add('sf-on');
+    location.reload();
 
     } catch(e) {
         console.error('Erreur validation:', e);
