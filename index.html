@@ -2504,27 +2504,52 @@ async function captureMockup(shirtSvg, sideData, fabricHex, W, H, Q) {
 }
 
 /* ══════════════════════════════════════
-   DASHBOARD — Envoi commande
+   DASHBOARD — Envoi commande vers /api/orders
+   product_type: 't-shirt', status: 'a-traiter'
    ══════════════════════════════════════ */
-async function sendOrderToDashboard(payload) {
+async function sendOrderToDashboard(payload, mockups) {
     var totalNum = parseFloat(payload.total) || 0;
+    var orderId  = payload.commande || '';
+
     var orderData = {
-        orderNumber   : payload.commande,
+        /* ── Identifiant & catégorie ── */
+        orderNumber   : orderId,
+        product_type  : 't-shirt',
+        status        : 'a-traiter',
+
+        /* ── Client ── */
         customerName  : payload.nom,
-        customerEmail : (payload.commande || 'order').replace(/[\s\/]/g, '-').toLowerCase() + '@commandes.oldastudio.fr',
+        customerEmail : orderId.replace(/[\s\/]/g, '-').toLowerCase() + '@commandes.oldastudio.fr',
         customerPhone : payload.telephone || '',
-        status        : 'COMMANDE_A_TRAITER',
+
+        /* ── Produit ── */
+        collection    : payload.collection || '',
+        reference     : payload.reference  || '',
+        taille        : payload.taille     || '',
+        couleurTshirt : payload.couleurTshirt    || '',
+        couleurTshirtHex : payload.couleurTshirtHex || '',
+
+        /* ── Logos ── */
+        logoAvant          : payload.logoAvant          || '',
+        logoArriere        : payload.logoArriere        || '',
+        couleurLogoAvant   : payload.couleurLogoAvant   || '',
+        couleurLogoArriere : payload.couleurLogoArriere || '',
+
+        /* ── Paiement ── */
         paymentStatus : payload.paye === 'OUI' ? 'PAID' : 'PENDING',
         total         : totalNum,
         subtotal      : totalNum,
         currency      : 'EUR',
-        notes         : [
-            payload.collection ? 'Collection: ' + payload.collection : '',
-            payload.couleurTshirt ? 'Couleur: ' + payload.couleurTshirt : '',
-            payload.logoAvant ? 'Logo avant: ' + payload.logoAvant : '',
-            payload.logoArriere ? 'Logo arrière: ' + payload.logoArriere : '',
-            payload.note || ''
-        ].filter(Boolean).join(' | '),
+
+        /* ── Notes & date ── */
+        date          : payload.date || '',
+        deadline      : payload.deadline || '',
+        notes         : payload.note || '',
+
+        /* ── QR — lien direct vers la fiche ── */
+        ficheUrl      : 'https://dasholda.up.railway.app/dashboard/commande/' + encodeURIComponent(orderId),
+
+        /* ── Items (format standard e-commerce) ── */
         items: [{
             name     : (payload.collection || '') + ' ' + (payload.reference || '') + ' (' + (payload.taille || '') + ')',
             sku      : payload.reference || '',
@@ -2532,8 +2557,15 @@ async function sendOrderToDashboard(payload) {
             price    : totalNum
         }]
     };
+
+    /* Ajouter les mockups data-URL si disponibles */
+    if (mockups) {
+        if (mockups.front) orderData.mockupFront = mockups.front;
+        if (mockups.back)  orderData.mockupBack  = mockups.back;
+    }
+
     try {
-        await fetch('https://dasholda.up.railway.app/api/orders', {
+        var response = await fetch('https://dasholda.up.railway.app/api/orders', {
             method:  'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -2541,8 +2573,11 @@ async function sendOrderToDashboard(payload) {
             },
             body: JSON.stringify(orderData),
         });
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        return { ok: true };
     } catch (e) {
         console.error('Dashboard OLDA injoignable:', e);
+        return { ok: false, error: e.message };
     }
 }
 
@@ -2658,12 +2693,13 @@ window.submit = async function() {
         personnalisation  : (selects['selPerso']  && selects['selPerso'].value)  || '0',
         total             : String((parseFloat(selects['selPrice']?.value)||0)+(parseFloat(selects['selPerso']?.value)||0)),
         paye              : payStatus === 'oui' ? 'OUI' : 'NON',
-        famille           : selectedFamily
+        famille           : selectedFamily,
+        deadline          : (document.getElementById('clientDeadline')?.value || '').trim()
     };
 
     /* ── Build fiche data (synchrone) ── */
     const coteLogoAr = (document.getElementById('coteLogoAr')?.value || '').trim();
-    const deadline   = (document.getElementById('clientDeadline')?.value || '').trim();
+    const deadline   = payload.deadline;
     const ficheBase = {
         commande          : payload.commande,
         date              : payload.date,
@@ -2706,32 +2742,99 @@ window.submit = async function() {
     /* ── Envoi Google Sheets (best-effort, non-bloquant) ── */
     fetch(API, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }).catch(() => {});
 
-    /* ── Envoi Dashboard OLDA (dasholda.up.railway.app) ── */
-    sendOrderToDashboard(payload);
+    /* ── Envoi Dashboard OLDA (dasholda.up.railway.app/api/orders) ── */
+    var dashResult = await sendOrderToDashboard(payload, {
+        front: mockupFront,
+        back:  mockupBack
+    });
 
-    /* ── Sauvegarde fiche dans localStorage (même domaine = même dashboard) ── */
+    /* ── Sauvegarde fiche dans localStorage ── */
     try {
         var ficheKey = ficheComplete.commande || ('cmd-' + Date.now());
         var allFiches = JSON.parse(localStorage.getItem('olda_fiches') || '{}');
-        if (!ficheComplete.status) ficheComplete.status = 'en-attente';
+        if (!ficheComplete.status) ficheComplete.status = 'a-traiter';
+        ficheComplete.product_type = 't-shirt';
         allFiches[ficheKey] = ficheComplete;
         localStorage.setItem('olda_fiches', JSON.stringify(allFiches));
     } catch(ficheErr) {
         console.warn('[OLDA Fiche] Erreur sauvegarde:', ficheErr.message);
     }
 
-    location.reload();
+    /* ── Confirmation Apple-style ── */
+    showAppleConfirmation(payload.commande, dashResult && dashResult.ok);
 
     } catch(e) {
         console.error('Erreur validation:', e);
         b.textContent = 'Envoyer à l\'Atelier'; b.disabled = false; b.style.opacity = '1';
-        const err = document.createElement('p');
-        err.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#FF3B30;color:#fff;padding:12px 20px;border-radius:12px;font-size:14px;font-weight:600;z-index:9999;';
-        err.textContent = 'Erreur : ' + e.message;
-        document.body.appendChild(err);
-        setTimeout(() => err.remove(), 5000);
+        showAppleToast('Erreur : ' + e.message, false);
     }
 };
+
+/* ══════════════════════════════════════
+   CONFIRMATION APPLE-STYLE
+   ══════════════════════════════════════ */
+function showAppleToast(msg, success) {
+    var t = document.createElement('div');
+    t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);'
+        + 'background:' + (success ? '#1D1D1F' : '#FF3B30') + ';color:#fff;padding:14px 24px;border-radius:14px;'
+        + 'font-size:14px;font-weight:600;z-index:9999;opacity:0;transition:all 0.3s ease;'
+        + 'box-shadow:0 4px 20px rgba(0,0,0,0.15);';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    requestAnimationFrame(function() { t.style.opacity = '1'; t.style.transform = 'translateX(-50%) translateY(0)'; });
+    setTimeout(function() {
+        t.style.opacity = '0'; t.style.transform = 'translateX(-50%) translateY(20px)';
+        setTimeout(function() { t.remove(); }, 300);
+    }, 4000);
+}
+
+function showAppleConfirmation(orderId, apiOk) {
+    /* Overlay plein écran */
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(255,255,255,0.97);z-index:10000;'
+        + 'display:flex;flex-direction:column;align-items:center;justify-content:center;'
+        + 'opacity:0;transition:opacity 0.35s ease;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);';
+
+    /* Checkmark animé (SVG Apple-style) */
+    overlay.innerHTML = ''
+        + '<div style="width:72px;height:72px;border-radius:50%;background:#34C759;display:flex;align-items:center;justify-content:center;'
+        +   'transform:scale(0);transition:transform 0.4s cubic-bezier(0.175,0.885,0.32,1.275);animation:none;" id="_appleCheck">'
+        +   '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">'
+        +     '<polyline points="20 6 9 17 4 12"/>'
+        +   '</svg>'
+        + '</div>'
+        + '<div style="margin-top:20px;font-size:20px;font-weight:700;color:#1D1D1F;letter-spacing:-0.03em;opacity:0;'
+        +   'transform:translateY(8px);transition:all 0.3s ease 0.2s;" id="_appleTitle">Commande envoyée</div>'
+        + '<div style="margin-top:6px;font-size:14px;color:#86868B;font-weight:500;opacity:0;'
+        +   'transform:translateY(8px);transition:all 0.3s ease 0.35s;" id="_appleSub">'
+        +   (orderId || '') + ' — Transmise à l\'atelier'
+        + '</div>'
+        + (apiOk ? '' : '<div style="margin-top:8px;font-size:12px;color:#FF9500;font-weight:500;opacity:0;'
+        +   'transform:translateY(8px);transition:all 0.3s ease 0.45s;" id="_appleWarn">Connexion dashboard instable — données sauvegardées</div>');
+
+    document.body.appendChild(overlay);
+
+    /* Séquence d'animation */
+    requestAnimationFrame(function() {
+        overlay.style.opacity = '1';
+        setTimeout(function() {
+            var chk = document.getElementById('_appleCheck');
+            if (chk) chk.style.transform = 'scale(1)';
+            var ttl = document.getElementById('_appleTitle');
+            if (ttl) { ttl.style.opacity = '1'; ttl.style.transform = 'translateY(0)'; }
+            var sub = document.getElementById('_appleSub');
+            if (sub) { sub.style.opacity = '1'; sub.style.transform = 'translateY(0)'; }
+            var wrn = document.getElementById('_appleWarn');
+            if (wrn) { wrn.style.opacity = '1'; wrn.style.transform = 'translateY(0)'; }
+        }, 100);
+    });
+
+    /* Reload après 2.5s */
+    setTimeout(function() {
+        overlay.style.opacity = '0';
+        setTimeout(function() { location.reload(); }, 350);
+    }, 2500);
+}
 
 
 })();
