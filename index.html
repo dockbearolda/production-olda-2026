@@ -2586,6 +2586,7 @@ async function sendToAtelier(payload, mockups) {
         couleurLogoArriere: payload.couleurLogoArriere|| '',
         note              : payload.note       || '',
         famille           : payload.famille    || 'textile',
+        category          : payload.famille === 'mug' ? 'mug' : 't-shirt',
         prix: {
             tshirt          : payload.prixTshirt       || '0',
             personnalisation: payload.personnalisation || '0',

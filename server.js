@@ -122,6 +122,13 @@ function mapToDasholda(order) {
     const itemName = [order.collection, order.reference, order.taille ? `(${order.taille})` : '']
         .filter(Boolean).join(' ') || 'T-shirt OLDA';
 
+    /* Catégorie produit pour le routage DASHOLDA
+       famille 'textile' → product_type 't-shirt'
+       famille 'mug'     → product_type 'mug'
+       défaut            → 't-shirt' (jamais 'autre' par erreur) */
+    const familleMap = { textile: 't-shirt', mug: 'mug' };
+    const product_type = familleMap[order.famille] || order.category || order.famille || 't-shirt';
+
     /* Notes enrichies */
     const notes = [
         order.note        || '',
@@ -137,6 +144,7 @@ function mapToDasholda(order) {
         customerEmail,
         customerPhone : order.telephone  || '',
         paymentStatus : paiement.statut === 'OUI' ? 'PAID' : 'PENDING',
+        product_type,
         total         : totalVal,
         subtotal,
         shipping      : 0,
