@@ -2537,6 +2537,7 @@ async function fetchWithRetry(url, options, maxRetries) {
         } catch (err) {
             clearTimeout(timer);
             lastErr = err;
+            console.warn('[fetchWithRetry] Tentative ' + attempt + '/' + maxRetries + ' échouée — URL:', url, '— Erreur:', err);
             if (attempt < maxRetries) {
                 await new Promise(function(r) { setTimeout(r, 800 * attempt); });
             }
@@ -2607,14 +2608,28 @@ async function sendOrderToDashboard(payload, mockups) {
             'Authorization': 'Bearer ' + DASHBOARD_TOKEN
         },
         body: JSON.stringify(orderData)
+        /* Pas de mode: 'no-cors' — on a besoin de lire la réponse et d'envoyer du JSON */
     };
+
+    console.log('[Dashboard OLDA] Envoi vers https://dasholda.up.railway.app/api/orders',
+                '— commande:', orderId, '— headers:', Object.keys(fetchOptions.headers));
 
     try {
         var response = await fetchWithRetry('https://dasholda.up.railway.app/api/orders', fetchOptions, 3);
-        if (!response.ok) throw new Error('HTTP ' + response.status);
+        if (!response.ok) {
+            var body = '';
+            try { body = await response.text(); } catch (_) {}
+            console.error('[Dashboard OLDA] Erreur HTTP', response.status, response.statusText,
+                          '\n→ URL :', 'https://dasholda.up.railway.app/api/orders',
+                          '\n→ Réponse serveur :', body);
+            return { ok: false, error: 'HTTP ' + response.status };
+        }
         return { ok: true };
     } catch (e) {
-        console.error('[Dashboard OLDA] Échec après 3 tentatives :', e.message);
+        console.error('[Dashboard OLDA] Échec après 3 tentatives',
+                      '\n→ URL :', 'https://dasholda.up.railway.app/api/orders',
+                      '\n→ Erreur complète :', e,
+                      '\n→ Type :', e.name, '—', e.message);
         return { ok: false, error: e.message };
     }
 }
@@ -2780,7 +2795,9 @@ window.submit = async function() {
     var _ficheEncoded = btoa(unescape(encodeURIComponent(JSON.stringify(_ficheLight))));
     payload.fiche = DASHBOARD_URL + '/ficheatelier-index.html#' + _ficheEncoded;
 
-    /* ── Envoi Google Sheets (best-effort, non-bloquant) ── */
+    /* ── Envoi Google Sheets (best-effort, non-bloquant)
+          no-cors intentionnel : Google Apps Script ne renvoie pas de CORS headers,
+          l'envoi est unidirectionnel — NE PAS utiliser no-cors pour le dashboard OLDA ── */
     fetch(API, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }).catch(() => {});
 
     /* ── Envoi Dashboard OLDA (dasholda.up.railway.app/api/orders) ── */
