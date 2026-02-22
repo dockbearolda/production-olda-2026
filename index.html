@@ -2563,73 +2563,49 @@ async function fetchWithRetry(url, options, maxRetries) {
 }
 
 /* ══════════════════════════════════════
-   DASHBOARD — Envoi commande vers /api/orders
-   URL + Token lus depuis Railway env vars via /api/config
-   product_type: 't-shirt', status: 'a-traiter'
+   ENVOI COMMANDE → DASHOLDA (via relay serveur)
+
+   Chemin : navigateur → /api/webhook/forward-to-dasholda → DASHOLDA /api/orders
+   Le token reste côté serveur (process.env.DASHBOARD_TOKEN)
+   Le serveur mappe les données via mapToDasholda()
    ══════════════════════════════════════ */
-async function sendOrderToDashboard(payload, mockups) {
-    var totalNum = parseFloat(payload.total) || 0;
-    var orderId  = payload.commande || '';
-
-    /* URL cible : DASHBOARD_URL vient de /api/config (process.env.DASHOLDA_URL) */
-    var baseUrl = DASHBOARD_URL || '';
-    if (baseUrl && !baseUrl.startsWith('http')) baseUrl = 'https://' + baseUrl;
-    var apiUrl = baseUrl + '/api/orders';
-
+async function sendToAtelier(payload, mockups) {
+    /* Format attendu par server.js → mapToDasholda() */
     var orderData = {
-        /* ── Identifiant & catégorie ── */
-        orderNumber   : orderId,
-        product_type  : 't-shirt',
-        status        : 'a-traiter',
-
-        /* ── Client ── */
-        customerName  : payload.nom,
-        customerEmail : orderId.replace(/[\s\/]/g, '-').toLowerCase() + '@commandes.oldastudio.fr',
-        customerPhone : payload.telephone || '',
-
-        /* ── Produit ── */
-        collection    : payload.collection || '',
-        reference     : payload.reference  || '',
-        taille        : payload.taille     || '',
-        couleurTshirt : payload.couleurTshirt    || '',
-
-        /* ── Logos ── */
-        logoAvant          : payload.logoAvant          || '',
-        logoArriere        : payload.logoArriere        || '',
-        couleurLogoAvant   : payload.couleurLogoAvant   || '',
-        couleurLogoArriere : payload.couleurLogoArriere || '',
-
-        /* ── Paiement ── */
-        paymentStatus : payload.paye === 'OUI' ? 'PAID' : 'PENDING',
-        total         : totalNum,
-
-        /* ── Notes & date ── */
-        date          : payload.date || '',
-        deadline      : payload.deadline || '',
-        notes         : payload.note || '',
-
-        /* ── QR — lien direct vers la fiche ── */
-        ficheUrl      : baseUrl + '/dashboard/commande/' + encodeURIComponent(orderId),
-
-        /* ── Items (format standard e-commerce) ── */
-        items: [{
-            name     : (payload.collection || '') + ' ' + (payload.reference || '') + ' (' + (payload.taille || '') + ')',
-            sku      : payload.reference || '',
-            quantity : 1,
-            price    : totalNum
-        }]
+        commande          : payload.commande   || '',
+        date              : payload.date       || '',
+        nom               : payload.nom        || '',
+        telephone         : payload.telephone  || '',
+        collection        : payload.collection || '',
+        reference         : payload.reference  || '',
+        taille            : payload.taille     || '',
+        couleurTshirt     : payload.couleurTshirt     || '',
+        logoAvant         : payload.logoAvant         || '',
+        logoArriere       : payload.logoArriere       || '',
+        couleurLogoAvant  : payload.couleurLogoAvant  || '',
+        couleurLogoArriere: payload.couleurLogoArriere|| '',
+        note              : payload.note       || '',
+        famille           : payload.famille    || 'textile',
+        prix: {
+            tshirt          : payload.prixTshirt       || '0',
+            personnalisation: payload.personnalisation || '0',
+            total           : payload.total            || '0'
+        },
+        paiement: { statut: payload.paye || 'NON' }
     };
 
-    /* Ajouter les mockups data-URL si disponibles */
-    if (mockups) {
-        if (mockups.front) orderData.mockupFront = mockups.front;
-        if (mockups.back)  orderData.mockupBack  = mockups.back;
+    /* Mockups si disponibles (server.js les met dans fiche.mockupFront) */
+    if (mockups && (mockups.front || mockups.back)) {
+        orderData.fiche = {
+            mockupFront : mockups.front || null,
+            mockupBack  : mockups.back  || null
+        };
     }
 
-    console.info('[Dashboard] POST →', apiUrl, '— commande:', orderId);
+    console.info('[Atelier] POST → /api/webhook/forward-to-dasholda — commande:', orderData.commande);
 
     try {
-        var response = await fetchWithRetry(apiUrl, {
+        var response = await fetchWithRetry('/api/webhook/forward-to-dasholda', {
             method  : 'POST',
             mode    : 'cors',
             headers : {
@@ -2642,99 +2618,28 @@ async function sendOrderToDashboard(payload, mockups) {
         if (!response.ok) {
             var errBody = '';
             try { errBody = await response.text(); } catch(_) {}
-            console.error('[Dashboard] ERREUR HTTP', response.status, response.statusText,
-                          '\n→ URL :', apiUrl,
-                          '\n→ Réponse serveur :', errBody);
-            if (response.status === 401) console.error('[Dashboard] → Vérifiez DASHBOARD_TOKEN dans les variables Railway');
-            if (response.status === 404) console.error('[Dashboard] → Vérifiez DASHOLDA_URL dans les variables Railway :', baseUrl);
+            console.error('[Atelier] ERREUR HTTP', response.status, response.statusText);
+            console.error('[Atelier] Réponse serveur :', errBody);
+            if (response.status === 401) console.error('[Atelier] → Token invalide — vérifiez DASHBOARD_TOKEN dans Railway');
+            if (response.status === 502) console.error('[Atelier] → DASHOLDA injoignable — vérifiez DASHOLDA_URL dans Railway');
+            if (response.status === 503) console.error('[Atelier] → DASHOLDA_URL non configurée sur le serveur');
             return { ok: false, error: 'HTTP ' + response.status + ' — ' + (errBody || response.statusText) };
         }
 
         var result = await response.json().catch(function() { return {}; });
-        console.info('[Dashboard] OK — commande transmise :', orderId, result);
+        console.info('[Atelier] OK — commande transmise :', orderData.commande, result.dasholadId ? '→ id: ' + result.dasholadId : '');
         return { ok: true, data: result };
 
     } catch (e) {
-        console.error('[Dashboard] ÉCHEC après 3 tentatives',
-                      '\n→ URL :', apiUrl,
-                      '\n→ Erreur :', e.name, '—', e.message);
-        console.error('[Dashboard] → Vérifiez que DASHOLDA_URL est correct et que le serveur est joignable');
-        return { ok: false, error: e.message };
-    }
-}
-
-/* ══════════════════════════════════════
-   TRANSFERT AUTOMATIQUE → DASHOLDA
-   Relay serveur : /api/webhook/forward-to-dasholda
-   ══════════════════════════════════════ */
-
-/**
- * Transfère la commande vers DASHOLDA via le relay serveur OLDA Studio.
- * Best-effort : les erreurs réseau ne bloquent pas la validation client.
- *
- * @param {Object} orderPayload  – payload commande (format OLDA Studio)
- * @param {Object} ficheData     – données de fiche (mockups si disponibles)
- */
-async function sendOrderToDasholda(orderPayload, ficheData) {
-    var orderData = {
-        commande          : orderPayload.commande,
-        date              : orderPayload.date,
-        nom               : orderPayload.nom,
-        telephone         : orderPayload.telephone,
-        collection        : orderPayload.collection,
-        reference         : orderPayload.reference,
-        taille            : orderPayload.taille,
-        couleurTshirt     : orderPayload.couleurTshirt,
-        logoAvant         : orderPayload.logoAvant,
-        logoArriere       : orderPayload.logoArriere,
-        couleurLogoAvant  : orderPayload.couleurLogoAvant,
-        couleurLogoArriere: orderPayload.couleurLogoArriere,
-        note              : orderPayload.note,
-        famille           : orderPayload.famille || 'textile',
-        prix: {
-            tshirt          : orderPayload.prixTshirt,
-            personnalisation: orderPayload.personnalisation,
-            total           : orderPayload.total
-        },
-        paiement: { statut: orderPayload.paye }
-    };
-
-    /* Inclure les mockups si disponibles (imageUrl de l'article côté DASHOLDA) */
-    if (ficheData) {
-        orderData.fiche = {
-            mockupFront: ficheData.mockupFront || null,
-            mockupBack : ficheData.mockupBack  || null
-        };
-    }
-
-    var fetchOptions = {
-        method : 'POST',
-        headers: {
-            'Content-Type' : 'application/json',
-            'Authorization': 'Bearer ' + DASHBOARD_TOKEN
-        },
-        body: JSON.stringify(orderData)
-    };
-
-    try {
-        var response = await fetchWithRetry('/api/webhook/forward-to-dasholda', fetchOptions, 3);
-
-        if (!response.ok) {
-            var errBody = await response.json().catch(function() { return {}; });
-            console.error('[→DASHOLDA] Réponse non-OK — statut:', response.status, errBody.error || '');
-        } else {
-            var result = await response.json().catch(function() { return {}; });
-            console.info('[→DASHOLDA] Commande transmise :', orderData.commande, result.dasholadId ? '— id: ' + result.dasholadId : '');
-        }
-    } catch (err) {
-        console.error('[→DASHOLDA] Échec après 3 tentatives :', err.message);
-        /* Sauvegarde locale pour diagnostic */
+        console.error('[Atelier] ÉCHEC réseau après 3 tentatives :', e.name, '—', e.message);
+        /* Sauvegarde locale pour retry ultérieur */
         try {
-            var _pending = JSON.parse(localStorage.getItem('olda_pending_dasholda') || '[]');
-            _pending.push(Object.assign({}, orderData, { _failedAt: new Date().toISOString() }));
-            localStorage.setItem('olda_pending_dasholda', JSON.stringify(_pending));
-            console.warn('[→DASHOLDA] Commande mise en file locale (olda_pending_dasholda).');
-        } catch (storageErr) { /* silencieux */ }
+            var pending = JSON.parse(localStorage.getItem('olda_pending_dasholda') || '[]');
+            pending.push(Object.assign({}, orderData, { _failedAt: new Date().toISOString() }));
+            localStorage.setItem('olda_pending_dasholda', JSON.stringify(pending));
+            console.warn('[Atelier] Commande sauvegardée en local (olda_pending_dasholda)');
+        } catch (_) {}
+        return { ok: false, error: e.message };
     }
 }
 
@@ -2829,8 +2734,8 @@ window.submit = async function() {
           l'envoi est unidirectionnel — NE PAS utiliser no-cors pour le dashboard OLDA ── */
     fetch(API, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }).catch(() => {});
 
-    /* ── Envoi Dashboard OLDA (dasholda.up.railway.app/api/orders) ── */
-    var dashResult = await sendOrderToDashboard(payload, {
+    /* ── Envoi → DASHOLDA via relay serveur ── */
+    var dashResult = await sendToAtelier(payload, {
         front: mockupFront,
         back:  mockupBack
     });
