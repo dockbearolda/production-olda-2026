@@ -397,6 +397,20 @@
             60%  { box-shadow: 0 0 0 9px rgba(0,122,255,0); }
             100% { box-shadow: 0 0 0 0 rgba(0,122,255,0); }
         }
+        @keyframes btnSpin {
+            to { transform: rotate(360deg); }
+        }
+        .btn-spinner {
+            display: inline-block;
+            width: 13px;
+            height: 13px;
+            border: 2px solid rgba(255,255,255,0.35);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: btnSpin 0.7s linear infinite;
+            vertical-align: middle;
+            margin-right: 7px;
+        }
 
         /* ═══════════════════════════════════
            FLOAT BAR (barre flottante logo)
@@ -1156,8 +1170,9 @@
         <!-- Taille DTF arrière -->
         <div class="card p-5">
             <label class="label ml-1 mb-2 block">Taille DTF arrière</label>
-            <input id="coteLogoAr" class="input" type="text" placeholder="mm" readonly
-                   style="background:var(--card);color:var(--text-2);cursor:default;">
+            <input id="coteLogoAr" class="input" type="text" placeholder="ex : 280 mm"
+                   style="color:var(--text);cursor:text;"
+                   oninput="var el=document.getElementById('rcDTF');if(el)el.textContent=this.value.trim()||'—';">
         </div>
 
         <!-- Note -->
@@ -1192,13 +1207,10 @@
             <div class="aselect" id="selPerso"></div>
         </div>
 
-        <!-- TOTAL (non modifiable) -->
-        <div class="card p-5">
-            <label class="label ml-1 mb-2 block">Total</label>
-            <div id="totalLabel"
-                 style="background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius);padding:14px 16px;font-size:16px;color:var(--text-2);letter-spacing:-0.022em;cursor:default;user-select:none;">
-                25 €
-            </div>
+        <!-- TOTAL -->
+        <div style="padding:32px 20px 28px;text-align:center;">
+            <div style="font-size:12px;font-weight:600;color:#86868B;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px;">Total</div>
+            <div id="totalLabel" style="font-size:36px;font-weight:700;color:#1D1D1F;letter-spacing:-0.04em;user-select:none;">25 €</div>
         </div>
 
         <!-- STATUT -->
@@ -2353,6 +2365,12 @@ window.calcTotal = function() {
     const t = (parseFloat(selects['selPrice'] && selects['selPrice'].value) || 0)
             + (parseFloat(selects['selPerso'] && selects['selPerso'].value) || 0);
     document.getElementById('totalLabel').textContent = t + ' €';
+    /* Sync recap en temps réel */
+    var rcT = document.getElementById('rcTotal');
+    if (rcT) rcT.textContent = t + ' €';
+    var rcDTF = document.getElementById('rcDTF');
+    var dtfInput = document.getElementById('coteLogoAr');
+    if (rcDTF && dtfInput) rcDTF.textContent = dtfInput.value.trim() || '—';
 };
 
 /* ══════════════════════════════════════
@@ -2520,6 +2538,31 @@ async function captureMockup(shirtSvg, sideData, fabricHex, W, H, Q) {
 }
 
 /* ══════════════════════════════════════
+   FETCH AVEC RETRY (3 essais max, timeout 10 s)
+   ══════════════════════════════════════ */
+async function fetchWithRetry(url, options, maxRetries) {
+    maxRetries = maxRetries || 3;
+    var lastErr;
+    for (var attempt = 1; attempt <= maxRetries; attempt++) {
+        var controller = new AbortController();
+        var timer = setTimeout(function() { controller.abort(); }, 10000);
+        try {
+            var resp = await fetch(url, Object.assign({}, options, { signal: controller.signal }));
+            clearTimeout(timer);
+            return resp;
+        } catch (err) {
+            clearTimeout(timer);
+            lastErr = err;
+            console.warn('[fetchWithRetry] Tentative ' + attempt + '/' + maxRetries + ' échouée — URL:', url, '— Erreur:', err);
+            if (attempt < maxRetries) {
+                await new Promise(function(r) { setTimeout(r, 800 * attempt); });
+            }
+        }
+    }
+    throw lastErr;
+}
+
+/* ══════════════════════════════════════
    DASHBOARD — Envoi commande vers /api/orders
    URL + Token lus depuis Railway env vars via /api/config
    product_type: 't-shirt', status: 'a-traiter'
@@ -2549,7 +2592,6 @@ async function sendOrderToDashboard(payload, mockups) {
         reference     : payload.reference  || '',
         taille        : payload.taille     || '',
         couleurTshirt : payload.couleurTshirt    || '',
-        couleurTshirtHex : payload.couleurTshirtHex || '',
 
         /* ── Logos ── */
         logoAvant          : payload.logoAvant          || '',
@@ -2560,8 +2602,6 @@ async function sendOrderToDashboard(payload, mockups) {
         /* ── Paiement ── */
         paymentStatus : payload.paye === 'OUI' ? 'PAID' : 'PENDING',
         total         : totalNum,
-        subtotal      : totalNum,
-        currency      : 'EUR',
 
         /* ── Notes & date ── */
         date          : payload.date || '',
@@ -2586,24 +2626,25 @@ async function sendOrderToDashboard(payload, mockups) {
         if (mockups.back)  orderData.mockupBack  = mockups.back;
     }
 
-    console.info('[Dashboard] POST →', apiUrl);
+    console.info('[Dashboard] POST →', apiUrl, '— commande:', orderId);
 
     try {
-        var response = await fetch(apiUrl, {
+        var response = await fetchWithRetry(apiUrl, {
             method  : 'POST',
             mode    : 'cors',
             headers : {
                 'Content-Type'  : 'application/json',
                 'Authorization' : 'Bearer ' + DASHBOARD_TOKEN
             },
-            body: JSON.stringify(orderData),
-        });
+            body: JSON.stringify(orderData)
+        }, 3);
 
         if (!response.ok) {
             var errBody = '';
             try { errBody = await response.text(); } catch(_) {}
-            console.error('[Dashboard] ERREUR HTTP', response.status, response.statusText);
-            console.error('[Dashboard] Réponse serveur :', errBody);
+            console.error('[Dashboard] ERREUR HTTP', response.status, response.statusText,
+                          '\n→ URL :', apiUrl,
+                          '\n→ Réponse serveur :', errBody);
             if (response.status === 401) console.error('[Dashboard] → Vérifiez DASHBOARD_TOKEN dans les variables Railway');
             if (response.status === 404) console.error('[Dashboard] → Vérifiez DASHOLDA_URL dans les variables Railway :', baseUrl);
             return { ok: false, error: 'HTTP ' + response.status + ' — ' + (errBody || response.statusText) };
@@ -2614,8 +2655,9 @@ async function sendOrderToDashboard(payload, mockups) {
         return { ok: true, data: result };
 
     } catch (e) {
-        console.error('[Dashboard] ERREUR RÉSEAU :', e.message);
-        console.error('[Dashboard] URL cible :', apiUrl);
+        console.error('[Dashboard] ÉCHEC après 3 tentatives',
+                      '\n→ URL :', apiUrl,
+                      '\n→ Erreur :', e.name, '—', e.message);
         console.error('[Dashboard] → Vérifiez que DASHOLDA_URL est correct et que le serveur est joignable');
         return { ok: false, error: e.message };
     }
@@ -2665,25 +2707,27 @@ async function sendOrderToDasholda(orderPayload, ficheData) {
         };
     }
 
+    var fetchOptions = {
+        method : 'POST',
+        headers: {
+            'Content-Type' : 'application/json',
+            'Authorization': 'Bearer ' + DASHBOARD_TOKEN
+        },
+        body: JSON.stringify(orderData)
+    };
+
     try {
-        var response = await fetch('/api/webhook/forward-to-dasholda', {
-            method : 'POST',
-            headers: {
-                'Content-Type' : 'application/json',
-                'Authorization': 'Bearer ' + DASHBOARD_TOKEN
-            },
-            body: JSON.stringify(orderData)
-        });
+        var response = await fetchWithRetry('/api/webhook/forward-to-dasholda', fetchOptions, 3);
 
         if (!response.ok) {
-            var errBody = await response.json().catch(() => ({}));
+            var errBody = await response.json().catch(function() { return {}; });
             console.error('[→DASHOLDA] Réponse non-OK — statut:', response.status, errBody.error || '');
         } else {
-            var result = await response.json().catch(() => ({}));
+            var result = await response.json().catch(function() { return {}; });
             console.info('[→DASHOLDA] Commande transmise :', orderData.commande, result.dasholadId ? '— id: ' + result.dasholadId : '');
         }
     } catch (err) {
-        console.error('[→DASHOLDA] Envoi échoué :', err.message);
+        console.error('[→DASHOLDA] Échec après 3 tentatives :', err.message);
         /* Sauvegarde locale pour diagnostic */
         try {
             var _pending = JSON.parse(localStorage.getItem('olda_pending_dasholda') || '[]');
@@ -2699,7 +2743,8 @@ async function sendOrderToDasholda(orderPayload, ficheData) {
    ══════════════════════════════════════ */
 window.submit = async function() {
     const b = document.getElementById('subBtn');
-    b.textContent = 'Envoi...'; b.disabled = true; b.style.opacity = '0.6';
+    b.innerHTML = '<span class="btn-spinner"></span>Envoi en cours...';
+    b.disabled = true; b.style.opacity = '0.7';
 
     try {
 
@@ -2779,7 +2824,9 @@ window.submit = async function() {
     var _ficheEncoded = btoa(unescape(encodeURIComponent(JSON.stringify(_ficheLight))));
     payload.fiche = DASHBOARD_URL + '/ficheatelier-index.html#' + _ficheEncoded;
 
-    /* ── Envoi Google Sheets (best-effort, non-bloquant) ── */
+    /* ── Envoi Google Sheets (best-effort, non-bloquant)
+          no-cors intentionnel : Google Apps Script ne renvoie pas de CORS headers,
+          l'envoi est unidirectionnel — NE PAS utiliser no-cors pour le dashboard OLDA ── */
     fetch(API, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }).catch(() => {});
 
     /* ── Envoi Dashboard OLDA (dasholda.up.railway.app/api/orders) ── */
@@ -2801,11 +2848,14 @@ window.submit = async function() {
     }
 
     /* ── Confirmation Apple-style ── */
+    if (dashResult && !dashResult.ok) {
+        showAppleToast('Connexion instable. Vérifiez la connexion de l\'atelier', false);
+    }
     showAppleConfirmation(payload.commande, dashResult && dashResult.ok);
 
     } catch(e) {
         console.error('Erreur validation:', e);
-        b.textContent = 'Envoyer à l\'Atelier'; b.disabled = false; b.style.opacity = '1';
+        b.innerHTML = 'Envoyer à l\'Atelier'; b.disabled = false; b.style.opacity = '1';
         showAppleToast('Erreur : ' + e.message, false);
     }
 };
@@ -2850,7 +2900,7 @@ function showAppleConfirmation(orderId, apiOk) {
         +   (orderId || '') + ' — Transmise à l\'atelier'
         + '</div>'
         + (apiOk ? '' : '<div style="margin-top:8px;font-size:12px;color:#FF9500;font-weight:500;opacity:0;'
-        +   'transform:translateY(8px);transition:all 0.3s ease 0.45s;" id="_appleWarn">Connexion dashboard instable — données sauvegardées</div>');
+        +   'transform:translateY(8px);transition:all 0.3s ease 0.45s;" id="_appleWarn">Connexion instable. Vérifiez la connexion de l\'atelier</div>');
 
     document.body.appendChild(overlay);
 
