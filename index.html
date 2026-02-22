@@ -1219,7 +1219,135 @@
             <button class="btn btn-ghost" onclick="go(2)" style="flex:0 0 auto;width:auto;padding:16px 20px;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
             </button>
-            <button class="btn btn-dark" id="subBtn" onclick="submit()" style="flex:1;">Valider la Commande</button>
+            <button class="btn btn-primary" onclick="go(4)" style="flex:1;">Récapitulatif</button>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         STEP 4 — CARTE RÉCAPITULATIVE
+         Dernière vérification avant envoi à l'atelier
+         ════════════════════════════════════════ -->
+    <div id="s4" class="step mt-6">
+
+        <!-- Carte Récapitulative -->
+        <div id="recapCard" style="background:#FFFFFF;border:1px solid #e5e5ea;border-radius:12px;overflow:hidden;font-size:14px;">
+
+            <!-- En-tête -->
+            <div style="padding:20px 20px 16px;border-bottom:1px solid #e5e5ea;">
+                <div style="font-size:18px;font-weight:700;color:#1D1D1F;letter-spacing:-0.03em;">Récapitulatif commande</div>
+                <div id="rcOrderId" style="font-size:13px;color:#86868B;margin-top:2px;">—</div>
+            </div>
+
+            <!-- Client -->
+            <div style="padding:16px 20px;border-bottom:1px solid #f2f2f7;">
+                <div style="font-size:11px;font-weight:700;color:#86868B;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px;">Client</div>
+                <div style="display:flex;flex-direction:column;gap:4px;">
+                    <div style="display:flex;justify-content:space-between;">
+                        <span style="color:#86868B;">Nom</span>
+                        <span id="rcNom" style="font-weight:600;color:#1D1D1F;">—</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;">
+                        <span style="color:#86868B;">Téléphone</span>
+                        <span id="rcTel" style="font-weight:600;color:#1D1D1F;">—</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;">
+                        <span style="color:#86868B;">Date</span>
+                        <span id="rcDate" style="font-weight:600;color:#1D1D1F;">—</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;">
+                        <span style="color:#86868B;">Deadline</span>
+                        <span id="rcDeadline" style="font-weight:600;color:#1D1D1F;">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Produit -->
+            <div style="padding:16px 20px;border-bottom:1px solid #f2f2f7;">
+                <div style="font-size:11px;font-weight:700;color:#86868B;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px;">Produit</div>
+                <div style="display:flex;flex-direction:column;gap:4px;">
+                    <div style="display:flex;justify-content:space-between;">
+                        <span style="color:#86868B;">Collection</span>
+                        <span id="rcCollection" style="font-weight:600;color:#1D1D1F;">—</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;">
+                        <span style="color:#86868B;">Référence</span>
+                        <span id="rcRef" style="font-weight:600;color:#1D1D1F;">—</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;">
+                        <span style="color:#86868B;">Coloris</span>
+                        <span id="rcCouleur" style="font-weight:600;color:#1D1D1F;display:flex;align-items:center;gap:6px;">—</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;">
+                        <span style="color:#86868B;">Taille</span>
+                        <span id="rcTaille" style="font-weight:600;color:#1D1D1F;">—</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;">
+                        <span style="color:#86868B;">Taille DTF arrière</span>
+                        <span id="rcDTF" style="font-weight:600;color:#1D1D1F;">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Logos -->
+            <div style="padding:16px 20px;border-bottom:1px solid #f2f2f7;">
+                <div style="font-size:11px;font-weight:700;color:#86868B;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px;">Logos</div>
+                <div style="display:flex;flex-direction:column;gap:4px;">
+                    <div style="display:flex;justify-content:space-between;">
+                        <span style="color:#86868B;">Logo avant</span>
+                        <span id="rcLogoAv" style="font-weight:600;color:#1D1D1F;">—</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;">
+                        <span style="color:#86868B;">Couleur logo avant</span>
+                        <span id="rcLogoAvColor" style="font-weight:600;color:#1D1D1F;">—</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;">
+                        <span style="color:#86868B;">Logo arrière</span>
+                        <span id="rcLogoAr" style="font-weight:600;color:#1D1D1F;">—</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;">
+                        <span style="color:#86868B;">Couleur logo arrière</span>
+                        <span id="rcLogoArColor" style="font-weight:600;color:#1D1D1F;">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes -->
+            <div id="rcNoteSection" style="padding:16px 20px;border-bottom:1px solid #f2f2f7;display:none;">
+                <div style="font-size:11px;font-weight:700;color:#86868B;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px;">Notes</div>
+                <div id="rcNote" style="color:#1D1D1F;line-height:1.4;">—</div>
+            </div>
+
+            <!-- Paiement -->
+            <div style="padding:16px 20px;">
+                <div style="font-size:11px;font-weight:700;color:#86868B;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px;">Paiement</div>
+                <div style="display:flex;flex-direction:column;gap:4px;">
+                    <div style="display:flex;justify-content:space-between;">
+                        <span style="color:#86868B;">T-Shirt</span>
+                        <span id="rcPrixTshirt" style="font-weight:600;color:#1D1D1F;">—</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;">
+                        <span style="color:#86868B;">Personnalisation</span>
+                        <span id="rcPrixPerso" style="font-weight:600;color:#1D1D1F;">—</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid #e5e5ea;">
+                        <span style="font-weight:700;color:#1D1D1F;">Total</span>
+                        <span id="rcTotal" style="font-weight:700;font-size:16px;color:#1D1D1F;">—</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;margin-top:4px;">
+                        <span style="color:#86868B;">Statut</span>
+                        <span id="rcStatut" style="font-weight:600;">—</span>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /recapCard -->
+
+        <!-- Boutons -->
+        <div class="flex gap-3" style="margin-top:16px;">
+            <button class="btn btn-ghost" onclick="go(3)" style="flex:0 0 auto;width:auto;padding:16px 20px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <button class="btn btn-dark" id="subBtn" onclick="submit()" style="flex:1;">Envoyer à l'Atelier</button>
         </div>
     </div>
 
@@ -1665,7 +1793,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 /* ══════════════════════════════════════
    NAVIGATION
    ══════════════════════════════════════ */
-const TITLES = ['Client','Studio','Paiement'];
+const TITLES = ['Client','Studio','Paiement','Récap'];
 
 /* Famille sélectionnée au Step 0 (textile par défaut) */
 let selectedFamily = 'textile';
@@ -1679,6 +1807,7 @@ window.go = function(n) {
     document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
     document.getElementById('s'+n).classList.add('active');
 
+    const totalSteps = 4;
     const progressWrap = document.getElementById('hProgressWrap');
     if (n === 0) {
         document.getElementById('hTitle').textContent = 'Studio Olda';
@@ -1689,11 +1818,12 @@ window.go = function(n) {
     } else {
         progressWrap.style.visibility = 'visible';
         document.getElementById('hTitle').textContent = TITLES[n-1];
-        document.getElementById('hLabel').textContent = `Etape ${n} sur 3`;
+        document.getElementById('hLabel').textContent = `Etape ${n} sur ${totalSteps}`;
         document.getElementById('hNum').textContent = n;
-        document.getElementById('hBar').style.width = (n/3*100)+'%';
+        document.getElementById('hBar').style.width = (n/totalSteps*100)+'%';
     }
     if (n === 2) updateSerial();
+    if (n === 4) populateRecap();
     window.scrollTo({top:0,behavior:'smooth'});
 };
 
@@ -2232,6 +2362,76 @@ window.calcTotal = function() {
 };
 
 /* ══════════════════════════════════════
+   RÉCAPITULATIF — peuple la carte avant envoi
+   ══════════════════════════════════════ */
+function populateRecap() {
+    const _t = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v || '—'; };
+    const logoColorName = (hex, arr) => (arr.find(c => c.h === hex) || { n: hex }).n;
+
+    /* Client */
+    const nom = ((document.getElementById('clientNom').value.trim() + ' ' +
+                  document.getElementById('clientPrenom').value.trim()).trim()) || '—';
+    _t('rcOrderId', document.getElementById('orderNo').textContent.trim());
+    _t('rcNom', nom);
+    _t('rcTel', document.getElementById('clientPhone').value.trim());
+    _t('rcDate', document.getElementById('orderDate').textContent.trim());
+    _t('rcDeadline', document.getElementById('clientDeadline').value || '—');
+
+    /* Produit */
+    _t('rcCollection', selects['selCollection'] ? selects['selCollection'].label : '');
+    _t('rcRef', selects['selRef'] ? selects['selRef'].label : '');
+
+    /* Coloris — nom + pastille */
+    const rcCouleur = document.getElementById('rcCouleur');
+    if (rcCouleur) {
+        const dot = '<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:' + color.h + ';border:1px solid #e5e5ea;vertical-align:middle;"></span>';
+        rcCouleur.innerHTML = color.n + ' ' + dot;
+    }
+
+    _t('rcTaille', selects['selSize'] ? selects['selSize'].value : '');
+    _t('rcDTF', (document.getElementById('coteLogoAr').value || '—'));
+
+    /* Logos */
+    const logoAvId  = logos.front.data ? (logos.front.data.type === 'atelier' ? logos.front.data.id : 'Custom') : 'Aucun';
+    const logoArId  = logos.back.data  ? (logos.back.data.type  === 'atelier' ? logos.back.data.id  : 'Custom') : 'Aucun';
+    const logoAvCol = logos.front.data && logos.front.data.type === 'atelier' ? logoColorName(logos.front.logoColor, LOGO_COLORS) : '—';
+    const logoArCol = logos.back.data  && logos.back.data.type  === 'atelier' ? logoColorName(logos.back.logoColor,  LOGO_COLORS) : '—';
+    _t('rcLogoAv', logoAvId);
+    _t('rcLogoAvColor', logoAvCol);
+    _t('rcLogoAr', logoArId);
+    _t('rcLogoArColor', logoArCol);
+
+    /* Notes */
+    const note = (document.getElementById('note').value || '').trim();
+    const noteSection = document.getElementById('rcNoteSection');
+    if (note) {
+        noteSection.style.display = '';
+        _t('rcNote', note);
+    } else {
+        noteSection.style.display = 'none';
+    }
+
+    /* Paiement */
+    const prixT = (selects['selPrice'] && selects['selPrice'].value) || '0';
+    const prixP = (selects['selPerso'] && selects['selPerso'].value) || '0';
+    const total = parseFloat(prixT) + parseFloat(prixP);
+    _t('rcPrixTshirt', prixT + ' €');
+    _t('rcPrixPerso', prixP + ' €');
+    _t('rcTotal', total + ' €');
+
+    const rcStatut = document.getElementById('rcStatut');
+    if (rcStatut) {
+        if (payStatus === 'oui') {
+            rcStatut.textContent = 'Payé';
+            rcStatut.style.color = '#34C759';
+        } else {
+            rcStatut.textContent = 'À régler';
+            rcStatut.style.color = '#FF3B30';
+        }
+    }
+}
+
+/* ══════════════════════════════════════
    MOCKUP CAPTURE — renders a side (front/back) to a JPEG data-URL
    ══════════════════════════════════════ */
 function renderSvgToImg(svgStr, w, h) {
@@ -2285,16 +2485,39 @@ async function captureMockup(shirtSvg, sideData, fabricHex, W, H, Q) {
    DASHBOARD — Envoi commande
    ══════════════════════════════════════ */
 async function sendOrderToDashboard(payload) {
+    var totalNum = parseFloat(payload.total) || 0;
+    var orderData = {
+        orderNumber   : payload.commande,
+        customerName  : payload.nom,
+        customerEmail : (payload.commande || 'order').replace(/[\s\/]/g, '-').toLowerCase() + '@commandes.oldastudio.fr',
+        customerPhone : payload.telephone || '',
+        status        : 'COMMANDE_A_TRAITER',
+        paymentStatus : payload.paye === 'OUI' ? 'PAID' : 'PENDING',
+        total         : totalNum,
+        subtotal      : totalNum,
+        currency      : 'EUR',
+        notes         : [
+            payload.collection ? 'Collection: ' + payload.collection : '',
+            payload.couleurTshirt ? 'Couleur: ' + payload.couleurTshirt : '',
+            payload.logoAvant ? 'Logo avant: ' + payload.logoAvant : '',
+            payload.logoArriere ? 'Logo arrière: ' + payload.logoArriere : '',
+            payload.note || ''
+        ].filter(Boolean).join(' | '),
+        items: [{
+            name     : (payload.collection || '') + ' ' + (payload.reference || '') + ' (' + (payload.taille || '') + ')',
+            sku      : payload.reference || '',
+            quantity : 1,
+            price    : totalNum
+        }]
+    };
     try {
         await fetch('https://dasholda.up.railway.app/api/orders', {
             method:  'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                id_commande: payload.commande,
-                client_nom:  payload.nom,
-                total:       payload.total,
-                date:        payload.date,
-            }),
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + DASHBOARD_TOKEN
+            },
+            body: JSON.stringify(orderData),
         });
     } catch (e) {
         console.error('Dashboard OLDA injoignable:', e);
@@ -2479,7 +2702,7 @@ window.submit = async function() {
 
     } catch(e) {
         console.error('Erreur validation:', e);
-        b.textContent = 'Valider la Commande'; b.disabled = false; b.style.opacity = '1';
+        b.textContent = 'Envoyer à l\'Atelier'; b.disabled = false; b.style.opacity = '1';
         const err = document.createElement('p');
         err.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#FF3B30;color:#fff;padding:12px 20px;border-radius:12px;font-size:14px;font-weight:600;z-index:9999;';
         err.textContent = 'Erreur : ' + e.message;
