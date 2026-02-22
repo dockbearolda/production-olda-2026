@@ -397,6 +397,20 @@
             60%  { box-shadow: 0 0 0 9px rgba(0,122,255,0); }
             100% { box-shadow: 0 0 0 0 rgba(0,122,255,0); }
         }
+        @keyframes btnSpin {
+            to { transform: rotate(360deg); }
+        }
+        .btn-spinner {
+            display: inline-block;
+            width: 13px;
+            height: 13px;
+            border: 2px solid rgba(255,255,255,0.35);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: btnSpin 0.7s linear infinite;
+            vertical-align: middle;
+            margin-right: 7px;
+        }
 
         /* ═══════════════════════════════════
            FLOAT BAR (barre flottante logo)
@@ -2504,6 +2518,30 @@ async function captureMockup(shirtSvg, sideData, fabricHex, W, H, Q) {
 }
 
 /* ══════════════════════════════════════
+   FETCH AVEC RETRY (3 essais max, timeout 10 s)
+   ══════════════════════════════════════ */
+async function fetchWithRetry(url, options, maxRetries) {
+    maxRetries = maxRetries || 3;
+    var lastErr;
+    for (var attempt = 1; attempt <= maxRetries; attempt++) {
+        var controller = new AbortController();
+        var timer = setTimeout(function() { controller.abort(); }, 10000);
+        try {
+            var resp = await fetch(url, Object.assign({}, options, { signal: controller.signal }));
+            clearTimeout(timer);
+            return resp;
+        } catch (err) {
+            clearTimeout(timer);
+            lastErr = err;
+            if (attempt < maxRetries) {
+                await new Promise(function(r) { setTimeout(r, 800 * attempt); });
+            }
+        }
+    }
+    throw lastErr;
+}
+
+/* ══════════════════════════════════════
    DASHBOARD — Envoi commande vers /api/orders
    product_type: 't-shirt', status: 'a-traiter'
    ══════════════════════════════════════ */
@@ -2527,7 +2565,6 @@ async function sendOrderToDashboard(payload, mockups) {
         reference     : payload.reference  || '',
         taille        : payload.taille     || '',
         couleurTshirt : payload.couleurTshirt    || '',
-        couleurTshirtHex : payload.couleurTshirtHex || '',
 
         /* ── Logos ── */
         logoAvant          : payload.logoAvant          || '',
@@ -2538,16 +2575,11 @@ async function sendOrderToDashboard(payload, mockups) {
         /* ── Paiement ── */
         paymentStatus : payload.paye === 'OUI' ? 'PAID' : 'PENDING',
         total         : totalNum,
-        subtotal      : totalNum,
-        currency      : 'EUR',
 
         /* ── Notes & date ── */
-        date          : payload.date || '',
-        deadline      : payload.deadline || '',
-        notes         : payload.note || '',
-
-        /* ── QR — lien direct vers la fiche ── */
-        ficheUrl      : 'https://dasholda.up.railway.app/dashboard/commande/' + encodeURIComponent(orderId),
+        date     : payload.date     || '',
+        deadline : payload.deadline || '',
+        notes    : payload.note     || '',
 
         /* ── Items (format standard e-commerce) ── */
         items: [{
@@ -2564,19 +2596,21 @@ async function sendOrderToDashboard(payload, mockups) {
         if (mockups.back)  orderData.mockupBack  = mockups.back;
     }
 
+    var fetchOptions = {
+        method:  'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + DASHBOARD_TOKEN
+        },
+        body: JSON.stringify(orderData)
+    };
+
     try {
-        var response = await fetch('https://dasholda.up.railway.app/api/orders', {
-            method:  'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + DASHBOARD_TOKEN
-            },
-            body: JSON.stringify(orderData),
-        });
+        var response = await fetchWithRetry('https://dasholda.up.railway.app/api/orders', fetchOptions, 3);
         if (!response.ok) throw new Error('HTTP ' + response.status);
         return { ok: true };
     } catch (e) {
-        console.error('Dashboard OLDA injoignable:', e);
+        console.error('[Dashboard OLDA] Échec après 3 tentatives :', e.message);
         return { ok: false, error: e.message };
     }
 }
@@ -2625,25 +2659,27 @@ async function sendOrderToDasholda(orderPayload, ficheData) {
         };
     }
 
+    var fetchOptions = {
+        method : 'POST',
+        headers: {
+            'Content-Type' : 'application/json',
+            'Authorization': 'Bearer ' + DASHBOARD_TOKEN
+        },
+        body: JSON.stringify(orderData)
+    };
+
     try {
-        var response = await fetch('/api/webhook/forward-to-dasholda', {
-            method : 'POST',
-            headers: {
-                'Content-Type' : 'application/json',
-                'Authorization': 'Bearer ' + DASHBOARD_TOKEN
-            },
-            body: JSON.stringify(orderData)
-        });
+        var response = await fetchWithRetry('/api/webhook/forward-to-dasholda', fetchOptions, 3);
 
         if (!response.ok) {
-            var errBody = await response.json().catch(() => ({}));
+            var errBody = await response.json().catch(function() { return {}; });
             console.error('[→DASHOLDA] Réponse non-OK — statut:', response.status, errBody.error || '');
         } else {
-            var result = await response.json().catch(() => ({}));
+            var result = await response.json().catch(function() { return {}; });
             console.info('[→DASHOLDA] Commande transmise :', orderData.commande, result.dasholadId ? '— id: ' + result.dasholadId : '');
         }
     } catch (err) {
-        console.error('[→DASHOLDA] Envoi échoué :', err.message);
+        console.error('[→DASHOLDA] Échec après 3 tentatives :', err.message);
         /* Sauvegarde locale pour diagnostic */
         try {
             var _pending = JSON.parse(localStorage.getItem('olda_pending_dasholda') || '[]');
@@ -2659,7 +2695,8 @@ async function sendOrderToDasholda(orderPayload, ficheData) {
    ══════════════════════════════════════ */
 window.submit = async function() {
     const b = document.getElementById('subBtn');
-    b.textContent = 'Envoi...'; b.disabled = true; b.style.opacity = '0.6';
+    b.innerHTML = '<span class="btn-spinner"></span>Envoi en cours...';
+    b.disabled = true; b.style.opacity = '0.7';
 
     try {
 
@@ -2761,11 +2798,14 @@ window.submit = async function() {
     }
 
     /* ── Confirmation Apple-style ── */
+    if (dashResult && !dashResult.ok) {
+        showAppleToast('Connexion instable. Vérifiez la connexion de l\'atelier', false);
+    }
     showAppleConfirmation(payload.commande, dashResult && dashResult.ok);
 
     } catch(e) {
         console.error('Erreur validation:', e);
-        b.textContent = 'Envoyer à l\'Atelier'; b.disabled = false; b.style.opacity = '1';
+        b.innerHTML = 'Envoyer à l\'Atelier'; b.disabled = false; b.style.opacity = '1';
         showAppleToast('Erreur : ' + e.message, false);
     }
 };
@@ -2810,7 +2850,7 @@ function showAppleConfirmation(orderId, apiOk) {
         +   (orderId || '') + ' — Transmise à l\'atelier'
         + '</div>'
         + (apiOk ? '' : '<div style="margin-top:8px;font-size:12px;color:#FF9500;font-weight:500;opacity:0;'
-        +   'transform:translateY(8px);transition:all 0.3s ease 0.45s;" id="_appleWarn">Connexion dashboard instable — données sauvegardées</div>');
+        +   'transform:translateY(8px);transition:all 0.3s ease 0.45s;" id="_appleWarn">Connexion instable. Vérifiez la connexion de l\'atelier</div>');
 
     document.body.appendChild(overlay);
 
