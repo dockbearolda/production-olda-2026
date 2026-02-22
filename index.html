@@ -1152,6 +1152,13 @@
             <div class="aselect" id="selSize"></div>
         </div>
 
+        <!-- Taille DTF arrière -->
+        <div class="card p-5">
+            <label class="label ml-1 mb-2 block">Taille DTF arrière</label>
+            <input id="coteLogoAr" class="input" type="text" placeholder="mm" readonly
+                   style="background:var(--card);color:var(--text-2);cursor:default;">
+        </div>
+
         <!-- Note -->
         <div class="card p-5">
             <p class="label mb-3">Note</p>
@@ -1184,11 +1191,12 @@
             <div class="aselect" id="selPerso"></div>
         </div>
 
-        <!-- TOTAL -->
+        <!-- TOTAL (non modifiable) -->
         <div class="card p-5">
             <label class="label ml-1 mb-2 block">Total</label>
-            <div class="aselect" style="pointer-events:none;">
-                <div class="aselect-trigger" id="totalLabel">25 €</div>
+            <div id="totalLabel"
+                 style="background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius);padding:14px 16px;font-size:16px;color:var(--text-2);letter-spacing:-0.022em;cursor:default;user-select:none;">
+                25 €
             </div>
         </div>
 
@@ -1751,7 +1759,7 @@ function updateLogoMmDisplay() {
     const sizeVal = selects['selSize'] ? selects['selSize'].value : '';
     const refData = REFERENCES[refVal];
     const logoArW = refData && refData.largeurs ? refData.largeurs[sizeVal] : null;
-    if (logoArW) input.value = logoArW;   // pré-remplit ; ne vide pas si saisie manuelle
+    if (logoArW) input.value = logoArW + ' mm';   // pré-remplit avec unité
 }
 
 /* ══════════════════════════════════════
