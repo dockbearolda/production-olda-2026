@@ -56,6 +56,9 @@
         @media (hover: none) {
             .aselect-opt:hover, .aselect-trigger:hover,
             .seg-btn:hover, .swatch:hover, .pay-opt:hover { background: unset; }
+            /* iOS/iPad : supprime calque décoratif + zoom au survol */
+            .stage::after { display: none; }
+            .shirt-col:hover .svg-view { transform: none; }
         }
 
         body {
@@ -939,6 +942,106 @@
             letter-spacing: -0.02em;
             margin-bottom: 6px;
         }
+
+        /* ═══════════════════════════════════
+           TOTAL BUBBLE (Apple style)
+           ═══════════════════════════════════ */
+        .total-bubble {
+            background: var(--card);
+            border-radius: 24px;
+            padding: 26px 20px 20px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 0 0 0.5px rgba(0,0,0,0.03);
+        }
+        .tbl-label { font-size: 11px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--text-3); margin-bottom: 6px; }
+        .tbl-eur   { font-size: 44px; font-weight: 800; color: var(--text-1); letter-spacing: -0.04em; line-height: 1; user-select: none; }
+        .tbl-usd   { font-size: 12px; font-weight: 500; color: var(--text-3); margin-top: 5px; letter-spacing: -0.01em; }
+
+        /* ═══════════════════════════════════
+           DAYS-REMAINING PILL
+           ═══════════════════════════════════ */
+        .days-pill {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: rgba(0,122,255,0.09); color: var(--accent);
+            font-size: 12px; font-weight: 700;
+            padding: 3px 10px; border-radius: 20px;
+            letter-spacing: -0.01em; transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .days-pill.soon   { background: rgba(255,149,0,0.10); color: #FF9500; }
+        .days-pill.urgent { background: rgba(255,59,48,0.08); color: var(--red); }
+
+        /* ═══════════════════════════════════
+           LOGO SHEET — Bouton Valider
+           ═══════════════════════════════════ */
+        .lsheet-validate-btn {
+            background: var(--accent); color: white;
+            border: none; border-radius: 12px;
+            padding: 8px 16px; font-size: 14px; font-weight: 600;
+            cursor: pointer; font-family: inherit;
+            opacity: 0; pointer-events: none;
+            transform: scale(0.88);
+            transition: opacity 0.22s cubic-bezier(0.4,0,0.2,1),
+                        transform 0.22s cubic-bezier(0.4,0,0.2,1);
+        }
+        .lsheet-validate-btn.visible { opacity: 1; pointer-events: auto; transform: scale(1); }
+        .lsheet-validate-btn:active  { transform: scale(0.94); }
+
+        /* ═══════════════════════════════════
+           BIO BADGE — arrière seulement, icône
+           ═══════════════════════════════════ */
+        .bio-icon-back {
+            display: none; /* hidden by default */
+            justify-content: flex-end;
+            padding: 4px 4px 0;
+            opacity: 0; transform: scale(0.82);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+        .bio-icon-back.visible { opacity: 1; transform: scale(1); }
+        .bio-icon-back .bi-leaf {
+            width: 22px; height: 22px; border-radius: 50%;
+            background: rgba(34,139,34,0.13);
+            border: 0.5px solid rgba(34,139,34,0.28);
+            display: flex; align-items: center; justify-content: center;
+            color: #1a6b32;
+        }
+
+        /* ═══════════════════════════════════
+           @media print — Fiche autocollante
+           ═══════════════════════════════════ */
+        #printSticker { display: none; }
+
+        @media print {
+            body > * { display: none !important; }
+            #printSticker {
+                display: flex !important;
+                flex-direction: row;
+                gap: 10mm;
+                align-items: flex-start;
+                padding: 8mm;
+                font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+                background: white;
+                page-break-inside: avoid;
+            }
+            #printSticker .ps-info { flex: 1; min-width: 0; }
+            #printSticker .ps-qr   { flex-shrink: 0; width: 68pt; height: 68pt; }
+            #printSticker .ps-qr img { width: 100%; height: 100%; display: block; }
+            #printSticker .ps-id {
+                font-size: 10pt; font-weight: 800; color: #000;
+                letter-spacing: -0.02em; word-break: break-all;
+                margin-bottom: 5pt; line-height: 1.2;
+            }
+            #printSticker .ps-row {
+                display: flex; gap: 5pt;
+                margin-bottom: 2.5pt; font-size: 8.5pt; line-height: 1.3;
+            }
+            #printSticker .ps-key {
+                flex-shrink: 0; width: 50pt;
+                font-weight: 700; color: #555;
+                font-size: 7pt; text-transform: uppercase; letter-spacing: 0.06em;
+            }
+            #printSticker .ps-val { font-weight: 700; color: #000; word-break: break-all; }
+        }
     </style>
 </head>
 <body>
@@ -950,7 +1053,10 @@
          ════════════════════════════════════════ -->
     <header class="mb-4">
         <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-[0.2em]" id="hLabel">Famille de produit</p>
-        <h1 class="text-[34px] font-black tracking-tight text-gray-900 leading-tight mt-1" id="hTitle">Studio Olda</h1>
+        <div class="flex items-center gap-3 mt-1">
+            <img src="olda-icon.svg" id="hLogo" alt="Olda" style="width:32px;height:32px;object-fit:contain;flex-shrink:0;opacity:0.88;">
+            <h1 class="text-[34px] font-black tracking-tight text-gray-900 leading-tight" id="hTitle">Studio Olda</h1>
+        </div>
         <span id="hNum" class="hidden">0</span>
         <div class="mt-5 h-[2px] bg-gray-200 rounded-full overflow-hidden" id="hProgressWrap">
             <div class="h-full bg-blue-600 rounded-full transition-all duration-500" id="hBar" style="width:0%"></div>
@@ -1034,20 +1140,20 @@
                     <span class="text-[17px] font-semibold text-gray-900 tracking-tight" id="orderDate">15/02/2026</span>
                 </div>
 
+                <!-- PRÉNOM — une ligne (en premier) -->
+                <div class="flex items-center py-3">
+                    <span class="w-24 shrink-0 text-[12px] font-black text-gray-300 uppercase tracking-[0.18em]">PRÉNOM</span>
+                    <input type="text" id="clientPrenom"
+                           class="flex-1 min-w-0 p-0 bg-transparent text-[17px] font-semibold text-gray-900 tracking-tight placeholder:text-gray-300 placeholder:font-normal outline-none border-0 focus:ring-0"
+                           placeholder="Pierre" autocomplete="given-name" autocapitalize="words">
+                </div>
+
                 <!-- NOM — une ligne -->
                 <div class="flex items-center py-3">
                     <span class="w-24 shrink-0 text-[12px] font-black text-gray-300 uppercase tracking-[0.18em]">NOM</span>
                     <input type="text" id="clientNom"
                            class="flex-1 min-w-0 p-0 bg-transparent text-[17px] font-semibold text-gray-900 tracking-tight placeholder:text-gray-300 placeholder:font-normal outline-none border-0 focus:ring-0"
                            placeholder="Dubois" autocomplete="family-name" autocapitalize="words">
-                </div>
-
-                <!-- PRÉNOM — une ligne -->
-                <div class="flex items-center py-3">
-                    <span class="w-24 shrink-0 text-[12px] font-black text-gray-300 uppercase tracking-[0.18em]">PRÉNOM</span>
-                    <input type="text" id="clientPrenom"
-                           class="flex-1 min-w-0 p-0 bg-transparent text-[17px] font-semibold text-gray-900 tracking-tight placeholder:text-gray-300 placeholder:font-normal outline-none border-0 focus:ring-0"
-                           placeholder="Pierre" autocomplete="given-name" autocapitalize="words">
                 </div>
 
                 <!-- TEL — une ligne -->
@@ -1058,11 +1164,15 @@
                            placeholder="0690 00 00 00">
                 </div>
 
-                <!-- LIMIT — une ligne -->
+                <!-- LIMIT — une ligne + décompte jours restants (iOS style) -->
                 <div class="flex items-center py-3">
                     <span class="w-24 shrink-0 text-[12px] font-black text-gray-300 uppercase tracking-[0.18em]">LIMIT</span>
-                    <input type="date" id="clientDeadline"
-                           class="flex-1 min-w-0 p-0 bg-transparent text-[17px] font-semibold text-gray-900 tracking-tight outline-none border-0 focus:ring-0">
+                    <div class="flex-1 min-w-0 flex items-center gap-3">
+                        <input type="date" id="clientDeadline"
+                               class="p-0 bg-transparent text-[17px] font-semibold text-gray-900 tracking-tight outline-none border-0 focus:ring-0"
+                               oninput="updateDeadlineBadge(this.value)">
+                        <span id="deadlineBadge" class="days-pill" style="display:none;"></span>
+                    </div>
                 </div>
 
             </div>
@@ -1102,11 +1212,7 @@
                             <div class="logo-inner" id="logoInnerFront"></div>
                             <div class="logo-frame"></div>
                         </div>
-                        <!-- Badge BIO (Apple-style) — visible si référence BIO -->
-                        <div class="bio-badge" id="bioBadge">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M17 8C8 10 5.9 16.17 3.82 21.34L5.71 22l1-2.3A4.49 4.49 0 008 20C19 20 22 3 22 3c-1 2-8 2-8 2z"/></svg>
-                            100% BIO
-                        </div>
+                        <!-- bioBadge front supprimé (icône déplacée sur l'arrière) -->
                     </div>
                 </div>
 
@@ -1125,10 +1231,11 @@
                             <div class="logo-inner" id="logoInnerBack"></div>
                             <div class="logo-frame"></div>
                         </div>
-                        <!-- Badge BIO arrière — même position que l'avant -->
-                        <div class="bio-badge" id="bioBadgeBack">
+                    </div>
+                    <!-- Badge BIO icône — bas-droite, hors du t-shirt -->
+                    <div class="bio-icon-back" id="bioBadgeBack">
+                        <div class="bi-leaf">
                             <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M17 8C8 10 5.9 16.17 3.82 21.34L5.71 22l1-2.3A4.49 4.49 0 008 20C19 20 22 3 22 3c-1 2-8 2-8 2z"/></svg>
-                            100% BIO
                         </div>
                     </div>
                 </div>
@@ -1201,16 +1308,17 @@
             <div class="aselect" id="selPrice"></div>
         </div>
 
-        <!-- PERSO -->
+        <!-- PERSONNALISATION -->
         <div class="card p-5">
-            <label class="label ml-1 mb-2 block">Perso</label>
+            <label class="label ml-1 mb-2 block">Personnalisation</label>
             <div class="aselect" id="selPerso"></div>
         </div>
 
-        <!-- TOTAL -->
-        <div style="padding:32px 20px 28px;text-align:center;">
-            <div style="font-size:12px;font-weight:600;color:#86868B;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px;">Total</div>
-            <div id="totalLabel" style="font-size:36px;font-weight:700;color:#1D1D1F;letter-spacing:-0.04em;user-select:none;">25 €</div>
+        <!-- TOTAL — bulle Apple -->
+        <div class="total-bubble">
+            <div class="tbl-label">Total</div>
+            <div id="totalLabel" class="tbl-eur">25 €</div>
+            <div id="totalLabelUsd" class="tbl-usd">≈ 27 $</div>
         </div>
 
         <!-- STATUT -->
@@ -1237,7 +1345,7 @@
     </div>
 
     <!-- ════════════════════════════════════════
-         STEP 4 — FICHE PRODUIT RÉCAPITULATIVE
+         STEP 4 — RÉCAPITULATIF DE COMMANDE
          Style Apple Premium — dernière vérification avant envoi
          ════════════════════════════════════════ -->
     <div id="s4" class="step mt-6">
@@ -1247,7 +1355,7 @@
             <!-- ── EN-TÊTE + QR CODE ── -->
             <div style="padding:20px;display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid #e5e5ea;">
                 <div style="flex:1;min-width:0;">
-                    <div style="font-size:11px;font-weight:700;color:#86868B;letter-spacing:0.08em;text-transform:uppercase;">Fiche Atelier</div>
+                    <div style="font-size:11px;font-weight:700;color:#86868B;letter-spacing:0.08em;text-transform:uppercase;">Récapitulatif de commande</div>
                     <div id="rcOrderId" style="font-size:20px;font-weight:700;color:#1D1D1F;letter-spacing:-0.03em;margin-top:4px;word-break:break-all;">—</div>
                     <div id="rcDate" style="font-size:13px;color:#86868B;margin-top:2px;">—</div>
                 </div>
@@ -1345,6 +1453,22 @@
 </div>
 
 <!-- ═══════════════════════════════════════════
+     PRINT STICKER — Fiche autocollante (invisible à l'écran, @media print uniquement)
+     Layout : infos à gauche, QR à droite
+════════════════════════════════════════════ -->
+<div id="printSticker">
+    <div class="ps-info">
+        <div class="ps-id" id="psOrderId">—</div>
+        <div class="ps-row"><span class="ps-key">Réf</span><span class="ps-val" id="psRef">—</span></div>
+        <div class="ps-row"><span class="ps-key">Client</span><span class="ps-val" id="psNom">—</span></div>
+        <div class="ps-row"><span class="ps-key">Tél</span><span class="ps-val" id="psTel">—</span></div>
+        <div class="ps-row"><span class="ps-key">Deadline</span><span class="ps-val" id="psDeadline">—</span></div>
+        <div class="ps-row"><span class="ps-key">DTF AR</span><span class="ps-val" id="psDTF">—</span></div>
+    </div>
+    <div class="ps-qr" id="psQr"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════
      LOGO BOTTOM SHEET (sélecteur Apple-style)
 ════════════════════════════════════════════ -->
 <div class="lsheet-backdrop" id="lsheetBackdrop" onclick="closeLogoSheet()"></div>
@@ -1352,7 +1476,10 @@
     <div class="lsheet-handle-row"><div class="lsheet-handle"></div></div>
     <div class="lsheet-header">
         <span class="lsheet-title" id="lsheetTitle">Logo Avant</span>
-        <button class="lsheet-close-btn" onclick="closeLogoSheet()">✕</button>
+        <div style="display:flex;align-items:center;gap:8px;">
+            <button class="lsheet-validate-btn" id="lsheetValidateBtn" onclick="validateLogoSheet()">Valider →</button>
+            <button class="lsheet-close-btn" onclick="closeLogoSheet()">✕</button>
+        </div>
     </div>
     <div class="lsheet-scroll">
         <!-- Couleur du logo (visible quand un logo Atelier est sélectionné) -->
@@ -1799,7 +1926,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 /* ══════════════════════════════════════
    NAVIGATION
    ══════════════════════════════════════ */
-const TITLES = ['Client','Studio','Paiement','Récap'];
+const TITLES = ['Client','Studio','Paiement','Récapitulatif'];
 
 /* Famille sélectionnée au Step 0 (textile par défaut) */
 let selectedFamily = 'textile';
@@ -1853,6 +1980,32 @@ function updateSerial() {
 }
 
 /* ══════════════════════════════════════
+   DEADLINE — décompte jours restants (iOS style)
+   ══════════════════════════════════════ */
+window.updateDeadlineBadge = function(val) {
+    var badge = document.getElementById('deadlineBadge');
+    if (!badge) return;
+    if (!val) { badge.style.display = 'none'; return; }
+    var today = new Date(); today.setHours(0,0,0,0);
+    var dead  = new Date(val + 'T00:00:00');
+    var diff  = Math.round((dead - today) / (1000*60*60*24));
+    badge.style.display = 'inline-flex';
+    if (diff < 0) {
+        badge.textContent = 'Dépassé';
+        badge.className   = 'days-pill urgent';
+    } else if (diff === 0) {
+        badge.textContent = 'Aujourd\'hui';
+        badge.className   = 'days-pill urgent';
+    } else if (diff <= 3) {
+        badge.textContent = diff + ' j';
+        badge.className   = 'days-pill soon';
+    } else {
+        badge.textContent = diff + ' j';
+        badge.className   = 'days-pill';
+    }
+};
+
+/* ══════════════════════════════════════
    REFS (H-001, F-001, E-001, A-001...)
    ══════════════════════════════════════ */
 window.buildRefs = function() {
@@ -1878,10 +2031,12 @@ window.buildRefs = function() {
         }
         updateLogoMmDisplay();
         const isBio = !!(refData && refData.bio);
-        const bioBadge = document.getElementById('bioBadge');
-        if (bioBadge) { bioBadge.classList.toggle('visible', isBio); }
+        /* BIO : icône feuille uniquement sur l'arrière, hors du t-shirt */
         const bioBadgeBack = document.getElementById('bioBadgeBack');
-        if (bioBadgeBack) { bioBadgeBack.classList.toggle('visible', isBio); }
+        if (bioBadgeBack) {
+            bioBadgeBack.style.display = isBio ? 'flex' : 'none';
+            bioBadgeBack.classList.toggle('visible', isBio);
+        }
     };
 };
 
@@ -2301,7 +2456,12 @@ function buildSheetLogoGrid() {
                 renderLogo();
                 updateSheetColorSection();
                 buildSheetLogoGrid();
-                closeLogoSheet();
+                /* Étape couleur avant validation : scroll haut + afficher bouton Valider */
+                var scroll = document.querySelector('.lsheet-scroll');
+                if (scroll) scroll.scrollTop = 0;
+                var vBtn = document.getElementById('lsheetValidateBtn');
+                if (vBtn) vBtn.classList.add('visible');
+                /* NE PAS fermer le sheet — l'utilisateur clique Valider */
             });
             g.appendChild(thumb);
         });
@@ -2344,8 +2504,17 @@ window.openLogoSheet = function(s) {
     updateSheetColorSection();
     const scroll = document.querySelector('.lsheet-scroll');
     if (scroll) scroll.scrollTop = 0;
+    /* Réinitialiser le bouton Valider */
+    var vBtn = document.getElementById('lsheetValidateBtn');
+    if (vBtn) vBtn.classList.remove('visible');
     document.getElementById('lsheet').classList.add('open');
     document.getElementById('lsheetBackdrop').classList.add('open');
+};
+
+window.validateLogoSheet = function() {
+    closeLogoSheet();
+    var vBtn = document.getElementById('lsheetValidateBtn');
+    if (vBtn) vBtn.classList.remove('visible');
 };
 
 window.closeLogoSheet = function() {
@@ -2365,6 +2534,9 @@ window.calcTotal = function() {
     const t = (parseFloat(selects['selPrice'] && selects['selPrice'].value) || 0)
             + (parseFloat(selects['selPerso'] && selects['selPerso'].value) || 0);
     document.getElementById('totalLabel').textContent = t + ' €';
+    /* Mention discrète USD (taux approximatif) */
+    var usdEl = document.getElementById('totalLabelUsd');
+    if (usdEl) usdEl.textContent = '≈ ' + Math.round(t * 1.08) + ' $';
     /* Sync recap en temps réel */
     var rcT = document.getElementById('rcTotal');
     if (rcT) rcT.textContent = t + ' €';
@@ -2441,9 +2613,9 @@ async function populateRecap() {
     _t('rcTaille', selects['selSize'] ? selects['selSize'].value : '');
     _t('rcDTF', (document.getElementById('coteLogoAr').value || '—'));
 
-    /* ── Logos ── */
-    const logoAvId  = logos.front.data ? (logos.front.data.type === 'atelier' ? logos.front.data.id : 'Custom') : 'Aucun';
-    const logoArId  = logos.back.data  ? (logos.back.data.type  === 'atelier' ? logos.back.data.id  : 'Custom') : 'Aucun';
+    /* ── Logos (nomenclature -AV / -AR automatique) ── */
+    const logoAvId  = logos.front.data ? (logos.front.data.type === 'atelier' ? logos.front.data.id + '-AV' : 'Custom-AV') : 'Aucun';
+    const logoArId  = logos.back.data  ? (logos.back.data.type  === 'atelier' ? logos.back.data.id  + '-AR' : 'Custom-AR') : 'Aucun';
     const logoAvCol = logos.front.data && logos.front.data.type === 'atelier' ? logoColorName(logos.front.logoColor, LOGO_COLORS) : '—';
     const logoArCol = logos.back.data  && logos.back.data.type  === 'atelier' ? logoColorName(logos.back.logoColor,  LOGO_COLORS) : '—';
     _t('rcLogoAv', logoAvId);
@@ -2468,6 +2640,24 @@ async function populateRecap() {
     _t('rcPrixTshirt', prixT + ' €');
     _t('rcPrixPerso', prixP + ' €');
     _t('rcTotal', total + ' €');
+
+    /* ── Print sticker — alimentation des champs pour @media print ── */
+    _t('psOrderId', orderId);
+    _t('psRef', selects['selRef'] ? selects['selRef'].label : '—');
+    /* Sticker : affiche Prénom Nom */
+    var _prenom = document.getElementById('clientPrenom').value.trim();
+    var _nom    = document.getElementById('clientNom').value.trim();
+    _t('psNom', (_prenom + ' ' + _nom).trim() || '—');
+    _t('psTel', document.getElementById('clientPhone').value.trim() || '—');
+    const dlVal = document.getElementById('clientDeadline').value;
+    _t('psDeadline', dlVal ? dlVal.split('-').reverse().join('/') : '—');
+    _t('psDTF', document.getElementById('coteLogoAr').value.trim() || '—');
+    /* Cloner le QR code dans le sticker print */
+    var psQr = document.getElementById('psQr');
+    if (psQr && qrBox.firstChild) {
+        psQr.innerHTML = '';
+        psQr.appendChild(qrBox.firstChild.cloneNode(true));
+    }
 
     const rcStatut = document.getElementById('rcStatut');
     if (rcStatut) {
@@ -2687,8 +2877,8 @@ window.submit = async function() {
                             ? logoColorName(logos.front.logoColor, LOGO_COLORS) : '',
         couleurLogoArriere: logos.back.data  && logos.back.data.type  === 'atelier'
                             ? logoColorName(logos.back.logoColor,  LOGO_COLORS) : '',
-        logoAvant         : logos.front.data ? (logos.front.data.type === 'atelier' ? logos.front.data.id : 'Custom') : '',
-        logoArriere       : logos.back.data  ? (logos.back.data.type  === 'atelier' ? logos.back.data.id  : 'Custom') : '',
+        logoAvant         : logos.front.data ? (logos.front.data.type === 'atelier' ? logos.front.data.id + '-AV' : 'Custom-AV') : '',
+        logoArriere       : logos.back.data  ? (logos.back.data.type  === 'atelier' ? logos.back.data.id  + '-AR' : 'Custom-AR') : '',
         note              : (document.getElementById('note').value || '').trim(),
         prixTshirt        : (selects['selPrice']  && selects['selPrice'].value)  || '0',
         personnalisation  : (selects['selPerso']  && selects['selPerso'].value)  || '0',
