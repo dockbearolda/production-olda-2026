@@ -432,30 +432,7 @@
             gap: 8px;
             animation: enterStep 0.2s ease;
         }
-        /* BIO badge — discret */
-        .bio-badge {
-            position: absolute;
-            bottom: 7px;
-            left: 7px;
-            display: inline-flex;
-            align-items: center;
-            gap: 3px;
-            background: rgba(34,139,34,0.13);
-            color: #1a6b32;
-            font-size: 8px;
-            font-weight: 600;
-            letter-spacing: 0.05em;
-            padding: 2px 6px 2px 5px;
-            border-radius: 12px;
-            border: 0.5px solid rgba(34,139,34,0.28);
-            pointer-events: none;
-            z-index: 20;
-            opacity: 0;
-            transform: scale(0.85);
-            transition: opacity 0.2s ease, transform 0.2s ease;
-        }
-        .bio-badge.visible { opacity: 1; transform: scale(1); }
-        .bio-badge svg { flex-shrink: 0; }
+        /* .bio-badge supprimé — remplacé par .bio-feather (plume verte arrière) */
         .fbar-btn {
             padding: 5px 11px;
             border-radius: 9px;
@@ -988,23 +965,19 @@
         .lsheet-validate-btn:active  { transform: scale(0.94); }
 
         /* ═══════════════════════════════════
-           BIO BADGE — arrière seulement, icône
+           PLUME BIO — arrière uniquement, identité support
+           Non interactive (pointer-events:none), non déplaçable
            ═══════════════════════════════════ */
-        .bio-icon-back {
-            display: none; /* hidden by default */
+        .bio-feather {
+            display: none;
             justify-content: flex-end;
-            padding: 4px 4px 0;
-            opacity: 0; transform: scale(0.82);
-            transition: opacity 0.2s ease, transform 0.2s ease;
+            padding: 3px 5px 0;
+            pointer-events: none;
+            opacity: 0;
+            transform: scale(0.75);
+            transition: opacity 0.28s ease, transform 0.28s cubic-bezier(0.34,1.56,0.64,1);
         }
-        .bio-icon-back.visible { opacity: 1; transform: scale(1); }
-        .bio-icon-back .bi-leaf {
-            width: 22px; height: 22px; border-radius: 50%;
-            background: rgba(34,139,34,0.13);
-            border: 0.5px solid rgba(34,139,34,0.28);
-            display: flex; align-items: center; justify-content: center;
-            color: #1a6b32;
-        }
+        .bio-feather.visible { opacity: 1; transform: scale(1); }
 
         /* ═══════════════════════════════════
            @media print — Fiche autocollante
@@ -1232,11 +1205,15 @@
                             <div class="logo-frame"></div>
                         </div>
                     </div>
-                    <!-- Badge BIO icône — bas-droite, hors du t-shirt -->
-                    <div class="bio-icon-back" id="bioBadgeBack">
-                        <div class="bi-leaf">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M17 8C8 10 5.9 16.17 3.82 21.34L5.71 22l1-2.3A4.49 4.49 0 008 20C19 20 22 3 22 3c-1 2-8 2-8 2z"/></svg>
-                        </div>
+                    <!-- Plume verte BIO — bas-droite arrière, identité support, non interactive -->
+                    <div class="bio-feather" id="bioBadgeBack" aria-hidden="true">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                             stroke="#5B9A6A" stroke-width="1.5"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/>
+                            <line x1="16" y1="8" x2="2" y2="22"/>
+                            <line x1="17.5" y1="15" x2="9" y2="15"/>
+                        </svg>
                     </div>
                 </div>
 
@@ -1627,10 +1604,10 @@ const LOGO_COLORS = [
     {n:'Rose',    h:'#FF69B4'},{n:'Orange',  h:'#FF6600'},{n:'Violet',  h:'#6B46C1'}
 ];
 
-/* ── Catalogue références ── */
+/* ── Catalogue références (H-001→H-010 / F-001→F-010) ── */
 const REFERENCES = {
-    'H-001': { fournisseur: 'NS300', desc: 'T-shirt Léger NATIVE SPIRIT NS300 100% CotonBIO', prix: 35, bio: true, largeurs: { XS: 220, S: 250, M: 270, L: 300, XL: 320, XXL: 320 } },
-    'H-002': { fournisseur: 'NS300', prix: 39, largeurs: { XS: 220, S: 250, M: 270, L: 300, XL: 320, XXL: 320 } }
+    'H-001': { fournisseur: 'NS300', prix: 35, bio: true,  largeurs: { XS: 220, S: 250, M: 270, L: 300, XL: 320, XXL: 320 } },
+    'H-002': { fournisseur: 'NS300', prix: 39, bio: false, largeurs: { XS: 220, S: 250, M: 270, L: 300, XL: 320, XXL: 320 } }
 };
 
 const FABRIC_RE = /rgb\(100%,\s*100%,\s*100%\)/gi;
@@ -2013,11 +1990,11 @@ window.buildRefs = function() {
     const opts = [];
     if (c) {
         const prefix = c[0].toUpperCase();
-        for (let i = 1; i <= 5; i++) {
-            const code = prefix + '-' + String(i).padStart(3,'0');
+        for (let i = 1; i <= 10; i++) {
+            const code    = prefix + '-' + String(i).padStart(3,'0');
             const refData = REFERENCES[code];
-            const bioTag = refData && refData.bio ? '  🌿 BIO' : '';
-            const label = refData ? `${code}  ·  ${refData.fournisseur}${bioTag}` : code;
+            /* Nomenclature stricte : CODE · FOURNISSEUR — sans mention BIO */
+            const label   = refData ? `${code}  ·  ${refData.fournisseur}` : code;
             opts.push({v: code, l: label});
         }
     }
@@ -2031,10 +2008,12 @@ window.buildRefs = function() {
         }
         updateLogoMmDisplay();
         const isBio = !!(refData && refData.bio);
-        /* BIO : icône feuille uniquement sur l'arrière, hors du t-shirt */
+        /* Plume verte BIO — arrière uniquement, non interactive */
         const bioBadgeBack = document.getElementById('bioBadgeBack');
         if (bioBadgeBack) {
             bioBadgeBack.style.display = isBio ? 'flex' : 'none';
+            /* Forcer reflow pour déclencher l'animation d'entrée */
+            void bioBadgeBack.offsetWidth;
             bioBadgeBack.classList.toggle('visible', isBio);
         }
     };
@@ -2899,7 +2878,6 @@ window.submit = async function() {
         deadline          : deadline,
         collection        : payload.collection,
         reference         : payload.reference,
-        refDesc           : (REFERENCES[payload.reference] && REFERENCES[payload.reference].desc) || '',
         bio               : !!(REFERENCES[payload.reference] && REFERENCES[payload.reference].bio),
         taille            : payload.taille,
         couleur           : { nom: color.n, hex: color.h },
