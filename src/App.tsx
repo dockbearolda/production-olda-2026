@@ -6,7 +6,7 @@ import ClientForm from './components/ClientForm';
 import Payment from './components/Payment';
 import CartBadge from './components/CartBadge';
 import CartDrawer from './components/CartDrawer';
-import type { Step, ClientInfo } from './types';
+import type { Step, ClientInfo, CartItem } from './types';
 
 const STEP_LABELS: Record<Step, string> = {
   studio:  'Studio',
@@ -40,6 +40,7 @@ function AppInner() {
   const [direction, setDirection]   = useState(1);
   const [clientInfo, setClientInfo] = useState<ClientInfo>(EMPTY_CLIENT);
   const [cartOpen, setCartOpen]     = useState(false);
+  const [editItem, setEditItem]     = useState<CartItem | null>(null);
 
   const stepIndex = STEP_ORDER.indexOf(step);
 
@@ -97,7 +98,11 @@ function AppInner() {
             style={{ width: '100%', minHeight: '100%' }}
           >
             {step === 'studio' && (
-              <Studio onNext={() => goTo('client')} />
+              <Studio
+                onNext={() => goTo('client')}
+                editItem={editItem}
+                onDoneEditing={() => setEditItem(null)}
+              />
             )}
             {step === 'client' && (
               <ClientForm
@@ -123,6 +128,11 @@ function AppInner() {
         open={cartOpen}
         onClose={() => setCartOpen(false)}
         onValidate={() => goTo('client')}
+        onEdit={(item) => {
+          setEditItem(item);
+          setCartOpen(false);
+          goTo('studio');
+        }}
       />
     </div>
   );

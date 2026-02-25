@@ -3,12 +3,12 @@ import {
 } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../../context/CartContext';
+import type { CartItem, Color, LogoPlacement } from '../../types';
 import {
   COLORS, LOGO_COLORS, REFERENCES, COLLECTIONS, SIZES,
   PRICE_TSHIRT, PRICE_PERSO, LOGO_SECTIONS,
   applyFabricColor, isLightColor,
 } from '../../data/products';
-import type { CartItem, Color, LogoPlacement } from '../../types';
 
 // ── Default logo placement values ──────────────────────
 const DEFAULT_LOGO: LogoPlacement = {
@@ -35,10 +35,12 @@ function uid(): string {
 
 interface Props {
   onNext: () => void;
+  editItem?: CartItem | null;
+  onDoneEditing?: () => void;
 }
 
-export default function Studio({ onNext }: Props) {
-  const { addItem } = useCart();
+export default function Studio({ onNext, editItem, onDoneEditing }: Props) {
+  const { addItem, updateItem } = useCart();
 
   // ── Product config ──────────────────────────────────
   const [collection, setCollection] = useState('');
@@ -64,6 +66,7 @@ export default function Studio({ onNext }: Props) {
   const [dragging, setDragging]   = useState(false);
   const stageRef                  = useRef<HTMLDivElement>(null);
   const dragOffsetRef             = useRef({ dx: 0, dy: 0 });
+  const skipAutoPriceRef          = useRef(false);
 
   // ── Fetch SVGs ───────────────────────────────────────
   useEffect(() => {
@@ -71,8 +74,28 @@ export default function Studio({ onNext }: Props) {
     fetch('/tshirt-back.svg').then(r => r.text()).then(setSvgBack).catch(() => {});
   }, []);
 
+  // ── Load editItem into state ─────────────────────────
+  useEffect(() => {
+    if (!editItem) return;
+    skipAutoPriceRef.current = true;
+    setCollection(editItem.collection);
+    setReference(editItem.reference);
+    setTaille(editItem.taille);
+    setDtfArriere(editItem.dtfArriere);
+    setColor(editItem.couleur);
+    setNote(editItem.note);
+    setPrixTshirt(editItem.prix.tshirt);
+    setPrixPerso(editItem.prix.personnalisation);
+    setLogoAvant({ ...editItem.logoAvant });
+    setLogoArriere({ ...editItem.logoArriere });
+  }, [editItem]);
+
   // Auto-prix et auto-largeur DTF selon référence + taille
   useEffect(() => {
+    if (skipAutoPriceRef.current) {
+      skipAutoPriceRef.current = false;
+      return;
+    }
     const ref = REFERENCES[reference];
     if (ref) {
       setPrixTshirt(ref.prix);
@@ -158,6 +181,23 @@ export default function Studio({ onNext }: Props) {
     setNote(''); setReference(''); setDtfArriere('');
     setLogoAvant({ ...DEFAULT_LOGO });
     setLogoArriere({ ...DEFAULT_LOGO_BACK });
+  }
+
+  // ── Update existing cart item ────────────────────────
+  function saveEdit() {
+    if (!editItem) return;
+    if (!collection || !reference || !taille) {
+      alert('Veuillez sélectionner une collection, une référence et une taille.');
+      return;
+    }
+    const updated: CartItem = {
+      ...editItem,
+      collection, reference,
+      couleur: color, taille, dtfArriere, logoAvant, logoArriere, note,
+      prix: { tshirt: prixTshirt, personnalisation: prixPerso, total },
+    };
+    updateItem(editItem.id, updated);
+    onDoneEditing?.();
   }
 
   // ── Logo overlay (FIX: toujours visible sur les 2 côtés) ──
@@ -497,12 +537,25 @@ export default function Studio({ onNext }: Props) {
       </div>
 
       {/* ── CTA ───────────────────────────────────── */}
-      <button className="btn btn-dark" onClick={addToCart}>
-        + Ajouter au panier
-      </button>
-      <button className="btn btn-primary" onClick={onNext}>
-        Informations client →
-      </button>
+      {editItem ? (
+        <>
+          <button className="btn btn-primary" onClick={saveEdit}>
+            ✓ Mettre à jour le panier
+          </button>
+          <button className="btn btn-ghost" onClick={onDoneEditing}>
+            ← Annuler les modifications
+          </button>
+        </>
+      ) : (
+        <>
+          <button className="btn btn-dark" onClick={addToCart}>
+            + Ajouter au panier
+          </button>
+          <button className="btn btn-primary" onClick={onNext}>
+            Informations client →
+          </button>
+        </>
+      )}
 
       {/* ── LOGO SHEET ────────────────────────────── */}
       <AnimatePresence>

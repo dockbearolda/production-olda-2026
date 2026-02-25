@@ -777,6 +777,23 @@ body {
   color: var(--text-1);
 }
 
+.cart-item-edit {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0,122,255,0.1);
+  color: var(--accent);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  transition: all 0.15s;
+  touch-action: manipulation;
+  flex-shrink: 0;
+}
+.cart-item-edit:active { transform: scale(0.9); }
 .cart-item-delete {
   width: 28px;
   height: 28px;

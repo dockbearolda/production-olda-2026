@@ -6,9 +6,10 @@ interface Props {
   open: boolean;
   onClose: () => void;
   onValidate: () => void;
+  onEdit: (item: CartItem) => void;
 }
 
-function CartItemRow({ item, onRemove }: { item: CartItem; onRemove: () => void }) {
+function CartItemRow({ item, onRemove, onEdit }: { item: CartItem; onRemove: () => void; onEdit: () => void }) {
   const ref = item.reference || item.famille;
   const sub = [item.collection, ref, item.taille].filter(Boolean).join(' · ');
   return (
@@ -29,15 +30,24 @@ function CartItemRow({ item, onRemove }: { item: CartItem; onRemove: () => void 
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
         <span className="cart-item-price">{item.prix.total} €</span>
-        <button className="cart-item-delete" onClick={onRemove} aria-label="Supprimer">
-          ×
-        </button>
+        <div style={{ display: 'flex', gap: 6 }}>
+          <button
+            className="cart-item-edit"
+            onClick={onEdit}
+            aria-label="Modifier"
+          >
+            ✏️
+          </button>
+          <button className="cart-item-delete" onClick={onRemove} aria-label="Supprimer">
+            ×
+          </button>
+        </div>
       </div>
     </div>
   );
 }
 
-export default function CartDrawer({ open, onClose, onValidate }: Props) {
+export default function CartDrawer({ open, onClose, onValidate, onEdit }: Props) {
   const { items, removeItem, total } = useCart();
 
   return (
@@ -87,6 +97,7 @@ export default function CartDrawer({ open, onClose, onValidate }: Props) {
                       key={item.id}
                       item={item}
                       onRemove={() => removeItem(item.id)}
+                      onEdit={() => { onEdit(item); onClose(); }}
                     />
                   ))}
 
