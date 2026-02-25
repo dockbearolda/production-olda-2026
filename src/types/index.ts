@@ -49,6 +49,7 @@ export interface CartItem {
   reference: string;
   couleur: Color;
   taille: string;
+  dtfArriere: string;      // largeur DTF arrière en mm
   logoAvant: LogoPlacement;
   logoArriere: LogoPlacement;
   note: string;

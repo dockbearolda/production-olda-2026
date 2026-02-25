@@ -44,6 +44,7 @@ export default function Studio({ onNext }: Props) {
   const [collection, setCollection] = useState('');
   const [reference, setReference]   = useState('');
   const [taille, setTaille]         = useState('M');
+  const [dtfArriere, setDtfArriere] = useState('');
   const [color, setColor]           = useState<Color>(COLORS[0]);
   const [note, setNote]             = useState('');
   const [prixTshirt, setPrixTshirt] = useState(25);
@@ -70,10 +71,15 @@ export default function Studio({ onNext }: Props) {
     fetch('/tshirt-back.svg').then(r => r.text()).then(setSvgBack).catch(() => {});
   }, []);
 
+  // Auto-prix et auto-largeur DTF selon référence + taille
   useEffect(() => {
     const ref = REFERENCES[reference];
-    if (ref) setPrixTshirt(ref.prix);
-  }, [reference]);
+    if (ref) {
+      setPrixTshirt(ref.prix);
+      const largeur = ref.largeurs[taille];
+      if (largeur) setDtfArriere(String(largeur));
+    }
+  }, [reference, taille]);
 
   const total       = prixTshirt + prixPerso;
   const refOpts     = collection ? buildRefs(collection) : [];
@@ -143,13 +149,13 @@ export default function Studio({ onNext }: Props) {
     }
     const item: CartItem = {
       id: uid(), famille: 'textile', collection, reference,
-      couleur: color, taille, logoAvant, logoArriere, note,
+      couleur: color, taille, dtfArriere, logoAvant, logoArriere, note,
       prix: { tshirt: prixTshirt, personnalisation: prixPerso, total },
       addedAt: new Date().toISOString(),
     };
     addItem(item);
     // Reset for next item
-    setNote(''); setReference('');
+    setNote(''); setReference(''); setDtfArriere('');
     setLogoAvant({ ...DEFAULT_LOGO });
     setLogoArriere({ ...DEFAULT_LOGO_BACK });
   }
@@ -402,6 +408,40 @@ export default function Studio({ onNext }: Props) {
                 <option key={s} value={s}>{s}</option>
               ))}
             </select>
+          </div>
+
+          <div>
+            <div className="label" style={{ marginBottom: 6 }}>
+              Largeur DTF arrière
+              {dtfArriere && (
+                <span style={{
+                  marginLeft: 8, fontSize: 11, fontWeight: 600,
+                  color: 'var(--text-3)', textTransform: 'none', letterSpacing: 0,
+                }}>
+                  (auto depuis référence)
+                </span>
+              )}
+            </div>
+            <div style={{ position: 'relative' }}>
+              <input
+                className="input"
+                type="number"
+                inputMode="numeric"
+                placeholder="ex: 280"
+                value={dtfArriere}
+                onChange={e => setDtfArriere(e.target.value)}
+                min={100}
+                max={500}
+                style={{ paddingRight: 46 }}
+              />
+              <span style={{
+                position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)',
+                fontSize: 13, fontWeight: 600, color: 'var(--text-3)',
+                pointerEvents: 'none',
+              }}>
+                mm
+              </span>
+            </div>
           </div>
 
           <div>
