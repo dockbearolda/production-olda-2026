@@ -159,16 +159,27 @@ function mapToDasholda(order) {
             sku     : order.reference || '',
             quantity: 1,
             price   : subtotal || totalVal,
-            imageUrl: fiche.mockupFront || null,
+            imageUrl: fiche.visuelAvant || fiche.mockupFront || null,
         }];
     }
 
     /* Notes globales de la commande */
+    const prt = order.prt || {};
     const notes = [
         order.note                  ? order.note                              : '',
         order.famille               ? `Famille: ${order.famille}`             : '',
         order.adresse               ? `Adresse: ${order.adresse}`             : '',
+        order.limit                 ? `Deadline: ${order.limit}`              : '',
         order.deadline              ? `Deadline: ${order.deadline}`           : '',
+        /* Fiche atelier */
+        fiche.typeProduit           ? `Type: ${fiche.typeProduit}`            : '',
+        fiche.couleur               ? `Couleur: ${fiche.couleur}`             : '',
+        fiche.tailleDTFAr           ? `DTF arrière: ${fiche.tailleDTFAr}`    : '',
+        fiche.visuelArriere         ? `Visuel arrière: ${fiche.visuelArriere}`: '',
+        /* PRT (press transfer) */
+        prt.refPrt                  ? `PRT ref: ${prt.refPrt}`                : '',
+        prt.taillePrt               ? `PRT taille: ${prt.taillePrt}`         : '',
+        prt.quantite                ? `PRT qté: ${prt.quantite}`              : '',
         /* Legacy fields */
         order.couleurTshirt         ? `Couleur: ${order.couleurTshirt}`       : '',
         order.logoAvant             ? `Logo avant: ${order.logoAvant}`        : '',
@@ -282,8 +293,8 @@ app.get('/api/ping', (req, res) => {
     });
 });
 
-/* ── POST /api/orders — reçoit une commande (toujours actif) ── */
-app.post('/api/orders', (req, res) => {
+/* ── POST /api/orders — reçoit une commande et transmet à DASHOLDA ── */
+app.post('/api/orders', async (req, res) => {
     const auth = req.headers['authorization'] || '';
     if (auth !== 'Bearer ' + DASHBOARD_TOKEN) {
         return res.status(401).json({ error: 'Non autorisé' });
@@ -310,7 +321,46 @@ app.post('/api/orders', (req, res) => {
         io.emit('stats-update', computeStats());
     }
 
-    res.status(201).json({ ok: true, commande: order.commande });
+    /* ── Transfert automatique vers DASHOLDA ── */
+    let dasholadaId = null;
+    if (DASHOLDA_URL) {
+        const payload = mapToDasholda(order);
+        try {
+            const headers = {
+                'Content-Type' : 'application/json',
+                'Authorization': 'Bearer ' + DASHBOARD_TOKEN
+            };
+            if (DASHOLDA_SECRET) headers['x-webhook-secret'] = DASHOLDA_SECRET;
+
+            const targetUrl = DASHOLDA_URL.replace(/\/$/, '') + '/api/orders';
+            console.log('[→DASHOLDA] Auto-transfert vers', targetUrl, '— commande:', order.commande);
+
+            const r = await fetch(targetUrl, {
+                method : 'POST',
+                headers,
+                body   : JSON.stringify(payload)
+            });
+
+            if (r.ok) {
+                const data = await r.json().catch(() => ({}));
+                dasholadaId = data.id || null;
+                console.log('✅ DASHOLDA confirmé — commande:', order.commande, '— id:', dasholadaId || '?');
+            } else {
+                const txt = await r.text().catch(() => '');
+                throw new Error(`HTTP ${r.status} — ${txt.slice(0, 300)}`);
+            }
+        } catch (err) {
+            console.error('⚠️ Transfert DASHOLDA échoué (commande stockée localement) :', err.message, '— commande:', order.commande);
+            failedForwards.push({
+                commande : order.commande,
+                payload,
+                erreur   : err.message,
+                tentéLe  : new Date().toISOString()
+            });
+        }
+    }
+
+    res.status(201).json({ ok: true, commande: order.commande, dasholadaId });
 });
 
 /* ── API dashboard (stats, liste, mise à jour statut) ── */
