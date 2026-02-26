@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../../context/CartContext';
 import type { ClientInfo, PaymentStatus } from '../../types';
@@ -33,7 +33,7 @@ export default function Payment({ clientInfo, onBack, onEditCart }: Props) {
   const [exchangeRate, setExchangeRate] = useState(1.08); // EUR to USD default
 
   // Fetch USD exchange rate on mount
-  React.useEffect(() => {
+  useEffect(() => {
     fetch('https://api.exchangerate-api.com/v4/latest/EUR')
       .then(r => r.json())
       .then(d => {
@@ -127,7 +127,7 @@ export default function Payment({ clientInfo, onBack, onEditCart }: Props) {
   }
 
   // ── Success screen (Apple-style notification) ─────────────────────
-  React.useEffect(() => {
+  useEffect(() => {
     if (success) {
       const timer = setTimeout(() => window.location.reload(), 2500);
       return () => clearTimeout(timer);
